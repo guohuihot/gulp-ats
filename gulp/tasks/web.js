@@ -10,21 +10,14 @@ module.exports = function(gulp, $, config) {
             ' */\n',
             ''
         ].join('\n'),
-        fs = require('fs'),
-        path = require('path'),
         http = require('http'),
         baseDir , pathConfig = {};
-
 
     // default
     gulp.task('server', ['base', 'serverWatch']);
     gulp.task('server:web', ['base', 'build', 'connect', 'serverWatch'], function () {
         require('child_process').exec('start http://localhost:8080/');
     });
-
-    gulp.task('open', function () {
-        require('child_process').exec('start http://localhost:8080/');
-    })
 
     gulp.task('base', function(cb) {
         var args = $.argv.config,
@@ -47,7 +40,7 @@ module.exports = function(gulp, $, config) {
         }
 
         if (baseJson.get('dir')) {
-            baseDir = path.normalize(baseJson.get('dir')) + '/';
+            baseDir = $.path.normalize(baseJson.get('dir')) + '/';
             console.log('\n当前项目目录:' + baseDir + '\n');
         } else{
             return cb('第一次请输入项目目录!,命令 gulp <task> --config="你的项目目录"\n');
@@ -71,7 +64,7 @@ module.exports = function(gulp, $, config) {
         });
 
         gulp.watch('**/' + baseDir + '**/*.scss', function(cssFile) {
-            baseDir = path.join(path.dirname(cssFile.path), '../');
+            baseDir = $.path.join($.path.dirname(cssFile.path), '../');
             pathConfig = {
                 css: baseDir + 'css/',
                 sass: baseDir + 'sass/',
@@ -86,18 +79,18 @@ module.exports = function(gulp, $, config) {
 
     // build
     gulp.task('build', function(done) {
-        fs.stat(baseDir, function(err, stats) {
+        $.fs.stat(baseDir, function(err, stats) {
             if (!stats.isDirectory()) {
                 gulp.src(pathConfig.tpl + '**/*')
                     .pipe(gulp.dest(baseDir));
             } else if (!err) {
-                fs.readdir(baseDir, function(er, files) {
+                $.fs.readdir(baseDir, function(er, files) {
                     var hash = {},
                         needFiles = [];
                     files.forEach(function(file, i) {
                         hash[file] = true;
                     })
-                    fs.readdir(pathConfig.tpl, function(e, orgFiles) {
+                    $.fs.readdir(pathConfig.tpl, function(e, orgFiles) {
                         orgFiles.forEach(function(file, i) {
                             if (!hash[file]) {
                                 gulp.src(pathConfig.tpl + file + '/')
