@@ -20,7 +20,7 @@ module.exports = function(gulp, $$, config) {
             encoding: null
         };
 
-        var urlParse = url.parse(optionsBase.url);
+        var urlParse = url.parse(options.url);
         var webName = 'down/' + urlParse.hostname;
         var baseUrl = urlParse.protocol + '//' + urlParse.host + '/';
         // open
@@ -237,6 +237,7 @@ module.exports = function(gulp, $$, config) {
             })
 
             for (i in dirHash) {
+                if (i.indexOf('fonts')) {return;};
                 data = data.replace(new RegExp(i, "gm"), '../images/');
             }
             callback.call(this, data);

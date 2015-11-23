@@ -14,8 +14,8 @@ module.exports = function(gulp, $, config) {
         baseDir , pathConfig = {};
 
     // default
-    gulp.task('server', ['base', 'serverWatch']);
-    gulp.task('server:web', ['base', 'build', 'connect', 'serverWatch'], function () {
+    gulp.task('server', ['base', 'server:watch']);
+    gulp.task('server:web', ['base', 'build', 'connect', 'server:watch'], function () {
         require('child_process').exec('start http://localhost:8080/');
     });
 
@@ -55,7 +55,7 @@ module.exports = function(gulp, $, config) {
     })
     // watch
 
-    gulp.task('serverWatch', function() {
+    gulp.task('server:watch', function() {
         $.livereload.listen();
 
         gulp.watch(baseDir + '**/*.html', function () {
