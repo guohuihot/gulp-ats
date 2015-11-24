@@ -1,11 +1,12 @@
-module.exports = function() {
-    var config = {
+module.exports = function(gulp, $) {
+    var utils = {
         mkdir: function(dest, src) {
             $.fs.stat(dest, function(err, stats) {
-                if (!stats.isDirectory()) {
+                if (err || !stats.isDirectory()) {
+                    if (err) $.fs.mkdir(dest);
                     gulp.src(src + '**/*')
                         .pipe(gulp.dest(dest));
-                } else if (!err) {
+                } else {
                     $.fs.readdir(dest, function(er, files) {
                         var hash = {},
                             needFiles = [];
@@ -23,7 +24,15 @@ module.exports = function() {
                     })
                 };
             })
+        },
+        inArray: function(search, array) {
+            for (var i in array) {
+                if (array[i] == search) {
+                    return true;
+                }
+            }
+            return false;
         }
     };
-    return config;
+    return utils;
 };

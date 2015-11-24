@@ -1,4 +1,17 @@
 {
-    "dir": "",
-    "name": "zeng"
+    "web": {
+        "dir": "",
+        "name": "zeng"
+    },
+    "webdown": {
+        "ignore": ["cnzz", "tongji", "jiathis"],
+        "conLogo": "attachment",
+        "dest": "down",
+        "src": "src/html/",
+        "cssLogo": "",
+        "debug": true
+    },
+    "help": {
+        "webdown": "gulp webdown --config=\"<目标的网址>, <下面的页面名>, <下载目录>\""
+    }
 }

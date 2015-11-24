@@ -1,7 +1,8 @@
 var gulp = require('gulp'),
-    $ = require('gulp-load-plugins')(),
-    config = require('./gulp/config')(),
-    gulpTaskList = require('fs').readdirSync('./gulp/tasks/');
+    $            = require('gulp-load-plugins')(),
+    utils        = require('./gulp/utils')(gulp, $),
+    debugMoudle  = ['webDown.js'],
+    gulpTaskList = debugMoudle.length && debugMoudle || require('fs').readdirSync('./gulp/tasks/');
 
 $.jsonFile = require('json-file');
 $.argv     = require('yargs').argv;
@@ -10,7 +11,7 @@ $.fs       = require('fs');
 $.path     = require('path');
 
 gulpTaskList.forEach(function(taskfile) {
-    require('./gulp/tasks/' + taskfile)(gulp, $, config);
+    require('./gulp/tasks/' + taskfile)(gulp, $, utils);
 });
 
 gulp.task('default', ['help']);

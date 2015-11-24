@@ -1,15 +1,17 @@
-module.exports = function(gulp, $$, config) {
+module.exports = function(gulp, $$, utils) {
     gulp.task('webdown', function(cb) {
-        var request = require('request');
-        var cheerio = require('cheerio');
-        var iconv = require('iconv-lite');
-        var url = require('url');
-        // 基本配置项
-        var optionsBase = config.webdown;
+        var request = require('request'),
+            cheerio = require('cheerio'),
+            iconv   = require('iconv-lite'),
+            base    = $$.jsonFile.read('./gulp/base.json'),
+            config  = base.get('webdown'),
+            url     = require('url');
+
         if (!$$.argv.config) {
-            cb('请设置要下载的网址！ 命令：gulp webdown --config="<您的网址>, <下面的页面名>"\n');
+            cb('命令：' + base.get('help')['webdown'] + '\n');
         };
         var args = $$.argv.config.split(',');
+
         // request请求配置
         var options = {
             url: args[0], //要下载的网址
@@ -21,14 +23,19 @@ module.exports = function(gulp, $$, config) {
         };
 
         var urlParse = url.parse(options.url);
-        var webName = 'down/' + urlParse.hostname;
+        // 下载目录
+        var webName = $$.path.join(process.cwd(), (args[2] || config.dest) + '/' + urlParse.hostname);
+        // hostname
         var baseUrl = urlParse.protocol + '//' + urlParse.host + '/';
+        // 创建下载目录
+        // console.log(webName);
+        utils.mkdir(webName, config.src);
         // open
         require('child_process').exec('open' + webName);
         
         function callback(error, response, body) {
             if (!error && response.statusCode == 200) {
-                optionsBase.encoding = 'utf8';
+                config.encoding = 'utf8';
                 var arr = body.toString().match(/<meta([^>]*?)>/g);
                 if (arr) {
                     arr.forEach(function(val) {
@@ -38,16 +45,14 @@ module.exports = function(gulp, $$, config) {
                             if (match[1].substr(0, 1) == '"') match[1] = match[1].substr(1);
                             if (match[1].indexOf('"') > 0) match[1] = match[1].substr(0, match[1].indexOf('"'));
 
-                            optionsBase.encoding = match[1].trim();
+                            config.encoding = match[1].trim();
                             return false;
                         }
                     })
                 }
-                if (optionsBase.debug) console.log(optionsBase.encoding);
-                // 创建目录
-                mkBaseDir();
+                if (config.debug) console.log(config.encoding);
                 // 对数据进行转码
-                body = iconv.decode(body, optionsBase.encoding);
+                body = iconv.decode(body, config.encoding);
                 // 同时数据处理
                 acquireData(body);
             }
@@ -65,7 +70,6 @@ module.exports = function(gulp, $$, config) {
             $('link[rel="stylesheet"]').each(function(i, el) {
                 var $source = $(el).attr('href').split('?')[0];
                 download($source);
-                console.log($$.path + '/////////////');
                 $(el).attr('href', 'css/' + $$.path.basename($source));
             });
 
@@ -73,7 +77,7 @@ module.exports = function(gulp, $$, config) {
                 var $source = $(el).attr('src'),
                     isRequireFile = true;
 
-                optionsBase.ignore.forEach(function(e, i) {
+                config.ignore.forEach(function(e, i) {
                     if ($source.indexOf(e) != -1) {
                         $(el).remove();
                         isRequireFile = false;
@@ -88,12 +92,12 @@ module.exports = function(gulp, $$, config) {
                 var $source = $(el).attr('src');
                 if (!$source) return;
                 isRequireFile = true;
-                optionsBase.ignore.forEach(function(e, i) {
+                config.ignore.forEach(function(e, i) {
                         if ($source.indexOf(e) != -1) isRequireFile = false;
                     })
                     // console.log($source);
                 if (!isRequireFile) return;
-                if (optionsBase.conLogo && $source.indexOf(optionsBase.conLogo) != -1) {
+                if (config.conLogo && $source.indexOf(config.conLogo) != -1) {
                     download($source, 1);
                     $(el).attr('src', 'pic/' + $$.path.basename($source));
                 } else {
@@ -118,7 +122,7 @@ module.exports = function(gulp, $$, config) {
                 });
             });
 
-            fileData = iconv.encode(fileData, optionsBase.encoding);
+            fileData = iconv.encode(fileData, config.encoding);
             // 创建html文件
             $$.fs.writeFile(filePath, fileData, function(err) {
                 if (err) {
@@ -130,14 +134,6 @@ module.exports = function(gulp, $$, config) {
 
         }
 
-        function mkBaseDir() {
-            aFolder = ['css', 'js', 'pic', 'images'];
-
-            aFolder.forEach(function(e, i) {
-                mkdir(webName + '/' + e);
-                console.log('Dir ' + webName + '/' + e + ' created');
-            })
-        }
 
         /**
          * 下载文件
@@ -208,7 +204,7 @@ module.exports = function(gulp, $$, config) {
                 hash = {},
                 dirHash = {};
             aImgUrls && aImgUrls.forEach(function(uri1, i) {
-                if (!hash[uri1] && uri1.indexOf(optionsBase.cssLogo) != -1) {
+                if (!hash[uri1] && uri1.indexOf(config.cssLogo) != -1) {
                     // console.log(uri1 + '----------');
                     uri1 = uri1.replace(/url\(('|"|)|('|"|)\)/g, '').split('?')[0];
 

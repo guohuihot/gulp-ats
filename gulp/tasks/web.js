@@ -15,7 +15,7 @@ module.exports = function(gulp, $, config) {
 
     // default
     gulp.task('server', ['base', 'server:watch']);
-    gulp.task('server:web', ['base', 'build', 'connect', 'server:watch'], function () {
+    gulp.task('server:web', ['base', 'mkdir', 'connect', 'server:watch'], function () {
         require('child_process').exec('start http://localhost:8080/');
     });
 
@@ -77,31 +77,9 @@ module.exports = function(gulp, $, config) {
         // gulp.watch([baseDir + 'js/*.js','!' + baseDir + 'js/*.min.js'],['js']);
     })
 
-    // build
-    gulp.task('build', function(done) {
-        $.fs.stat(baseDir, function(err, stats) {
-            if (!stats.isDirectory()) {
-                gulp.src(pathConfig.tpl + '**/*')
-                    .pipe(gulp.dest(baseDir));
-            } else if (!err) {
-                $.fs.readdir(baseDir, function(er, files) {
-                    var hash = {},
-                        needFiles = [];
-                    files.forEach(function(file, i) {
-                        hash[file] = true;
-                    })
-                    $.fs.readdir(pathConfig.tpl, function(e, orgFiles) {
-                        orgFiles.forEach(function(file, i) {
-                            if (!hash[file]) {
-                                gulp.src(pathConfig.tpl + file + '/')
-                                    .pipe(gulp.dest(baseDir));
-                            }
-                        })
-                    })
-                })
-            };
-        })
-            
+    // mkdir
+    gulp.task('mkdir', function(cb) {
+        config.mkdir(baseDir, pathConfig.tpl);
     });
 
     // connect
