@@ -6,12 +6,15 @@ module.exports = function(gulp, $$, utils) {
             base    = $$.jsonFile.read('./gulp/base.json'),
             config  = base.get('webdown'),
             url     = require('url');
-
+        // 参数不存在返回错误信息
         if (!$$.argv.config) {
-            cb('命令：' + base.get('help')['webdown'] + '\n');
+            cb('命令：' + base.get('help')['webdown']['content'] + '\n');
         };
         var args = $$.argv.config.split(',');
-
+        // 设置目录
+        /*if (args[2]) {
+            base.set('webdow', args[2]);
+        };*/
         // request请求配置
         var options = {
             url: args[0], //要下载的网址
@@ -31,9 +34,9 @@ module.exports = function(gulp, $$, utils) {
         // console.log(webName);
         utils.mkdir(webName, config.src);
         // open
-        require('child_process').exec('open' + webName);
-        
-        function callback(error, response, body) {
+        // require('child_process').exec('explorer ' + webName);
+
+        var requestCb = function(error, response, body) {
             if (!error && response.statusCode == 200) {
                 config.encoding = 'utf8';
                 var arr = body.toString().match(/<meta([^>]*?)>/g);
@@ -58,52 +61,26 @@ module.exports = function(gulp, $$, utils) {
             }
         }
 
-        request(options, callback);
+        request(options, requestCb);
 
         // 处理数据
         function acquireData(data) {
             // console.log(data);
             var $ = cheerio.load(data, {
                 decodeEntities: false //关闭转换实体编码的功能
-            });
+            }),
+             aCss,aJs,aImages;
 
             $('link[rel="stylesheet"]').each(function(i, el) {
-                var $source = $(el).attr('href').split('?')[0];
-                download($source);
-                $(el).attr('href', 'css/' + $$.path.basename($source));
+                aCss.push($(el).attr('href'));
             });
 
             $('script[src]').each(function(i, el) {
-                var $source = $(el).attr('src'),
-                    isRequireFile = true;
-
-                config.ignore.forEach(function(e, i) {
-                    if ($source.indexOf(e) != -1) {
-                        $(el).remove();
-                        isRequireFile = false;
-                    }
-                })
-                if (isRequireFile) {
-                    download($source);
-                    $(el).attr('src', 'js/' + $$.path.basename($source));
-                }
+                aJs.push( $(el).attr('src'));
             });
+
             $('img').each(function(i, el) {
-                var $source = $(el).attr('src');
-                if (!$source) return;
-                isRequireFile = true;
-                config.ignore.forEach(function(e, i) {
-                        if ($source.indexOf(e) != -1) isRequireFile = false;
-                    })
-                    // console.log($source);
-                if (!isRequireFile) return;
-                if (config.conLogo && $source.indexOf(config.conLogo) != -1) {
-                    download($source, 1);
-                    $(el).attr('src', 'pic/' + $$.path.basename($source));
-                } else {
-                    download($source);
-                    $(el).attr('src', 'images/' + $$.path.basename($source));
-                }
+                aImages.push( $(el).attr('src'));
             });
             // 去掉内容里的链接
             $('a').each(function(i, el) {
@@ -210,7 +187,7 @@ module.exports = function(gulp, $$, utils) {
 
                     var imgName = $$.path.basename(uri1);
                     hash[uri1] = true;
-                    // return;
+                    
                     // console.log($$.path.dirname(uri).replace('css', '') + e.replace('../', ''));
                     if (uri1.indexOf('http') == -1) {
                         if (!dirHash[$$.path.dirname(uri1)]) dirHash[$$.path.dirname(uri1)] = true;

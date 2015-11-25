@@ -7,11 +7,14 @@
         "ignore": ["cnzz", "tongji", "jiathis"],
         "conLogo": "attachment",
         "dest": "down",
-        "src": "src/html/",
+        "src": "D:\\nodejs\\src\\html",
         "cssLogo": "",
         "debug": true
     },
     "help": {
-        "webdown": "gulp webdown --config=\"<目标的网址>, <下面的页面名>, <下载目录>\""
+        "webdown": {
+            "title": "下载网页",
+            "content": "gulp webdown --config=\"目标的网址, 下面的页面名, [下载目录]\""
+        }
     }
 }
