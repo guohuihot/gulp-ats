@@ -15,15 +15,6 @@ module.exports = function(gulp, $$, utils) {
         /*if (args[2]) {
             base.set('webdow', args[2]);
         };*/
-        // request请求配置
-        var options = {
-            url: args[0], //要下载的网址
-            gzip: true, //是否开启gzip
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36'
-            },
-            encoding: null
-        };
 
         var urlParse = url.parse(options.url);
         // 下载目录
@@ -33,6 +24,15 @@ module.exports = function(gulp, $$, utils) {
         // 创建下载目录
         // console.log(webName);
         utils.mkdir(webName, config.src);
+        // request请求配置
+        var options = {
+            url: args[0], //要下载的网址
+            gzip: true, //是否开启gzip
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36'
+            },
+            encoding: null
+        };
         // open
         // require('child_process').exec('explorer ' + webName);
 
@@ -53,7 +53,6 @@ module.exports = function(gulp, $$, utils) {
                         }
                     })
                 }
-                if (config.debug) console.log(config.encoding);
                 // 对数据进行转码
                 body = iconv.decode(body, config.encoding);
                 // 同时数据处理
@@ -62,19 +61,24 @@ module.exports = function(gulp, $$, utils) {
         }
 
         request(options, requestCb);
-
+        // processUrl
+        var processUrl = function(url) {
+            url = url.split('?')[0].split('/').pop();
+            return url;
+        }
         // 处理数据
         function acquireData(data) {
             // console.log(data);
             var $ = cheerio.load(data, {
                 decodeEntities: false //关闭转换实体编码的功能
             }),
-             aCss,aJs,aImages;
+             aCss, aJs, aImages;
 
             $('link[rel="stylesheet"]').each(function(i, el) {
-                aCss.push($(el).attr('href'));
+                aCss.push(processUrl($(el).attr('href')));
             });
-
+console.log(aCss);
+return false;
             $('script[src]').each(function(i, el) {
                 aJs.push( $(el).attr('src'));
             });
@@ -110,6 +114,7 @@ module.exports = function(gulp, $$, utils) {
             })
 
         }
+
 
 
         /**
@@ -215,34 +220,6 @@ module.exports = function(gulp, $$, utils) {
             }
             callback.call(this, data);
 
-        }
-        /**
-         * 创建文件目录
-         * @param  {[type]} dirpath [description]
-         * @param  {[type]} dirname [description]
-         * @return {[type]}         [description]
-         */
-        function mkdir(dirpath, dirname) {
-            //判断是否是第一次调用  
-            if (typeof dirname === "undefined") {
-                if ($$.fs.existsSync(dirpath)) {
-                    return;
-                } else {
-                    mkdir(dirpath, $$.path.dirname(dirpath));
-                }
-            } else {
-                //判断第二个参数是否正常，避免调用时传入错误参数  
-                if (dirname !== $$.path.dirname(dirpath)) {
-                    mkdir(dirpath);
-                    return;
-                }
-                if ($$.fs.existsSync(dirname)) {
-                    $$.fs.mkdirSync(dirpath)
-                } else {
-                    mkdir(dirname, $$.path.dirname(dirname));
-                    $$.fs.mkdirSync(dirpath);
-                }
-            }
         }
     })
 
