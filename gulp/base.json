@@ -4,12 +4,16 @@
         "name": "zeng"
     },
     "webdown": {
-        "ignore": ["cnzz", "tongji", "jiathis"],
+        "ignore": [
+            "cnzz",
+            "tongji",
+            "jiathis"
+        ],
         "conLogo": "attachment",
         "dest": "down",
         "src": "D:\\nodejs\\src\\html",
         "cssLogo": "",
-        "debug": true
+        "debug": 1
     },
     "help": {
         "webdown": {
