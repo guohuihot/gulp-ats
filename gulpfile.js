@@ -4,10 +4,7 @@ var gulp = require('gulp'),
     debugMoudle  = ['webDown.js'],
     gulpTaskList = debugMoudle.length && debugMoudle || require('fs').readdirSync('./gulp/tasks/');
 
-$.jsonFile = require('json-file-plus');
-$.argv     = require('yargs').argv;
 $.moment   = require('moment');
-$.fs       = require('fs');
 $.path     = require('path');
 
 gulpTaskList.forEach(function(taskfile) {

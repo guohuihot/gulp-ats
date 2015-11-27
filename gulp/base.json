@@ -9,10 +9,10 @@
             "tongji",
             "jiathis"
         ],
-        "conLogo": "attachment",
-        "dest": "down",
-        "src": "D:\\nodejs\\src\\html",
-        "cssLogo": "",
+        "pic": "img1",
+        "image": "",
+        "dest": "C:\\Users\\Administrator\\Desktop",
+        "src": "D:\\nodejs\\src\\html\\",
         "debug": 1
     },
     "help": {
