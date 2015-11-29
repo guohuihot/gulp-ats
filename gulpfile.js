@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
     $            = require('gulp-load-plugins')(),
     utils        = require('./gulp/utils')(gulp, $),
-    debugMoudle  = ['webDown.js'],
+    debugMoudle  = ['webDown.js', 'web.js'],
     gulpTaskList = debugMoudle.length && debugMoudle || require('fs').readdirSync('./gulp/tasks/');
 
 $.moment   = require('moment');
@@ -18,6 +18,7 @@ gulp.task('help', function() {
     web模块\n\
     gulp server\t\t监控一个动态服务器\n\
     gulp server:web\t创建一个静态服务器并监控\n\
+    gulp server:remote\t监控一个远程动态服务器\n\
     gulp csscomb\tcss排序并格式化\n\n\
     webdown模块\n\
     gulp webdown --config="<您的网址>, <下面的页面名>"\t\t下载网页\n\n\

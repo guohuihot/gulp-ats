@@ -1,26 +1,21 @@
 module.exports = function(gulp, $, config) {
     // banner
-    var baseJson = $.jsonFile.read('./gulp/base.json'),
-        banner = ['/**',
-            // ' * @name < %= filename %>',
-            ' * @name ${filename}',
-            ' * @author ' + baseJson.get('name'),
-            ' * @link 08cms.com',
-            ' * @date ${date}',
-            ' */\n',
-            ''
-        ].join('\n'),
-        http = require('http'),
-        baseDir , pathConfig = {};
+    var http       = require('http'),
+        argv       = require('yargs').argv,
+        path       = require('path'),
+        pathConfig = {}, webConfig, baseDir;
 
     // default
     gulp.task('server', ['base', 'server:watch']);
+    gulp.task('server:remote', ['base', 'remote:watch']);
     gulp.task('server:web', ['base', 'mkdir', 'connect', 'server:watch'], function () {
         require('child_process').exec('start http://localhost:8080/');
     });
 
     gulp.task('base', function(cb) {
-        var args = $.argv.config,
+        var base = require('json-file-plus').sync('./gulp/base.json');
+        webConfig = base.data.web;
+        var args = argv.config,
             argsK = ['dir', 'name'];
 
         if (args) {
@@ -29,20 +24,19 @@ module.exports = function(gulp, $, config) {
                 var obj = JSON.parse(args);
 
                 for (var v in obj) {
-                    baseJson.set(v, obj[v]);
+                    webConfig[v] = obj[v];
                 }
             } else {
                 args.split(',').forEach(function(v, i) {
-                    baseJson.set(argsK[i], v)
+                    webConfig[argsK[i]] = v;
                 })
             }
-            baseJson.writeSync(null, 4);
         }
 
-        if (baseJson.get('dir')) {
-            baseDir = $.path.normalize(baseJson.get('dir')) + '/';
+        if (webConfig.dir) {
+            baseDir = path.normalize(webConfig.dir) + '/';
             console.log('\n当前项目目录:' + baseDir + '\n');
-        } else{
+        } else {
             return cb('第一次请输入项目目录!,命令 gulp <task> --config="你的项目目录"\n');
         };
         pathConfig = {
@@ -52,6 +46,7 @@ module.exports = function(gulp, $, config) {
             image: baseDir + 'image/',
             tpl: 'src/html/'
         }
+        base.saveSync();
     })
     // watch
 
@@ -64,7 +59,7 @@ module.exports = function(gulp, $, config) {
         });
 
         gulp.watch('**/' + baseDir + '**/*.scss', function(cssFile) {
-            baseDir = $.path.join($.path.dirname(cssFile.path), '../');
+            baseDir = path.join(path.dirname(cssFile.path), '../');
             pathConfig = {
                 css: baseDir + 'css/',
                 sass: baseDir + 'sass/',
@@ -74,6 +69,20 @@ module.exports = function(gulp, $, config) {
             gulp.run('compass');
         });
 
+        // gulp.watch([baseDir + 'js/*.js','!' + baseDir + 'js/*.min.js'],['js']);
+    })
+
+    gulp.task('remote:watch', function() {
+        gulp.watch('**/' + baseDir + '**/*.scss', function(cssFile) {
+            baseDir = path.join(path.dirname(cssFile.path), '../');
+            pathConfig = {
+                css: baseDir + 'css/',
+                sass: baseDir + 'sass/',
+                js: baseDir + 'js/',
+                image: baseDir + 'image/'
+            }
+            gulp.run('compass');
+        });
         // gulp.watch([baseDir + 'js/*.js','!' + baseDir + 'js/*.min.js'],['js']);
     })
 
@@ -114,6 +123,16 @@ module.exports = function(gulp, $, config) {
     // compass
 
     gulp.task('compass', function() {
+
+        var banner = ['/**',
+            // ' * @name < %= filename %>',
+            ' * @name ${filename}',
+            ' * @author ' + webConfig.name,
+            ' * @link 08cms.com',
+            ' * @date ${date}',
+            ' */\n',
+            ''
+        ].join('\n');
 
         return gulp.src(pathConfig.sass + '*.scss')
             .pipe($.changed(pathConfig.css, {
