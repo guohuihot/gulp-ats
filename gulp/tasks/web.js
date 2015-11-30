@@ -1,18 +1,12 @@
-module.exports = function(gulp, $, config) {
+module.exports = function(gulp, $, utils) {
     // banner
     var http       = require('http'),
         argv       = require('yargs').argv,
         path       = require('path'),
         pathConfig = {}, webConfig, baseDir;
 
-    // default
-    gulp.task('server', ['base', 'server:watch']);
-    gulp.task('server:remote', ['base', 'remote:watch']);
-    gulp.task('server:web', ['base', 'mkdir', 'connect', 'server:watch'], function () {
-        require('child_process').exec('start http://localhost:8080/');
-    });
 
-    gulp.task('base', function(cb) {
+    var processBase = function(cb) {
         var base = require('json-file-plus').sync('./gulp/base.json');
         webConfig = base.data.web;
         var args = argv.config,
@@ -37,7 +31,7 @@ module.exports = function(gulp, $, config) {
             baseDir = path.normalize(webConfig.dir) + '/';
             console.log('\n当前项目目录:' + baseDir + '\n');
         } else {
-            return cb('第一次请输入项目目录!,命令 gulp <task> --config="你的项目目录"\n');
+            return cb('命令：gulp <任务名> --config="' + webConfig['message'] + '"\n');
         };
         pathConfig = {
             css: baseDir + 'css/',
@@ -47,7 +41,39 @@ module.exports = function(gulp, $, config) {
             tpl: 'src/html/'
         }
         base.saveSync();
-    })
+        console.log(111);
+    }
+    // server
+    gulp.task('server', function(cb) {
+        processBase(cb);
+        gulp.run('server:watch');
+    });
+    // server:remote
+    gulp.task('server:remote', function(cb) {
+        processBase(cb);
+        gulp.watch('**/' + baseDir + '**/*.scss', function(cssFile) {
+            baseDir = path.join(path.dirname(cssFile.path), '../');
+            pathConfig = {
+                css: baseDir + 'css/',
+                sass: baseDir + 'sass/',
+                js: baseDir + 'js/',
+                image: baseDir + 'image/'
+            }
+            gulp.run('compass');
+        });
+    });
+    // server:web
+    gulp.task('server:web', function (cb) {
+        processBase(cb);
+        utils.mkdir(baseDir, pathConfig.tpl);
+        $.connect.server({
+            root: baseDir,
+            port: 8080/*,
+            livereload: true*/
+        });
+        gulp.run('server:watch');
+        require('child_process').exec('start http://localhost:8080/');
+    });
     // watch
 
     gulp.task('server:watch', function() {
@@ -72,33 +98,6 @@ module.exports = function(gulp, $, config) {
         // gulp.watch([baseDir + 'js/*.js','!' + baseDir + 'js/*.min.js'],['js']);
     })
 
-    gulp.task('remote:watch', function() {
-        gulp.watch('**/' + baseDir + '**/*.scss', function(cssFile) {
-            baseDir = path.join(path.dirname(cssFile.path), '../');
-            pathConfig = {
-                css: baseDir + 'css/',
-                sass: baseDir + 'sass/',
-                js: baseDir + 'js/',
-                image: baseDir + 'image/'
-            }
-            gulp.run('compass');
-        });
-        // gulp.watch([baseDir + 'js/*.js','!' + baseDir + 'js/*.min.js'],['js']);
-    })
-
-    // mkdir
-    gulp.task('mkdir', function(cb) {
-        config.mkdir(baseDir, pathConfig.tpl);
-    });
-
-    // connect
-    gulp.task('connect', function() {
-        $.connect.server({
-            root: baseDir,
-            port: 8080/*,
-            livereload: true*/
-        });
-    });
 
     // js
     gulp.task('js', function() {

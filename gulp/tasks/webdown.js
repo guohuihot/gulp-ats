@@ -7,42 +7,40 @@ module.exports = function(gulp, $$, utils) {
             fs       = require('fs'),
             jsonFile = require('json-file-plus'),
             argv     = require('yargs').argv,
-            extend   = require('node.extend'),
-            baseUrl  = './gulp/base.json';
+            extend   = require('node.extend');
 
         var async = require('async');
 
         // process config
-        var processCon = function(baseUrl, cb) {
-            jsonFile(baseUrl, function(e, f) {
-                var base = f.data;
-                // 参数不存在返回错误信息
-                if (!argv.config) {
-                    cb('命令：' + base['help']['webdown']['content'] + '\n');
-                };
-                var args = argv.config.split(','),
-                    urlParse = url.parse(args[0]),
-                    base = f.data,
-                    reqConfig = {
-                        url: urlParse.href, //要下载的网址
-                        gzip: true, //是否开启gzip
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36'
-                        },
-                        encoding: null
-                    },
-                    webConfig = extend(true, {
-                        hostUrl: urlParse.protocol + '//' + urlParse.host + '/',
-                        downDir: (base['webdown']['dest'] = args[2] || base['webdown'].dest) + '\\' + urlParse.hostname + '\\',
-                        fileName: (args[1] || 'index') + '.html'
-                    }, base['webdown']);
-                // 创建下载目录
-                utils.mkdir(webConfig.downDir, webConfig.src);
-                // 设置目录 保存配置
-                f.save();
+        var processCon = function(cb) {
+            var baseFile = jsonFile.sync('./gulp/base.json');
 
-                cb(null, reqConfig, webConfig);
-            })
+            var base = baseFile.data;
+            // 参数不存在返回错误信息
+            if (!argv.config) {
+                cb('命令：gulp webdown --config="' + base['webdown']['message'] + '"\n');
+            };
+            var args = argv.config.split(','),
+                urlParse = url.parse(args[0]),
+                reqConfig = {
+                    url: urlParse.href, //要下载的网址
+                    gzip: true, //是否开启gzip
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36'
+                    },
+                    encoding: null
+                },
+                webConfig = extend(true, {
+                    hostUrl: urlParse.protocol + '//' + urlParse.host + '/',
+                    downDir: (base['webdown']['dest'] = args[2] || base['webdown'].dest) + '\\' + urlParse.hostname + '\\',
+                    fileName: (args[1] || 'index') + '.html'
+                }, base['webdown']);
+            // 创建下载目录
+            utils.mkdir(webConfig.downDir, webConfig.src);
+            // 设置目录 保存配置
+            baseFile.saveSync();
+
+            cb(null, reqConfig, webConfig);
         }
 
         // 开始请求
@@ -166,9 +164,6 @@ module.exports = function(gulp, $$, utils) {
         }
 
         async.waterfall([
-                function(cb) {
-                    cb(null, baseUrl)
-                },
                 processCon,
                 req,
                 processHtml,
