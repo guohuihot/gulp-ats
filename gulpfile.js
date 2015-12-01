@@ -11,23 +11,15 @@ gulpTaskList.forEach(function(taskfile) {
     require('./gulp/tasks/' + taskfile)(gulp, $, utils);
 });
 
-gulp.task('default', ['help']);
-gulp.task('help', function() {
-    console.log('\n\
-    --------------- help -----------------\n\n\
-    web模块\n\
-    gulp server\t\t监控一个动态服务器\n\
-    gulp server:web\t创建一个静态服务器并监控\n\
-    gulp server:remote\t监控一个远程动态服务器\n\
-    gulp csscomb\tcss排序并格式化\n\n\
-    webdown模块\n\
-    gulp webdown --config="<您的网址>, <下面的页面名>"\t\t下载网页\n\n\
-    pack模块\n\
-    gulp pack --config="<您的目录>, <打包名称>"\t\t打包\n\n\
-    markdown模块\n\
-    gulp markdown --config="<您的目录>"\t\tmarkdown转换\n\n\
-    其它\n\
-    gulp help\t\tgulp参数说明\n\n\
-    --------------- /help -----------------\n\
-    ');
+gulp.task('default', function() {
+    var tasks = require('json-file-plus').sync('./gulp/base.json').data.tasks,
+        taskInfo = '\n--------------- help -----------------\n\n';
+
+    taskInfo += '使用帮助信息\t\tgulp\n\n';
+    for(var i in tasks) {
+        taskInfo += tasks[i]['title'] + '\tgulp ' + i + ' -c "' + tasks[i]['argv'] + '"\n\n';
+    }
+    taskInfo += '--------------- /help -----------------\n';
+    
+    console.log(taskInfo);
 });

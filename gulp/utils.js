@@ -3,27 +3,14 @@ module.exports = function(gulp, $) {
     var utils = {
         mkdir: function(dest, src) {
             fs.stat(dest, function(err, stats) {
+                var nSrc;
                 if (err || !stats.isDirectory()) {
-                    if (err) fs.mkdir(dest);
-                    gulp.src(src + '**/*')
-                        .pipe(gulp.dest(dest));
+                    nSrc = src + '**/*';
                 } else {
-                    fs.readdir(dest, function(er, files) {
-                        var hash = {},
-                            needFiles = [];
-                        files.forEach(function(file, i) {
-                            hash[file] = true;
-                        })
-                        fs.readdir(src, function(e, orgFiles) {
-                            orgFiles.forEach(function(file, i) {
-                                if (!hash[file]) {
-                                    gulp.src(src + file + '/')
-                                        .pipe(gulp.dest(dest));
-                                }
-                            })
-                        })
-                    })
+                    nSrc = src + '*/';
                 };
+                gulp.src(nSrc)
+                    .pipe(gulp.dest(dest));
             })
         },
         inArray: function(search, array) {

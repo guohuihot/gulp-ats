@@ -1,7 +1,8 @@
 {
     "web": {
-        "dir": "C:\\Users\\Administrator\\Desktop\\test",
-        "name": "zeng",
+        "dir": "C:\\Users\\Administrator\\Desktop\\tests",
+        "name": "ahuing",
+        "src": "src/html/",
         "message": "[根目录]"
     },
     "webdown": {
@@ -14,7 +15,36 @@
         "image": "",
         "dest": "C:\\Users\\Administrator\\Desktop",
         "src": "D:\\nodejs\\src\\html\\",
-        "debug": 1,
-        "message": "目标的网址, 下面的页面名, [下载目录]"
+        "debug": 1
+    },
+    "tasks": {
+        "server": {
+            "title": "监控一个动态服务器",
+            "argv": "[项目目录],[作者姓名],[文件源]"
+        },
+        "server:web": {
+            "title": "创建一个静态服务器",
+            "argv": "[项目目录],[作者姓名]"
+        },
+        "server:remote": {
+            "title": "监控一个远程动态服务器",
+            "argv": "[项目目录],[作者姓名]"
+        },
+        "csscomb": {
+            "title": "css排序并格式化\t",
+            "argv": "[项目目录]"
+        },
+        "pack": {
+            "title": "压缩文件并删除原文件",
+            "argv": "[您的目录],[打包名称]"
+        },
+        "markdown": {
+            "title": "markdown文件转html",
+            "argv": "[markdown文件目录]"
+        },
+        "webdown": {
+            "title": "下载网页(扒皮)\t",
+            "argv": "[网页地址],[页面名称],[下载目录],[内面图片的标志]"
+        }
     }
 }
