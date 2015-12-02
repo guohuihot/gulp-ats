@@ -35,13 +35,13 @@ module.exports = function(gulp, $, utils) {
     // server
     gulp.task('server', function(cb) {
         processBase('server', cb);
-        gulp.run('server:watch');
+        gulp.start('server:watch');
     });
     // server:remote
     gulp.task('server:remote', function(cb) {
         isLocal = false;
         processBase('server:remote', cb);
-        gulp.run('server:watch');
+        gulp.start('server:watch');
     });
     // server:web
     gulp.task('server:web', function (cb) {
@@ -65,10 +65,10 @@ module.exports = function(gulp, $, utils) {
         if (isLocal) {
             $.livereload.listen();
 
-            gulp.watch(config.dir + '**/*.html', function () {
-                gulp.src(config.dir + '**/*.html')
-                .pipe($.livereload());
-            });
+            //gulp.watch(config.dir + '**/*.html', function () {
+                //gulp.src(config.dir + '**/*.html')
+                //.pipe($.livereload());
+            //});
         };
 
         gulp.watch('**/' + config.dir + '**/*.scss', function(cssFile) {
@@ -79,7 +79,7 @@ module.exports = function(gulp, $, utils) {
                 js: config.dir + 'js/',
                 image: config.dir + 'image/'
             }
-            gulp.run('compass');
+            gulp.start('compass');
         });
 
         // gulp.watch([config.dir + 'js/*.js','!' + config.dir + 'js/*.min.js'],['js']);
