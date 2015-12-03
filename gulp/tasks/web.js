@@ -2,10 +2,8 @@ module.exports = function(gulp, $, utils) {
     // banner
     var http       = require('http'),
         path       = require('path'),
-        pathConfig = {},
-        isLocal = true,
+        isLocal    = true,
         config;
-
 
     var processBase = function(taskName, cb) {
         var base = require('json-file-plus').sync('./gulp/base.json'),
@@ -20,16 +18,12 @@ module.exports = function(gulp, $, utils) {
         }
 
         if (config.dir) {
+            config.dir = path.normalize(config.dir) + '/';
             console.log('\n当前项目目录:' + config.dir + '\n');
         } else {
             return cb('命令：gulp '+ taskName +' -c "' + config['tasks'][taskName]['argv'] + '"\n');
         };
-        pathConfig = {
-            css: config.dir + 'css/',
-            sass: config.dir + 'sass/',
-            js: config.dir + 'js/',
-            image: config.dir + 'image/'
-        }
+
         base.saveSync();
     }
     // server
@@ -65,20 +59,23 @@ module.exports = function(gulp, $, utils) {
         if (isLocal) {
             $.livereload.listen();
 
-            //gulp.watch(config.dir + '**/*.html', function () {
-                //gulp.src(config.dir + '**/*.html')
-                //.pipe($.livereload());
-            //});
+            $.watch(config.dir + '**/*.html', function () {
+                gulp.src(config.dir + '**/*.html', {read: false})
+                .pipe($.livereload());
+            });
         };
 
-        gulp.watch('**/' + config.dir + '**/*.scss', function(cssFile) {
-            config.dir = path.join(path.dirname(cssFile.path), '../');
-            pathConfig = {
-                css: config.dir + 'css/',
-                sass: config.dir + 'sass/',
-                js: config.dir + 'js/',
-                image: config.dir + 'image/'
-            }
+        gulp.watch(config.dir + '**/*.scss', function(cssFile) {
+            config.filePath = cssFile.path;
+            config.banner = ['/**',
+                ' * @name ' + path.basename(cssFile.path, '.scss') + '.css',
+                ' * @author ' + config.name,
+                ' * @link 08cms.com',
+                ' * @date ' + $.moment().format("YYYY-MM-DD HH:mm:ss"),
+                ' */\n',
+                ''
+            ].join('\n');
+
             gulp.start('compass');
         });
 
@@ -88,7 +85,7 @@ module.exports = function(gulp, $, utils) {
 
     // js
     gulp.task('js', function() {
-        gulp.src([pathConfig.js + '*.js', '!' + pathConfig.js + '*.min.js'])
+        gulp.src([config.dir + 'js/*.js', '!' + config.dir + 'js/*.min.js'])
             // .pipe(watch([config.dir + 'js/*.js','!' + config.dir + 'js/*.min.js']))
             // .pipe(changed(config.dir + 'js/'))
             .pipe(jshint())
@@ -97,7 +94,7 @@ module.exports = function(gulp, $, utils) {
             .pipe(rename({
                 suffix: '.min'
             }))
-            .pipe(gulp.dest(pathConfig.js))
+            .pipe(gulp.dest(config.dir + 'js/'))
             .pipe(reload({
                 stream: true
             }))
@@ -109,39 +106,27 @@ module.exports = function(gulp, $, utils) {
     // compass
 
     gulp.task('compass', function() {
-
-        var banner = ['/**',
-            // ' * @name < %= filename %>',
-            ' * @name ${filename}',
-            ' * @author ' + config.name,
-            ' * @link 08cms.com',
-            ' * @date ${date}',
-            ' */\n',
-            ''
-        ].join('\n');
-
-        return gulp.src(pathConfig.sass + '*.scss')
-            .pipe($.changed(pathConfig.css, {
+        config.dir = path.join(path.dirname(config.filePath), '../');
+        /*return gulp.src(config.dir + 'scss/*.scss')
+            .pipe($.changed(config.dir + 'css/', {
                 extension: '.css'
-            }))
+            }))*/
+        return gulp.src(config.filePath)
             .pipe($.compass({
                 project: config.dir,
                 // style: 'compact',
                 // comments: true,
                 css: 'css',
                 image: 'images',
-                sass: 'sass',
+                sass: 'scss',
                 // sourcemap: true, // 生成sourcemap
                 time: true
             }))
-            .pipe($.header(banner, {
-                date: $.moment().format("YYYY-MM-DD HH:mm:ss")
-            }))
-            // .pipe($.csscomb('csscomb.json'))
-            .pipe(gulp.dest(pathConfig.css))
+            .pipe($.header(config.banner))
+            .pipe(gulp.dest(config.dir + 'css/'))
             .pipe($.livereload())
             .pipe($.notify({
-                message: 'css header ok !'
+                message: 'css compass ok !'
             }));
     });
 

@@ -1,6 +1,6 @@
 {
     "web": {
-        "dir": "E:\\wwwroot\\house\\template\\blue\\",
+        "dir": "E:\\wwwroot\\house\\template\\blue\\/",
         "name": "ahuing",
         "src": "src/html/",
         "message": "[根目录]"

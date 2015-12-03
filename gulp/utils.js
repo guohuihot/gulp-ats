@@ -7,7 +7,7 @@ module.exports = function(gulp, $) {
                 if (err || !stats.isDirectory()) {
                     nSrc = src + '**/*';
                 } else {
-                    nSrc = src + '*/';
+                    nSrc = [src + '*/', '!' + src + '*.html'];
                 };
                 gulp.src(nSrc)
                     .pipe(gulp.dest(dest));
