@@ -3,10 +3,12 @@ module.exports = function(gulp, $, utils) {
     var http       = require('http'),
         path       = require('path'),
         isLocal    = true,
+        jsonFile = require('json-file-plus'),
+        tasksInfo = jsonFile.sync('./gulp/tasks.json').data,
         config;
 
     var processBase = function(taskName, cb) {
-        var base = require('json-file-plus').sync('./gulp/base.json'),
+        var base = jsonFile.sync('./gulp/base.json'),
             args  = require('yargs').alias('c', 'config').argv.c,
             argsK = ['dir', 'name'];                                      
 
@@ -21,7 +23,7 @@ module.exports = function(gulp, $, utils) {
             config.dir = path.normalize(config.dir) + '/';
             console.log('\n当前项目目录:' + config.dir + '\n');
         } else {
-            return cb('命令：gulp '+ taskName +' -c "' + config['tasks'][taskName]['argv'] + '"\n');
+            return cb('命令：gulp '+ taskName +' -c "' + tasksInfo[taskName]['argv'] + '"\n');
         };
 
         base.saveSync();
