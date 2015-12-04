@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
     $            = require('gulp-load-plugins')(),
     utils        = require('./gulp/utils')(gulp, $),
-    debugMoudle  = ['web.js'],
+    debugMoudle  = ['webdown.js'],
     gulpTaskList = debugMoudle.length && debugMoudle || require('fs').readdirSync('./gulp/tasks/');
 
 $.moment = require('moment');

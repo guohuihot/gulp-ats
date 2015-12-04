@@ -1,13 +1,13 @@
 module.exports = function(gulp, $$, utils) {
+    var request = require('request'),
+        cheerio  = require('cheerio'),
+        iconv    = require('iconv-lite'),
+        url      = require('url'),
+        fs       = require('fs'),
+        jsonFile = require('json-file-plus'),
+        extend   = require('node.extend');
+
     gulp.task('webdown', function(callback) {
-        var request = require('request'),
-            cheerio  = require('cheerio'),
-            iconv    = require('iconv-lite'),
-            url      = require('url'),
-            fs       = require('fs'),
-            jsonFile = require('json-file-plus'),
-            argv     = require('yargs').argv,
-            extend   = require('node.extend');
 
         var async = require('async');
 
@@ -16,11 +16,12 @@ module.exports = function(gulp, $$, utils) {
             var baseFile = jsonFile.sync('./gulp/base.json');
 
             var base = baseFile.data;
+            var argv = require('yargs').alias('c', 'config').argv.c;
             // 参数不存在返回错误信息
-            if (!argv.config) {
-                cb('命令：gulp webdown --config="' + base['webdown']['message'] + '"\n');
+            if (!argv) {
+                cb('命令：gulp webdown -c "' + base['webdown']['argv'] + '"\n');
             };
-            var args = argv.config.split(','),
+            var args = argv.split(','),
                 urlParse = url.parse(args[0]),
                 reqConfig = {
                     url: urlParse.href, //要下载的网址
@@ -135,7 +136,7 @@ module.exports = function(gulp, $$, utils) {
             // 转码
             fs.writeFile(webConfig.downDir + webConfig.fileName, fileData, function(err) {
                 if (err) {
-                    console.log('1:' + err);
+                    cb(err);
                 } else {
                     console.log(webConfig.downDir + webConfig.fileName + ' created');
                 };
@@ -147,6 +148,10 @@ module.exports = function(gulp, $$, utils) {
         var downSource = function(webConfig, source, cb) {
             // ['images'].forEach(function(e, i) {
             ['js','css','images','pic'].forEach(function(e, i) {
+                    if (e == 'images') {
+                        console.log(source.images);
+                        return false;
+                    }
                 async.eachSeries(source[e], function(item, callback) {
                     var fileName = webConfig.downDir + e + '/' + item.split('/').pop();
                     request(item, function(err, response, fileData) {
@@ -154,6 +159,9 @@ module.exports = function(gulp, $$, utils) {
                             callback(err);
                         } else {
                             console.log(fileName + ' created');
+                            if (e == 'css') {
+                                source.images.concat(process(fileData, webConfig));
+                            };
                             callback();
                         };
                     }).pipe(fs.createWriteStream(fileName))
@@ -181,110 +189,82 @@ module.exports = function(gulp, $$, utils) {
             });
         
 
-        /**
-         * 下载文件
-         * @param  {string}   uri      请求的url
-         * @param  {string}   dirName  保存的路径
-         * @param  {Function} callback [description]
-         * @return {[type]}            [description]
-         */
-        function download(uri, isCon, callback) {
-            // return;
-            uri = uri.split('?')[0];
-            // console.log(uri); 处理像'//www.jqduang.com/aaa.css'这种链接
-            if (uri.indexOf('//') == 0) {
-                uri = 'http:' + uri;
-            } else if (uri.indexOf('http') != 0) {
-                uri = (uri.indexOf('/') == 0 ? baseUrl : options.url) + uri;
-            }
-
-            var dirName = webName + '/',
-                extname = $$.path.extname(uri);
-
-            if (/.(?:png|jpg|jpeg|bmp|gif)/.test(extname)) {
-                dirName += isCon ? 'pic' : 'images';
-            } else if (/.(?:css|js)/.test(extname)) {
-                dirName += extname.replace('.', '').replace(' ', '');
-            } else {
-                return false;
-            }
-            request(uri, function(error, response, fileData) {
-                if (!error && response.statusCode == 200) {
-                    var fileName = $$.path.basename(uri).split('?')[0].replace(/ /g, '');
-                    // 对css专项处理
-                    if (extname == '.css') {
-                        parseCss(fileData, uri, function(fileData1) {
-                            // 创建文件
-                            $$.fs.writeFile(dirName + '/' + fileName, fileData1, function(err) {
-                                if (err) {
-                                    console.log('1:' + err);
-                                } else {
-                                    console.log(dirName + '/' + fileName + ' created');
-                                };
-                            })
-                        })
-                    } else {
-                        // 创建文件
-                        $$.fs.writeFile(dirName + '/' + fileName, fileData, function(err) {
-                            if (err) {
-                                console.log('1:' + err);
-                            } else {
-                                console.log(dirName + '/' + fileName + ' created');
-                            };
-                        })
-                    };
-                } else {
-                    console.log('3:' + error + ':' + uri);
-                }
-            });
-        };
-        /**
-         * 解析css源码并提取附件
-         * @param  {stream} data    css流
-         * @param  {string} baseUrl css文件地址
-         * @return {null}         
-         */
-        function parseCss(data, uri, callback) {
-            var urlsRegexp = /url\((.+).(?:png|png\?.+|jpg|jpg\?.+|jpeg|jpeg\?.+|bmp|gif|gif\?.+)\)/ig,
-                aImgUrls = data && data.match(urlsRegexp) || null,
-                hash = {},
-                dirHash = {};
-            aImgUrls && aImgUrls.forEach(function(uri1, i) {
-                if (!hash[uri1] && uri1.indexOf(config.cssLogo) != -1) {
-                    // console.log(uri1 + '----------');
-                    uri1 = uri1.replace(/url\(('|"|)|('|"|)\)/g, '').split('?')[0];
-
-                    var imgName = $$.path.basename(uri1);
-                    hash[uri1] = true;
-                    
-                    // console.log($$.path.dirname(uri).replace('css', '') + e.replace('../', ''));
-                    if (uri1.indexOf('http') == -1) {
-                        if (!dirHash[$$.path.dirname(uri1)]) dirHash[$$.path.dirname(uri1)] = true;
-                        uri1 = url.resolve(uri, uri1);
-                    } else {
-                        var hurl = uri1.replace(imgName, '');
-                        if (!dirHash[hurl]) dirHash[hurl] = true;
-                    }
-
-                    request(uri1, function(err, res, body) {
-                            if (err) {
-                                console.log('4:' + err + ':' + uri1);
-                            }
-                        })
-                        .pipe($$.fs.createWriteStream(webName + '/images/' + imgName))
-                        .on('close', function() {
-                            console.log(webName + '/images/' + imgName + ' created cssimg');
-                        });
-                }
-            })
-
-            for (i in dirHash) {
-                if (i.indexOf('fonts')) {return;};
-                data = data.replace(new RegExp(i, "gm"), '../images/');
-            }
-            callback.call(this, data);
-
-        }
     })
 
+    gulp.task('processcss', function() {
+        request('http://js.soufunimg.com/homepage/new/fang905bj/newsV3/style/www_css20151012V1.css', function(err, response, fileData) {
+            if (err) {
+                console.log(err);
+            } else {
+                parseCss(fileData)
+            };
+        })
+    })
+
+
+    /**
+     * 解析css源码并提取附件
+     * @param  {stream} data    css流
+     * @param  {string} baseUrl css文件地址
+     * @return {null}         
+     */
+    function parseCss(data, config) {
+        // var urlsRegexp = /^url\(["'"]?\s*|\s*["']?\)$/g,
+        // var urlsRegexp = /url\((.+).(?:png|png\?.+|jpg|jpg\?.+|jpeg|jpeg\?.+|bmp|gif|gif\?.+)\)/ig,
+        var urlsRegexp = /url\(.+?\)/ig,
+            aUrls = data.match(urlsRegexp),
+            newUrls = [],
+            hash = {},
+            sameHash = {};
+            // 过滤重复
+            aUrls && aUrls.forEach(function(furl, i) {
+                var urlParse = url.parse(furl.replace(/url\(('|"|)|('|"|)\)/g, '')),
+                    fName;
+                if (!hash[urlParse.href]) {
+                    // 处理相同文件名
+                    fName = path.basename(urlParse.pathname);
+                    if (sameHash[fName]) {
+                        urlParse.href
+                    }
+                    newUrls.push(urlParse.href)
+                    sameHash[fName] = true;
+
+                    hash[urlParse.href] = true;
+                }
+            })
+            return false;
+        aImgUrls && aImgUrls.forEach(function(uri1, i) {
+            if (!hash[uri1] && uri1.indexOf(config.cssLogo) != -1) {
+                // console.log(uri1 + '----------');
+                uri1 = uri1.replace(/url\(('|"|)|('|"|)\)/g, '').split('?')[0];
+
+                var imgName = $$.path.basename(uri1);
+                hash[uri1] = true;
+                
+                // console.log($$.path.dirname(uri).replace('css', '') + e.replace('../', ''));
+                if (uri1.indexOf('http') == -1) {
+                    if (!dirHash[$$.path.dirname(uri1)]) dirHash[$$.path.dirname(uri1)] = true;
+                    uri1 = url.resolve(uri, uri1);
+                } else {
+                    var hurl = uri1.replace(imgName, '');
+                    if (!dirHash[hurl]) dirHash[hurl] = true;
+                }
+
+                request(uri1, function(err, res, body) {
+                        if (err) {
+                            console.log('4:' + err + ':' + uri1);
+                        }
+                    })
+                    .pipe($$.fs.createWriteStream(webName + '/images/' + imgName))
+                    .on('close', function() {
+                        console.log(webName + '/images/' + imgName + ' created cssimg');
+                    });
+            }
+        })
+
+        for (i in dirHash) {
+            if (i.indexOf('fonts')) {return;};
+            data = data.replace(new RegExp(i, "gm"), '../images/');
+        }
+    }
 };

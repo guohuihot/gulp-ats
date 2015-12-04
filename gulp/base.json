@@ -13,7 +13,7 @@
         ],
         "pic": "img1",
         "image": "",
-        "dest": "C:\\Users\\Administrator\\Desktop",
+        "dest": "C:/Users/Administrator/Desktop",
         "src": "D:\\nodejs\\src\\html\\",
         "debug": 1
     }

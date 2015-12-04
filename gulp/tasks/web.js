@@ -65,9 +65,29 @@ module.exports = function(gulp, $, utils) {
                 gulp.src(config.dir + '**/*.html', {read: false})
                 .pipe($.livereload());
             });
+        } else {
+            gulp.watch(config.dir + '**/*.{html,css,min.js}', function(cssFile) {
+                if (cssFile.type != 'changed') return false;
+                var relativeDir = path.dirname(path.relative(config.dir, cssFile.path).replace(/\\/g,'/'));
+                console.log('本地：' + cssFile.path);
+                console.log('远程：' + '/housev7.08cms.com/template/blue/' + relativeDir + '/');
+                return gulp.src(cssFile.path)
+                    .pipe($.ftp({
+                        host: '183.129.245.7',
+                        user: '08house',
+                        pass: '8UdGu9V6',
+                        port: '621',
+                        remotePath: '/housev7.08cms.com/template/blue/' + relativeDir + '/'
+                    }))
+                    .pipe($.livereload())
+                    .pipe($.notify({
+                        message: 'ftp ok !'
+                    }));
+            })
         };
 
         gulp.watch(config.dir + '**/*.scss', function(cssFile) {
+            if (cssFile.type != 'changed') return false;
             config.filePath = cssFile.path;
             config.banner = ['/**',
                 ' * @name ' + path.basename(cssFile.path, '.scss') + '.css',
@@ -108,14 +128,11 @@ module.exports = function(gulp, $, utils) {
     // compass
 
     gulp.task('compass', function() {
-        config.dir = path.join(path.dirname(config.filePath), '../');
-        /*return gulp.src(config.dir + 'scss/*.scss')
-            .pipe($.changed(config.dir + 'css/', {
-                extension: '.css'
-            }))*/
+        var compassDir = path.join(path.dirname(config.filePath), '../');
+
         return gulp.src(config.filePath)
             .pipe($.compass({
-                project: config.dir,
+                project: compassDir,
                 // style: 'compact',
                 // comments: true,
                 css: 'css',
@@ -125,25 +142,11 @@ module.exports = function(gulp, $, utils) {
                 time: true
             }))
             .pipe($.header(config.banner))
-            .pipe(gulp.dest(config.dir + 'css/'))
-            .pipe($.livereload())
+            .pipe(gulp.dest(compassDir + 'css/'))
+            .pipe($.if(isLocal, $.livereload()))
             .pipe($.notify({
                 message: 'css compass ok !'
             }));
-    });
-
-    // ftp
-    gulp.task('ftp', function() {
-        return gulp.src('src/*')
-            .pipe(ftp({
-                host: 'website.com',
-                user: 'johndoe',
-                pass: '1234'
-            }))
-            // you need to have some kind of stream after gulp-ftp to make sure it's flushed
-            // this can be a gulp plugin, gulp.dest, or any kind of stream
-            // here we use a passthrough stream
-            .pipe(gutil.noop());
     });
 
     // csscomb
