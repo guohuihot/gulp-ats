@@ -1,25 +1,20 @@
 module.exports = function(gulp, $$, utils) {
     var request = require('request'),
-        cheerio  = require('cheerio'),
-        iconv    = require('iconv-lite'),
-        url      = require('url'),
-        path      = require('path'),
-        fs       = require('fs'),
-        jsonFile = require('json-file-plus'),
-        extend   = require('node.extend'),
+        url        = require('url'),
+        fs         = require('fs'),
         urlsRegexp = /url\(.+?\)/ig,
-        rUrls = {}, oUrls = {};
+        rUrls      = {}, oUrls = {};
 
     gulp.task('webdown', function(callback) {
-
         var async = require('async');
 
         // process config
         var processCon = function(cb) {
-            var baseFile = jsonFile.sync('./gulp/base.json');
-
-            var base = baseFile.data;
-            var argv = require('yargs').alias('c', 'config').argv.c;
+            var jsonFile = require('json-file-plus'),
+                extend   = require('node.extend'),
+                baseFile = jsonFile.sync('./gulp/base.json'),
+                base     = baseFile.data,
+                argv     = require('yargs').alias('c', 'config').argv.c;
             // 参数不存在返回错误信息
             if (!argv) {
                 cb('命令：gulp webdown -c "' + base['webdown']['argv'] + '"\n');
@@ -66,25 +61,24 @@ module.exports = function(gulp, $$, utils) {
                             }
                         })
                     }
-                    // 对数据进行转码
-                    body = iconv.decode(body, reqConfig.encoding);
                     cb(null, body, reqConfig, webConfig)
                 }
             });
         }
 
-        // processHtml
-        var processHtml = function(data, reqConfig, webConfig, cb) {
+        // downHtml
+        var downHtml = function(data, reqConfig, webConfig, cb) {
+            var cheerio  = require('cheerio'),
+                iconv    = require('iconv-lite');
+            // 对数据进行转码
+            data = iconv.decode(data, reqConfig.encoding);
+
             var $ = cheerio.load(data, {
                 decodeEntities: false //关闭转换实体编码的功能
-            }),
-            source = {
-                css: []
-            };
+            });
 
             $('link[rel="stylesheet"]').each(function(i, el) {
                 processUrls($(el).attr('href'), webConfig.hostUrl, function(rUrl, oUrl, nUrl) {
-                    source.css.push(rUrl);
                     $(el).attr('href', nUrl);
                 })
             });
@@ -98,7 +92,7 @@ module.exports = function(gulp, $$, utils) {
             $('img').each(function(i, el) {
                 $(el).attr('src') && processUrls($(el).attr('src'), webConfig.hostUrl, function(rUrl, oUrl, nUrl) {
                     $(el).attr('src', nUrl);
-                })
+                }, el)
             });
 
             // 去掉内容里的链接
@@ -113,7 +107,7 @@ module.exports = function(gulp, $$, utils) {
                 var cssCon = $(el).html();
                 var cssConUrls = cssCon.match(urlsRegexp);
                 if (cssConUrls) {
-                    processUrls(cssCon.match(urlsRegexp), webConfig.hostUrl, function(rUrl, oUrl, nUrl) {
+                    processUrls(cssConUrls, webConfig.hostUrl, function(rUrl, oUrl, nUrl) {
                         $(el).attr('src', nUrl);
                         var reg =new RegExp(oUrl, 'g');
                         cssCon = cssCon.replace(reg, nUrl);
@@ -123,80 +117,102 @@ module.exports = function(gulp, $$, utils) {
             });
             // 兼容st编辑器，多个中线注释会出错
             var fileData = $.html().replace(/<!--/g, '<!-- ').replace(/-->/g, ' -->');
-            iconv.encode(fileData, reqConfig.encoding);
             // 转码
+            fileData = iconv.encode(fileData, reqConfig.encoding);
+            // return false;
             fs.writeFile(webConfig.downDir + webConfig.fileName, fileData, function(err) {
                 if (err) {
                     cb(err);
                 } else {
                     console.log(webConfig.downDir + webConfig.fileName + ' created');
+                    cb(null, webConfig);
                 };
             })
-
-            cb(null, webConfig, source);
         }
 
-        var downSource = function(webConfig, source, cb) {
-            var taskUrls = [];
-
-            for (i in rUrls) {
-                taskUrls.push({
-                    rUrl: i,
-                    nUrl: rUrls[i]
-                });
-            }
-            async.eachSeries(taskUrls, function(item, callback) {
-                    request(item.rUrl, function(err, response, fileData) {
+        var downCss = function(webConfig, cb) {
+            async.forEachOfLimit(rUrls, 20, function(v, k, callback) {
+                if (v.split('.').pop() == 'css') {
+                    request(k, function(err, response, fileData) {
                         if (err) {
                             callback(err);
                         } else {
-                            console.log(webConfig.downDir + item.nUrl + ' created');
+                            var cssConUrls = fileData.match(urlsRegexp);
+                            if (cssConUrls) {
+                                processUrls(cssConUrls, webConfig.hostUrl, function(rUrl, oUrl, nUrl) {
+                                    var reg =new RegExp(oUrl, 'g');
+                                    fileData = fileData.replace(reg, '../' + nUrl);
+                                })
+                            };
+
+                            fs.writeFile(webConfig.downDir + v, fileData, function(err) {
+                                if (err) {
+                                    callback(err);
+                                };
+                            })
+                            console.log(webConfig.downDir + v + ' created');
                             callback();
                         };
-                    }).pipe(fs.createWriteStream(webConfig.downDir + item.nUrl))
-                }, function(err) {
+                    })
+                    // 删除已下载
+                    delete rUrls[k];
+                } else {
+                    callback();
+                }
+            }, function(err) {
+                if (err) {
+                    cb(err);
+                } else {
+                    cb(null, webConfig);
+                }
+            })
+        }
+
+        var downSource = function(webConfig, cb) {
+            // return false;
+            async.forEachOfLimit(rUrls, 20, function(v, k, callback) {
+                request(k, function(err, response, fileData) {
                     if (err) {
-                        console.error("error");
-                    }
-                })
+                        callback(err);
+                    } else {
+                        console.log(webConfig.downDir + v + ' created');
+                        callback();
+                    };
+                }).pipe(fs.createWriteStream(webConfig.downDir + v));
+            }, function(err) {
+                if (err) {
+                    cb(err);
+                } else {
+                    cb(null, '完成');
+                }
+            })
         }
 
         async.waterfall([
                 processCon,
                 req,
-                processHtml/*,
-                downSource*/
+                downHtml,
+                downCss,
+                downSource
             ],
             function(err, result) {
                 if (err) {
                     callback(err);
                 } else {
-
                     // open
                     // require('child_process').exec('explorer ' + result.downDir);
-                    // console.log(result);;
+                    console.log(result);
                 };
             });
         
 
     })
 
-    gulp.task('processcss', function() {
-        request('http://js.soufunimg.com/homepage/new/fang905bj/newsV3/style/www_css20151012V1.css', function(err, response, fileData) {
-            if (err) {
-                console.log(err);
-            } else {
-                processUrls(fileData.match(urlsRegexp), 'http://js.soufunimg.com/homepage/new/fang905bj/newsV3/style/')
-                console.log(rUrls);
-                console.log(oUrls);
-            };
-        })
-    })
     /**
      * 处理链接地址
      * @param  {array} urls    要处理的链接
      * @param  {string} baseUrl 基本地址
-     * @return {json}         {原地址:下载地址}
+     * @param  {function} fn 回调函数
      */
     function processUrls(urls, rBaseUrl, fn) {
         var hash = {}, isHtml, _urls = [];
@@ -211,6 +227,7 @@ module.exports = function(gulp, $$, utils) {
             oUrl = oUrl.replace(/url\(('|"|)|('|"|)\)/g, '');
             var urlParse = url.parse(oUrl),
                 rUrl, fName, fExtendName, fDirname;
+            if (!urlParse.href) return;
             if (urlParse.protocol) {
                 rUrl = urlParse.protocol + '//' + urlParse.host + urlParse.pathname
             } else {
@@ -225,7 +242,7 @@ module.exports = function(gulp, $$, utils) {
                         fDirname = 'images/';
                     break;
                     case 'svg':case 'eot':case 'woff':
-                        fDirname = 'font/';
+                        fDirname = 'fonts/';
                     break;
                     case 'js':
                         fDirname = 'js/';
@@ -250,50 +267,4 @@ module.exports = function(gulp, $$, utils) {
         })
     }
 
-    /**
-     * 解析css源码并提取附件
-     * @param  {stream} data    css流
-     * @param  {string} baseUrl css文件地址
-     * @return {null}         
-     */
-     /*function parseCss(data, rBaseUrl) {
-        // var urlsRegexp = /^url\(["'"]?\s*|\s*["']?\)$/g,
-        // var urlsRegexp = /url\((.+).(?:png|png\?.+|jpg|jpg\?.+|jpeg|jpeg\?.+|bmp|gif|gif\?.+)\)/ig,
-        var urlsRegexp = /url\(.+?\)/ig,
-            aUrls = data.match(urlsRegexp)
-            return processUrls(aUrls, rBaseUrl);
-       aImgUrls && aImgUrls.forEach(function(uri1, i) {
-            if (!hash[uri1] && uri1.indexOf(config.cssLogo) != -1) {
-                // console.log(uri1 + '----------');
-                uri1 = uri1.replace(/url\(('|"|)|('|"|)\)/g, '').split('?')[0];
-
-                var imgName = $$.path.basename(uri1);
-                hash[uri1] = true;
-                
-                // console.log($$.path.dirname(uri).replace('css', '') + e.replace('../', ''));
-                if (uri1.indexOf('http') == -1) {
-                    if (!dirHash[$$.path.dirname(uri1)]) dirHash[$$.path.dirname(uri1)] = true;
-                    uri1 = url.resolve(uri, uri1);
-                } else {
-                    var hurl = uri1.replace(imgName, '');
-                    if (!dirHash[hurl]) dirHash[hurl] = true;
-                }
-
-                request(uri1, function(err, res, body) {
-                        if (err) {
-                            console.log('4:' + err + ':' + uri1);
-                        }
-                    })
-                    .pipe($$.fs.createWriteStream(webName + '/images/' + imgName))
-                    .on('close', function() {
-                        console.log(webName + '/images/' + imgName + ' created cssimg');
-                    });
-            }
-        })
-
-        for (i in dirHash) {
-            if (i.indexOf('fonts')) {return;};
-            data = data.replace(new RegExp(i, "gm"), '../images/');
-        }
-    }*/
 };
