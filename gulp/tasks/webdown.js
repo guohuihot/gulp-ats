@@ -116,7 +116,7 @@ module.exports = function(gulp, $$, utils) {
                 };
             });
             // 兼容st编辑器，多个中线注释会出错
-            var fileData = $.html().replace(/<!--/g, '<!-- ').replace(/-->/g, ' -->');
+            var fileData = $.html().replace(/<!--\S(.+)\S-->/g, '<!-- $1 -->');
             // 转码
             fileData = iconv.encode(fileData, reqConfig.encoding);
             // return false;
