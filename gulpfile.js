@@ -17,7 +17,7 @@ gulp.task('default', function() {
 
     taskInfo += '使用帮助信息\t\tgulp\n\n';
     for(var i in tasks) {
-        taskInfo += tasks[i]['title'] + '\tgulp ' + i + ' -c "' + tasks[i]['argv'] + '"\n\n';
+        taskInfo += tasks[i]['title'] + '\tgulp ' + i + ' ' + tasks[i]['argv'] + '\n\n';
     }
     taskInfo += '--------------- /help -----------------\n';
     

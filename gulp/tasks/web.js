@@ -37,11 +37,12 @@ module.exports = function(gulp, $, utils) {
                 uri2MVC: false
             }
         },
+        argv  = require('yargs').alias('c', 'config').argv,
         config;
 
     var processBase = function(taskName, cb) {
         var base = jsonFile.sync('./gulp/base.json'),
-            args  = require('yargs').alias('c', 'config').argv.c,
+            args  = argv.c,
             argsK = ['dir','dist', 'name'];                                      
 
         config = base.data.web;
@@ -53,7 +54,8 @@ module.exports = function(gulp, $, utils) {
 
         if (config.dir) {
             config.dir = path.normalize(config.dir) + '/';
-            console.log('\n当前项目目录:' + config.dir + '\n');
+            console.log('\n当前项目目录:' + config.dir);
+            console.log('当前目标目录:' + config.dist + '\n');
         } else {
             return cb('命令：gulp '+ taskName +' -c "' + tasksInfo[taskName]['argv'] + '"\n');
         };
@@ -81,7 +83,9 @@ module.exports = function(gulp, $, utils) {
         
         utils.mkdir(config.dir, config.src);
         gulp.start('connect', 'server:watch');
-        require('child_process').exec('start http://localhost:8080/');
+        if (argv.o) {
+            require('child_process').exec('start http://localhost:8080/');
+        };
     });
     // connect 
     gulp.task('connect', function() {
@@ -139,7 +143,7 @@ module.exports = function(gulp, $, utils) {
             ].join('\n'); 
 
             if (path.extname(file.path) == '.scss') {           
-                gulp.start('compass');
+                gulp.start('compass1');
             } else {
                 gulp.start('js');
             };
@@ -149,7 +153,7 @@ module.exports = function(gulp, $, utils) {
 
     // js
     gulp.task('js', function() {
-        gulp.src(config.filePath)
+        gulp.src(config.filePath, { base: config.dir })
             .pipe($.jshint(jshintConfig))
             .pipe($.jshint.reporter())
             // .pipe($.jslint())
@@ -177,7 +181,7 @@ module.exports = function(gulp, $, utils) {
             }))*/
             .pipe($.header(config.banner))
             .pipe($.convertEncoding({to: 'gbk'}))
-            .pipe(gulp.dest(config.nDist + 'js/'))
+            .pipe(gulp.dest(config.dist))
             .pipe($.notify({
                 message: 'js 压缩 ok !'
             }))
@@ -186,20 +190,43 @@ module.exports = function(gulp, $, utils) {
     // compass
 
     gulp.task('compass', function() {
-// return false;
+        // return false;
         return gulp.src(config.filePath)
             .pipe($.compass({
                 project: config.nDir,
                 // style: 'compact',
                 // comments: true,
-                css: config.nDist + 'css/',
+                css: config.nDist + 'css',
                 image: 'images',
                 sass: 'scss',
                 // sourcemap: true, // 生成sourcemap
                 time: true
             }))
             .pipe($.header(config.banner))
-            .pipe(gulp.dest(config.nDist + 'css/'))
+            .pipe(gulp.dest(config.nDist + 'css'))
+            .pipe($.if(isLocal, $.livereload()))
+            .pipe($.notify({
+                message: 'css compass ok !'
+            }));
+    });
+    // compass
+
+    gulp.task('compass1', function() {
+        // return false;
+        console.log(config.nDir);
+        return gulp.src(config.filePath, {base: config.dir})
+            .pipe($.compass({
+                // project: config.nDir,
+                // style: 'compact',
+                // comments: true,
+                css: config.nDir + 'css',
+                image: config.nDir + 'images',
+                sass: config.nDir + 'scss',
+                // sourcemap: true, // 生成sourcemap
+                time: true
+            }))
+            .pipe($.header(config.banner))
+            .pipe(gulp.dest(config.dist))
             .pipe($.if(isLocal, $.livereload()))
             .pipe($.notify({
                 message: 'css compass ok !'

@@ -1,7 +1,7 @@
 {
     "web": {
-        "dir": "E:\\wwwroot\\house\\template\\src\\/",
-        "dist": "E:\\wwwroot\\house\\template\\blue",
+        "dir": "C:\\Users\\Administrator\\Desktop\\test/",
+        "dist": "C:\\Users\\Administrator\\Desktop\\test1",
         "name": "ahuing",
         "src": "src/html/",
         "message": "[根目录]"
