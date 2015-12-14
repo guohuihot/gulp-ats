@@ -2,7 +2,9 @@ var gulp = require('gulp'),
     $            = require('gulp-load-plugins')(),
     utils        = require('./gulp/utils')(gulp, $),
     debugMoudle  = [],
-    gulpTaskList = debugMoudle.length && debugMoudle || require('fs').readdirSync('./gulp/tasks/');
+    gulpTaskList = debugMoudle.length &&
+                    debugMoudle ||
+                    require('fs').readdirSync('./gulp/tasks/');
 
 $.moment = require('moment');
 $.path   = require('path');
