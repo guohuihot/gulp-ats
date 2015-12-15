@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
     $            = require('gulp-load-plugins')(),
     utils        = require('./gulp/utils')(gulp, $),
-    debugMoudle  = [],
+    debugMoudle  = [], //调试用，只加载数组里的模块，如：['web.js']
     gulpTaskList = debugMoudle.length &&
                     debugMoudle ||
                     require('fs').readdirSync('./gulp/tasks/');

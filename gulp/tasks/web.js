@@ -51,25 +51,29 @@ module.exports = function(gulp, $, utils) {
     var processBase = function(taskName, cb) {
         var base = jsonFile.sync('./gulp/base.json'),
             args  = argv.c,
-            argsK = ['dir','dist', 'name'];                                      
+            argsK = ['baseurl','src','dist', 'author'];                                      
 
         config = base.data.web;
         if (args) {
             args.split(',').forEach(function(v, i) {
-                if (v) config[argsK[i]] = v;
+                if (v) {
+                    config[argsK[i]] = v;
+                }
             })
         }
 
-        if (config.dir) {
-            config.dir = path.normalize(config.dir + '/');
-            console.log('\n当前项目目录:' + config.dir);
-            console.log('当前目标目录:' + config.dist + '\n');
+        if (config.baseurl) {
+            config.src = path.join(config.baseurl, config.src);
+            config.dist = path.join(config.baseurl, config.dist);
+            console.log('\n当前配置:');
+            console.log(config);
+            console.log('\n');
         } else {
             return cb('命令：gulp '+ taskName +' -c "' + tasksInfo[taskName]['argv'] + '"\n');
         };
 
         if (!config.dist) {
-            config.dist = config.dir;
+            config.dist = config.src;
         }
 
         base.saveSync();
@@ -89,7 +93,7 @@ module.exports = function(gulp, $, utils) {
     gulp.task('server:web', function (cb) {
         processBase('server:web', cb);
         
-        utils.mkdir(config.dir, config.src);
+        utils.mkdir(config.baseurl, config.tpl);
         gulp.start('connect', 'server:watch');
         if (argv.o) {
             require('child_process').exec('start http://localhost:8080/');
@@ -98,7 +102,7 @@ module.exports = function(gulp, $, utils) {
     // connect 
     gulp.task('connect', function() {
         $.connect.server({
-            root: config.dir,
+            root: config.dist,
             port: 8080/*,
             livereload: true*/
         });
@@ -110,13 +114,13 @@ module.exports = function(gulp, $, utils) {
         if (isLocal) {
             $.livereload.listen();
 
-            $.watch(config.dir + '**/*.html', function () {
-                gulp.src(config.dir + '**/*.html', {read: false})
+            $.watch(config.src + '/**/*.html', function () {
+                gulp.src(config.src + '/**/*.html', {read: false})
                 .pipe($.livereload());
             });
         } else {
-            $.watch(config.dir + '**/*.{html,css,js}', function(cssFile) {
-                var relativeDir = path.dirname(path.relative(config.dir, cssFile.path).replace(/\\/g,'/'));
+            $.watch(config.src + '/**/*.{html,css,js}', function(cssFile) {
+                var relativeDir = path.dirname(path.relative(config.src, cssFile.path).replace(/\\/g,'/'));
                 console.log('本地：' + cssFile.path);
                 console.log('远程：' + '/housev7.08cms.com/template/blue/' + relativeDir + '/');
                 return gulp.src(cssFile.path)
@@ -134,35 +138,46 @@ module.exports = function(gulp, $, utils) {
             })
         };
         // scss
-        $.watch([config.dir + '**/*.scss', '!' + config.dir + '**/sprite-*.scss'], function (file) {
-            gulp.src(file.path, {base: config.dir})
-            .pipe($.sass({
-                outputStyle: 'nested', //Type: String Default: nested Values: nested, expanded, compact, compressed
-                sourceMap: true
-            }).on('error', $.sass.logError))
-            .pipe($.autoprefixer())
-            .pipe($.csscomb('csscomb.json'))
-            .pipe($.header(banner, {
-                name: file.basename, 
-                author: config.name,
-                time: $.moment().format("YYYY-MM-DD HH:mm:ss")
-            }))
-            // .pipe($.convertEncoding({to: 'gbk'}))
-            .pipe(gulp.dest(config.dist))
-            .pipe($.notify({
-                message: 'css 处理 ok !'
-            }))
+        $.watch([config.src + '/**/*.scss', '!' + config.src + '/**/part-*.scss'], function (file) {
+            gulp.src(file.path, {base: config.src})
+                .pipe($.sass({
+                    outputStyle: 'nested', //Type: String Default: nested Values: nested, expanded, compact, compressed
+                    sourceMap: true
+                }).on('error', $.sass.logError))
+                .pipe($.autoprefixer({
+                    browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
+                    //cascade: true, 是否美化属性值 默认：true 像这样：
+                    //-webkit-transform: rotate(45deg);
+                    //        transform: rotate(45deg);
+                    //remove:true //是否去掉不必要的前缀 默认：true 
+                }))
+                // .pipe($.csso())
+                .pipe($.csscomb('./src/css/csscomb.json'))
+                .pipe($.header(banner, {
+                    name: file.basename.replace(/scss/, 'css'), 
+                    author: config.author,
+                    time: $.moment().format("YYYY-MM-DD HH:mm:ss")
+                }))
+                // .pipe($.convertEncoding({to: 'gbk'}))
+                .pipe(gulp.dest(config.dist))
+                .pipe($.notify({
+                    message: 'css 处理 ok !'
+                }))
         });
         // sprite
-        $.watch(config.dir + '**/*.{gif,png}', function (file) {
+        $.watch(config.src + '/**/*.{gif,png}', function (file) {
             var fDirname = path.join(file.dirname, '../../'),
             nBasename = file.dirname.split('\\').pop(),
-            baseDir =path.join(config.dist, path.relative(config.dir, fDirname));
+            baseDir =path.join(config.dist, path.relative(config.src, fDirname));
 
-            gulp.src(file.dirname + '/*', { base: config.dir })
+            gulp.src(file.dirname + '/*', { base: config.src })
                 .pipe($.spritesmith({
                     imgName: 'images/sprite-'+ nBasename +'.png',
-                    cssName: fDirname + '/css/sprite-'+ nBasename +'.scss',
+                    imgPath: '../images/sprite-'+ nBasename +'.png',
+                    cssName: fDirname + '/css/part-'+ nBasename +'.scss',
+                    // cssTemplate: './src/css/scss.template.handlebars',
+                    cssSpritesheetName: 'ico',
+                    cssOpts: {cssOpts: {functions: false}},
                     padding: 10
                 }))
                 .pipe(gulp.dest(baseDir))
@@ -171,8 +186,8 @@ module.exports = function(gulp, $, utils) {
                 }));
         });
         // js
-        $.watch(config.dir + '**/*.js', function (file) {
-            gulp.src(file.path, {base: config.dir})
+        $.watch(config.src + '/**/*.js', function (file) {
+            gulp.src(file.path, {base: config.src})
             // file.pipe($.jshint(jshintConfig))
             .pipe($.jshint.reporter())
             // .pipe($.jslint())
@@ -200,7 +215,7 @@ module.exports = function(gulp, $, utils) {
             }))*/
             .pipe($.header(banner, {
                 name: file.basename, 
-                author: config.name,
+                author: config.author,
                 time: $.moment().format("YYYY-MM-DD HH:mm:ss")
             }))
             .pipe($.convertEncoding({to: 'gbk'}))
@@ -211,35 +226,12 @@ module.exports = function(gulp, $, utils) {
         });
     })
 
-    // compass
-
-    gulp.task('compass', function() {
-        // return false;
-        return gulp.src(config.filePath)
-            .pipe($.compass({
-                project: config.nDir,
-                // style: 'compact',
-                // comments: true,
-                css: config.nDist + 'css',
-                image: 'images',
-                sass: 'scss',
-                // sourcemap: true, // 生成sourcemap
-                time: true
-            }))
-            .pipe($.header(config.banner))
-            .pipe(gulp.dest(config.nDist + 'css'))
-            .pipe($.if(isLocal, $.livereload()))
-            .pipe($.notify({
-                message: 'css compass ok !'
-            }));
-    });
-
     // csscomb
     gulp.task('csscomb', function() {
         processBase('csscomb', cb);
-        return gulp.src(config.dir + '**/*.css')
+        return gulp.src(config.dist + '/**/*.css')
             .pipe(csscomb('csscomb.json'))
-            .pipe(gulp.dest(config.dir))
+            .pipe(gulp.dest(config.dist))
             .pipe(notify({
                 message: 'csscomb ok !'
             }));

@@ -1,10 +1,10 @@
 {
     "web": {
-        "dir": "C:\\Users\\Administrator\\Desktop\\test\\",
-        "dist": "C:\\Users\\Administrator\\Desktop\\test1",
-        "name": "ahuing",
-        "src": "src/html/",
-        "message": "[根目录]"
+        "baseurl": "C:\\Users\\Administrator\\Desktop\\test",
+        "src": "C:\\Users\\Administrator\\Desktop\\test\\src",
+        "dist": "C:\\Users\\Administrator\\Desktop\\test\\dist",
+        "author": "ahuing",
+        "tpl": "src/html/"
     },
     "webdown": {
         "ignore": [
