@@ -177,7 +177,10 @@ module.exports = function(gulp, $, utils) {
                     cssName: fDirname + '/css/part-'+ nBasename +'.scss',
                     // cssTemplate: './src/css/scss.template.handlebars',
                     cssSpritesheetName: 'ico',
-                    cssOpts: {cssOpts: {functions: false}},
+                    cssOpts: {
+                        cssSelector: function (sprite) { return 'selector'; },
+                        functions: false
+                    },
                     padding: 10
                 }))
                 .pipe(gulp.dest(baseDir))
