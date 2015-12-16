@@ -33,7 +33,6 @@
     "gulp-sass": "^2.1.1",
     "gulp-uglify": "^1.4.2",
     "gulp-watch": "^4.3.5",
-    "gulp-watch-path": "^0.1.0",
     "gulp-zip": "^3.0.2",
     "gulp.spritesmith": "^6.0.0",
     "iconv-lite": "^0.4.13",

@@ -140,9 +140,8 @@ module.exports = function(gulp, $, utils) {
             })
         };
         // scss
-        $.watch([config.src + '/**/*.scss', '!' + config.src + '/**/part-*.scss'], function (file) {
-            var paths = $.watchPath(file, config.src, config.dist);
-            gulp.src(paths.srcPath)
+        $.watch([config.src + '/**/*.scss', '!' + config.src + '/**/{part-,sprite-}*.scss'], function (file) {
+            gulp.src(file.path, {base: config.src})
                 .pipe($.sass({
                     outputStyle: 'nested', //Type: String Default: nested Values: nested, expanded, compact, compressed
                     sourceMap: true
@@ -161,30 +160,29 @@ module.exports = function(gulp, $, utils) {
                     author: config.author,
                     time: $.moment().format("YYYY-MM-DD HH:mm:ss")
                 }))
-                // .pipe($.convertEncoding({to: 'gbk'}))
-                .pipe(gulp.dest(paths.distDir))
+                .pipe($.convertEncoding({to: 'gbk'}))
+                .pipe(gulp.dest(config.dist))
                 .pipe($.notify({
                     message: 'css 处理 ok !'
                 }))
         });
         // sprite
-        $.watch(config.src + '/**/ico-*/*', function (file) {
+        $.watch(config.src + '/**/ico-*/*.{png,gif,jpg,jpeg}', function (file) {
             var srcDir = path.join(file.dirname, '../../'),
             relativeDir = path.relative(config.src, srcDir),
-            nSrc = path.join(config.src, relativeDir),
-            nDist = path.join(config.dist, relativeDir),
-            sName = file.dirname.split('\\').pop().replace(/ico-/,'');
+            nSrc        = path.join(config.src, relativeDir),
+            nDist       = path.join(config.dist, relativeDir),
+            sName       = file.dirname.split('\\').pop().replace(/ico-/,'');
 
-            gulp.src(file.dirname + '/*')
+            gulp.src(file.dirname + '/*.{png,gif,jpg,jpeg}')
                 .pipe($.spritesmith({
                     imgName: nDist + '/images/sprite-'+ sName +'.png',
                     imgPath: '../images/sprite-'+ sName +'.png',
-                    cssName: nSrc + '/css/part-'+ sName +'.scss',
-                    // cssTemplate: './src/css/scss.template.handlebars',
+                    cssName: nSrc + '/css/sprite-'+ sName +'.scss',
+                    cssTemplate: './src/css/scss.template.handlebars',
                     cssSpritesheetName: sName,
                     cssOpts: {
-                        cssSelector: function (sprite) { sprite.name = 'ccccccc-' + sprite.name; },
-                        functions: false
+                        prefix: 'ico-'
                     },
                     padding: 10
                 }))
