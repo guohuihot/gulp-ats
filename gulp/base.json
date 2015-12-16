@@ -1,8 +1,8 @@
 {
     "web": {
-        "baseurl": "C:\\Users\\guohui\\Desktop\\test",
-        "src": "C:\\Users\\guohui\\Desktop\\test\\src",
-        "dist": "C:\\Users\\guohui\\Desktop\\test\\dist",
+        "baseurl": "C:\\Users\\Administrator\\Desktop\\test",
+        "src": "src",
+        "dist": "dist",
         "author": "ahuing",
         "tpl": "src/html/"
     },

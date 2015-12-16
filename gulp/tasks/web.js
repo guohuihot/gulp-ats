@@ -4,6 +4,7 @@ module.exports = function(gulp, $, utils) {
         path      = require('path'),
         isLocal   = true,
         jsonFile  = require('json-file-plus'),
+        del = require('del'),
         tasksInfo = jsonFile.sync('./gulp/tasks.json').data,
         jshintConfig = {
             bitwise: false, //禁用位运算符，位运算符在 JavaScript 中使用较少，经常是把 && 错输成 &
@@ -63,8 +64,6 @@ module.exports = function(gulp, $, utils) {
         }
 
         if (config.baseurl) {
-            config.src = path.join(config.baseurl, config.src);
-            config.dist = path.join(config.baseurl, config.dist);
             console.log('\n当前配置:');
             console.log(config);
             console.log('\n');
@@ -77,6 +76,9 @@ module.exports = function(gulp, $, utils) {
         }
 
         base.saveSync();
+
+        config.src = path.join(config.baseurl, config.src);
+        config.dist = path.join(config.baseurl, config.dist);
     }
     // server
     gulp.task('server', function(cb) {
@@ -139,7 +141,8 @@ module.exports = function(gulp, $, utils) {
         };
         // scss
         $.watch([config.src + '/**/*.scss', '!' + config.src + '/**/part-*.scss'], function (file) {
-            gulp.src(file.path, {base: config.src})
+            var paths = $.watchPath(file, config.src, config.dist);
+            gulp.src(paths.srcPath)
                 .pipe($.sass({
                     outputStyle: 'nested', //Type: String Default: nested Values: nested, expanded, compact, compressed
                     sourceMap: true
@@ -159,31 +162,33 @@ module.exports = function(gulp, $, utils) {
                     time: $.moment().format("YYYY-MM-DD HH:mm:ss")
                 }))
                 // .pipe($.convertEncoding({to: 'gbk'}))
-                .pipe(gulp.dest(config.dist))
+                .pipe(gulp.dest(paths.distDir))
                 .pipe($.notify({
                     message: 'css 处理 ok !'
                 }))
         });
         // sprite
-        $.watch(config.src + '/**/*.{gif,png}', function (file) {
-            var fDirname = path.join(file.dirname, '../../'),
-            nBasename = file.dirname.split('\\').pop(),
-            baseDir =path.join(config.dist, path.relative(config.src, fDirname));
+        $.watch(config.src + '/**/ico-*/*', function (file) {
+            var srcDir = path.join(file.dirname, '../../'),
+            relativeDir = path.relative(config.src, srcDir),
+            nSrc = path.join(config.src, relativeDir),
+            nDist = path.join(config.dist, relativeDir),
+            sName = file.dirname.split('\\').pop().replace(/ico-/,'');
 
-            gulp.src(file.dirname + '/*', { base: config.src })
+            gulp.src(file.dirname + '/*')
                 .pipe($.spritesmith({
-                    imgName: 'images/sprite-'+ nBasename +'.png',
-                    imgPath: '../images/sprite-'+ nBasename +'.png',
-                    cssName: fDirname + '/css/part-'+ nBasename +'.scss',
+                    imgName: nDist + '/images/sprite-'+ sName +'.png',
+                    imgPath: '../images/sprite-'+ sName +'.png',
+                    cssName: nSrc + '/css/part-'+ sName +'.scss',
                     // cssTemplate: './src/css/scss.template.handlebars',
-                    cssSpritesheetName: 'ico',
+                    cssSpritesheetName: sName,
                     cssOpts: {
-                        cssSelector: function (sprite) { return 'selector'; },
+                        cssSelector: function (sprite) { sprite.name = 'ccccccc-' + sprite.name; },
                         functions: false
                     },
                     padding: 10
                 }))
-                .pipe(gulp.dest(baseDir))
+                .pipe(gulp.dest(config.dist))
                 .pipe($.notify({
                     message: 'sprite 生成 ok !'
                 }));
@@ -238,6 +243,12 @@ module.exports = function(gulp, $, utils) {
             .pipe(notify({
                 message: 'csscomb ok !'
             }));
+    });
+    // clean
+    gulp.task('server:clean', function(cb) {
+        processBase('server:clean', cb);
+        console.log(config.dist);
+        del([config.dist]);
     });
 
 };
