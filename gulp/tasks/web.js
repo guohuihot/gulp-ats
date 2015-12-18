@@ -47,6 +47,7 @@ module.exports = function(gulp, $, utils) {
                 ' */\n',
                 ''
             ].join('\n'),
+        spritePrefix = 'icon-',
         config;
 
     var processBase = function(taskName, cb) {
@@ -140,7 +141,7 @@ module.exports = function(gulp, $, utils) {
             })
         };
         // scss
-        $.watch([config.src + '/**/*.scss', '!' + config.src + '/**/part-*.scss'], function (file) {
+        $.watch([config.src + '/**/css/*.scss'], function (file) {
             var paths = $.watchPath(file, config.src, config.dist);
             gulp.src(paths.srcPath)
                 .pipe($.sass({
@@ -168,23 +169,21 @@ module.exports = function(gulp, $, utils) {
                 }))
         });
         // sprite
-        $.watch(config.src + '/**/ico-*/*', function (file) {
-            var srcDir = path.join(file.dirname, '../../'),
-            relativeDir = path.relative(config.src, srcDir),
-            nSrc = path.join(config.src, relativeDir),
+        $.watch(config.src + '/**/images/*/*', function(file) {
+            var nSrc = path.join(file.dirname, '../../'),
+            relativeDir = path.relative(config.src, nSrc),
             nDist = path.join(config.dist, relativeDir),
-            sName = file.dirname.split('\\').pop().replace(/ico-/,'');
-
-            gulp.src(file.dirname + '/*')
+            sName = file.dirname.split('\\').pop();
+            // console.log(sName);
+            gulp.src(file.dirname + '/*.{png,gif,jpg,jpeg}')
                 .pipe($.spritesmith({
-                    imgName: nDist + '/images/sprite-'+ sName +'.png',
-                    imgPath: '../images/sprite-'+ sName +'.png',
-                    cssName: nSrc + '/css/part-'+ sName +'.scss',
-                    // cssTemplate: './src/css/scss.template.handlebars',
-                    cssSpritesheetName: sName,
-                    cssOpts: {
-                        cssSelector: function (sprite) { sprite.name = 'ccccccc-' + sprite.name; },
-                        functions: false
+                    imgName: nDist + '/images/' + sName + '.png',
+                    imgPath: '../images/' + sName + '.png',
+                    cssName: nSrc + '/css/part/' + sName + '.scss',
+                    cssTemplate: './src/css/scss.template.handlebars',
+                    // cssSpritesheetName: sName,
+                    cssVarMap: function (sprite) {
+                      sprite.name = sName + '-' + sprite.name;
                     },
                     padding: 10
                 }))
