@@ -1,16 +1,16 @@
 module.exports = function(gulp, $) {
     var fs = require('fs');
     var utils = {
-        mkdir: function(dest, src) {
+        mkdir: function(dest, src, sync) {
             fs.stat(dest, function(err, stats) {
                 var nSrc;
-                if (err || !stats.isDirectory()) {
+                if (err || !stats.isDirectory() || sync) {
                     nSrc = src + '**/*';
                 } else {
                     nSrc = [src + '*/', '!' + src + '*.html'];
                 };
                 gulp.src(nSrc)
-                    .pipe(gulp.dest(dest));
+                    .pipe(gulp.dest(dest))
             })
         },
         inArray: function(search, array) {

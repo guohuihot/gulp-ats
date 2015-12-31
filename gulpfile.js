@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
     $            = require('gulp-load-plugins')(),
     utils        = require('./gulp/utils')(gulp, $),
-    debugMoudle  = ['web.js'], //调试用，只加载数组里的模块，如：['web.js']
+    debugMoudle  = [], //调试用，只加载数组里的模块，如：['web.js']
     gulpTaskList = debugMoudle.length &&
                     debugMoudle ||
                     require('fs').readdirSync('./gulp/tasks/');
@@ -15,13 +15,15 @@ gulpTaskList.forEach(function(taskfile) {
 
 gulp.task('default', function() {
     var tasks = require('json-file-plus').sync('./gulp/tasks.json').data,
-        taskInfo = '\n--------------- help -----------------\n\n';
-
-    taskInfo += '使用帮助信息\t\tgulp\n\n';
+        taskInfo = '',
+        params;
+    taskInfo += '\ngulp\t显示帮助信息(参数一个字母一个中线，>一个字母两个中线)\n\n';
     for(var i in tasks) {
-        taskInfo += tasks[i]['title'] + '\tgulp ' + i + ' ' + tasks[i]['argv'] + '\n\n';
+        params = '';
+        for (var j in tasks[i]['argv']) {
+            params += j + '\t' + tasks[i]['argv'][j] + '\n\t';
+        }
+        taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
     }
-    taskInfo += '--------------- /help -----------------\n';
-    
     console.log(taskInfo);
 });

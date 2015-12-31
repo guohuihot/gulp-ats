@@ -1,10 +1,9 @@
 {
     "web": {
-        "baseurl": "C:\\Users\\Administrator\\Desktop\\test",
-        "src": "src",
-        "dist": "dist",
+        "path": "C:\\Users\\Administrator\\Desktop\\test",
         "author": "ahuing",
-        "tpl": "src/html/"
+        "src": "./src",
+        "tpl": "./src"
     },
     "webdown": {
         "ignore": [

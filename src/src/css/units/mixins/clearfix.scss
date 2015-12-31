@@ -1,0 +1,14 @@
+@mixin clearfix() {
+	&:after {
+		display: block;
+		clear: both; 
+
+		height: 0;
+
+		content: '\20';
+	}
+ 
+	& {
+		*zoom: 1
+	}
+}

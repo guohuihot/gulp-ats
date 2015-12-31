@@ -1,13 +1,13 @@
-module.exports = function(gulp, $, config) {
-    gulp.task('default', ['watch']);
+module.exports = function(gulp, $, utils) {
     // markdown
     gulp.task('markdown', function() {
-        return gulp.src('src/docs/**/*.md')
-            .pipe($.watch('src/docs/**/*.md'))
-            .pipe($.markdown())
+        return gulp.src(['./**/*.md','!./node_modules/**/*'], {base: './'})
+            .pipe($.changed('./docs/'))
+            .pipe($.marked())
             .pipe($.wrap({
-                src: 'config/markdown_template.html'
+                src: './gulp/markdown/template.html'
             }))
-            .pipe(gulp.dest('src/docs/'));
+            .pipe($.convertEncoding({to: 'gbk'}))
+            .pipe(gulp.dest('./docs'));
     });
 };

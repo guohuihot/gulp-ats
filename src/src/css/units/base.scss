@@ -1,0 +1,72 @@
+//
+// base
+// --------------------------------------------------
+
+// Body reset
+
+html {
+  font-size: 10px;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+  font-family: $ff;
+  font-size: $fz;
+  line-height: $lh;
+  color: $color;
+  background-color: $bgc;
+}
+
+// Reset fonts for relevant elements
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+
+// Links
+
+a {
+  color: $link-color;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: $hover-color;
+    text-decoration: $hover-decoration;
+  }
+
+  &:focus {
+    @include outline;
+  }
+}
+
+
+// Figures
+//
+// We reset this here because previously Normalize had no `figure` margins. This
+// ensures we don't break anyone's use of the element.
+
+figure {
+  margin: 0;
+}
+
+
+// Images
+
+img {
+  vertical-align: middle;
+}
+
+// Horizontal rules
+
+[type='button'],
+[type='submit'],
+[type='image'] {
+    cursor: pointer;
+}
+
