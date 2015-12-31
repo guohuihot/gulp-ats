@@ -23,6 +23,7 @@
     "gulp-csso": "^1.0.1",
     "gulp-ftp": "^1.1.0",
     "gulp-iconfont": "^5.0.1",
+    "gulp-iconfont-css": "^2.0.0",
     "gulp-if": "^2.0.0",
     "gulp-imagemin": "^2.4.0",
     "gulp-jshint": "^1.12.0",

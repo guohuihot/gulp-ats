@@ -169,7 +169,7 @@ module.exports = function(gulp, $) {
                 .pipe($.spritesmith({
                     imgName: pathRelative + '.png',
                     imgPath: '../images/' + sName + '.png',
-                    cssName: path.join(file.dirname, '../../css/part/' + sName + '.scss'),
+                    cssName: path.join(file.dirname, '../../css/img/' + sName + '.scss'),
                     cssTemplate: './gulp/css/scss.template.handlebars',
                     // cssSpritesheetName: sName,
                     cssVarMap: function (sprite) {
@@ -185,21 +185,33 @@ module.exports = function(gulp, $) {
         // font
         $.watch(config.src + '/**/fonts/*/*.svg', function(file) {
             var pathRelative = path.relative(config.src, file.dirname),
-                sName = path.basename(file.dirname);
-            gulp.src(file.dirname + '/*.svg')
-                .pipe(iconfont({
-                        fontName: pathRelative, // required
-                        appendUnicode: true, // recommended option
-                        formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
-                        timestamp: runTimestamp, // recommended to get consistent builds when watching files
-                    }))
-                    .on('glyphs', function(glyphs, options) {
-                        // CSS templating, e.g.
-                        console.log(glyphs, options);
-                    })
+                    sName = path.basename(file.dirname),
+                    cssPath = path.join(file.dirname, '../../css/font/');
+
+            gulp.src(file.dirname + '/*.svg', {base: config.src })
+                .pipe($.iconfont({
+                    fontName: pathRelative, // required
+                    // appendUnicode: true, // recommended option
+                    formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
+                    // timestamp: runTimestamp // recommended to get consistent builds when watching files
+                }))
+                .on('glyphs', function(glyphs, options) {
+                    // CSS templating, e.g.
+                    // console.log(glyphs, options);
+                    gulp.src('./gulp/css/fonts.scss')
+                        .pipe($.template({
+                            glyphs: glyphs,
+                            fontPath: '../fonts/',
+                            fontName: sName,
+                            cssClass: sName
+                        }))
+                        .pipe($.rename(sName + '.scss'))
+                        .pipe(gulp.dest(cssPath))
+                })
+                // .pipe($.plumber())
                 .pipe(gulp.dest(config.path))
                 .pipe($.notify({
-                    message: 'sprite 处理 ok !'
+                    message: 'fonts 生成 ok !'
                 }));
         });
         // scss
@@ -375,9 +387,7 @@ module.exports = function(gulp, $) {
             files.forEach(function(dir) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
-                    cssPath = argv.all ?
-                        '../../css/part/' + sName + '.scss' :
-                        '../../../css/part/' + sName + '.scss';
+                    cssPath = (argv.all ? '' : '../') + '../../css/img/' + sName + '.scss';
 
                 gulp.src(dir + '/*.{png,gif,jpg,jpeg}', {base: nSrc })
                     .pipe($.spritesmith({
@@ -401,6 +411,43 @@ module.exports = function(gulp, $) {
         gulp.src([nSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: nSrc})
             .pipe($.imagemin(imageminConfig))
             .pipe(gulp.dest(config.path));
+
+        // fonts
+        glob(nSrc + '/**/fonts/!(static)/', function (err, files) {
+            files.forEach(function(dir) {
+                var pathRelative = path.relative(nSrc, dir),
+                    sName = path.basename(dir),
+                    cssPath = path.join(config.src,
+                        path.join(pathRelative, (argv.all ? '' : '../') + '../css/font/')
+                    );
+
+                gulp.src(dir + '/*.svg', {base: nSrc })
+                    .pipe($.iconfont({
+                        fontName: pathRelative, // required
+                        // appendUnicode: true, // recommended option
+                        formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
+                        // timestamp: runTimestamp // recommended to get consistent builds when watching files
+                    }))
+                    .on('glyphs', function(glyphs, options) {
+                        // CSS templating, e.g.
+                        // console.log(glyphs, options);
+                        gulp.src('./gulp/css/fonts.scss')
+                            .pipe($.template({
+                                glyphs: glyphs,
+                                fontPath: '../fonts/',
+                                fontName: sName,
+                                cssClass: sName
+                            }))
+                            .pipe($.rename(sName + '.scss'))
+                            .pipe(gulp.dest(cssPath))
+                    })
+                    // .pipe($.plumber())
+                    .pipe(gulp.dest(config.path))
+                    .pipe($.notify({
+                        message: 'fonts 生成 ok !'
+                    }));
+            });
+        });
         // 处理自己的scss
         gulp.src([nSrc + '/**/css/*.scss'], {base: nSrc })
             .pipe($.if(!argv.d, $.sourcemaps.init()))
@@ -429,33 +476,6 @@ module.exports = function(gulp, $) {
             .pipe($.notify({
                 message: 'css 处理 ok !'
             }));
-        // fonts
-        glob(nSrc + '/**/fonts/!(static)/', function (err, files) {
-            files.forEach(function(dir) {
-                var pathRelative = path.relative(nSrc, dir),
-                    sName = path.basename(dir),
-                    cssPath = argv.all ?
-                        '../../css/part/' + sName + '.scss' :
-                        '../../../css/part/' + sName + '.scss';
-
-                gulp.src(dir + '/*.svg', {base: nSrc })
-                    .pipe($.iconfont({
-                            fontName: 'myFont'//, // required
-                            // appendUnicode: true, // recommended option
-                            // formats: ['ttf', 'eot'], // default, 'woff2' and 'svg' are available
-                            // timestamp: runTimestamp // recommended to get consistent builds when watching files
-                        }))
-                        .on('glyphs', function(glyphs, options) {
-                            // CSS templating, e.g.
-                            console.log(glyphs, options);
-                        })
-                    // .pipe($.plumber())
-                    .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                        message: 'fonts 生成 ok !'
-                    }));
-            });
-        });
         // concat js
         glob(nSrc + '/**/js/!(plugin|static)/', function (err, files) {
             files.forEach(function(dir) {
@@ -467,10 +487,6 @@ module.exports = function(gulp, $) {
                         author: config.author,
                         time: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))*/
-                    .pipe($.template({
-                        author: config.author,
-                        date: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                    }))
                     .pipe($.template({
                         author: config.author,
                         date: $.moment().format('YYYY-MM-DD HH:mm:ss')
