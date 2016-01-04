@@ -5,11 +5,15 @@
 <title>测试页面</title>   
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <link rel="stylesheet" href="css/ats.css" />
+<link rel="stylesheet" href="css/demo.css" />
 </head>
 <body>
 <div class="ma">
-<h1>Hello, ats! 编辑文件测试下</h1>
+
+<h1>Hello, ats! 编辑文件测试下<a href="./" class="demo-home home">Go index!</a></h1>
 <textarea style="border:none;width:90%;outline:none;height:600px">
+gulp init       查看当前配置
+
 gulp build      初始化或同步一个项目
         -p      path    项目地址
         -d      dev     启用开发模式
@@ -28,8 +32,8 @@ gulp wacth      监控一个项目目录
 gulp clean      清理文件
         -p      项目地址，会清理目录下css,js,images,fonts,maps，谨慎使用！
 
-</textarea>
 
+</textarea>
 </div>
 <script type="text/javascript" src="js/seajs.js"></script>
 <script type="text/javascript">

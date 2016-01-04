@@ -1,8 +1,8 @@
 /**
- * @name login
- * @author ahuing
+ * @name <%= name %>
+ * @author <%= author %>
  * @link 08cms.com
- * @date 2015-12-31 09:50:56
+ * @date <%= date %>
  */
 
 define('login', ['$', 'template', 'uri2MVC', 'modal'], function(require){

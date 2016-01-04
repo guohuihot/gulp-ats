@@ -1,5 +1,5 @@
 module.exports = function(gulp, $, config) {
-    gulp.task('pack', function() {
+    gulp.task('pack:patch', function() {
         // argv.run('gulp html_pstohtml --config="e:/test"');
         if (!$.argv.config) {
             console.log('请设置要打包的名称！');

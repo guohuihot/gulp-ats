@@ -1,18 +1,12 @@
 module.exports = function(gulp, $) {
     // banner
-    var path      = require('path'),
-        jsonFile  = require('json-file-plus'),
-        del       = require('del'),
-        extend    = require('node.extend'),
-        argv      = require('yargs').argv,
-        // banner = ['/**',
-        //         // ' * @name <%= file.path.split(/[^.s](css|js)/).pop()%>',
-        //         ' * @author <%= author%>',
-        //         ' * @link 08cms.com',
-        //         ' * @date <%= date%>',
-        //         ' */\n',
-        //         '<%= contents %>'
-        //     ].join('\n'),
+    var path = require('path'),
+        jsonFile     = require('json-file-plus'),
+        del          = require('del'),
+        extend       = require('node.extend'),
+        yaml         = require('js-yaml'),
+        buffer         = require('vinyl-buffer'),
+        argv         = require('yargs').argv,
         jshintConfig = {
             bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
             curly         : false, //循环或者条件语句必须使用花括号包围
@@ -77,9 +71,10 @@ module.exports = function(gulp, $) {
             multipass         : true //类型：Boolean 默认：false 多次优化svg直到完全优化
         },
         config;
+
     argv.d = argv.d === 0 ? false : true;
 
-    gulp.task('server:init', function(cb) {
+    gulp.task('init', function(cb) {
         var base = jsonFile.sync('./gulp/base.json'),
         baseConfig = base.data.web;
 
@@ -110,12 +105,12 @@ module.exports = function(gulp, $) {
                 livereload: true
             });
             if (argv.o) {
-                require('child_process').exec('start http://localhost:8080/');
+                require('child_process').exec('start http://localhost:8080/demo.html');
             }
         });
     // watch
 
-    gulp.task('watch', ['server:init'], function() {
+    gulp.task('watch', ['init'], function() {
         if (argv.f) {
             $.watch(config.path + '/**/*.{html,css,js}', function(cssFile) {
                 var relativeDir = path.dirname(path.relative(config.path, cssFile.path)
@@ -170,8 +165,8 @@ module.exports = function(gulp, $) {
                     imgName: pathRelative + '.png',
                     imgPath: '../images/' + sName + '.png',
                     cssName: path.join(file.dirname, '../../css/img/' + sName + '.scss'),
-                    cssTemplate: './gulp/css/scss.template.handlebars',
-                    // cssSpritesheetName: sName,
+                    cssTemplate: './gulp/css/images.scss',
+                    cssSpritesheetName: sName,
                     cssVarMap: function (sprite) {
                       sprite.name = sName + '-' + sprite.name;
                     },
@@ -187,7 +182,6 @@ module.exports = function(gulp, $) {
             var pathRelative = path.relative(config.src, file.dirname),
                     sName = path.basename(file.dirname),
                     cssPath = path.join(file.dirname, '../../css/font/');
-
             gulp.src(file.dirname + '/*.svg', {base: config.src })
                 .pipe($.iconfont({
                     fontName: pathRelative, // required
@@ -221,6 +215,7 @@ module.exports = function(gulp, $) {
                 del([config.path + '/' + pathRelative], {force: true});
             } else {
                 gulp.src(file.path, {base: config.src})
+                    .pipe($.plumber())
                     .pipe($.if(argv.d, $.sourcemaps.init()))
                     .pipe($.sass({
                         outputStyle: 'nested', 
@@ -240,6 +235,7 @@ module.exports = function(gulp, $) {
                         time: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))*/
                     .pipe($.template({
+                        name: path.basename(file.path),
                         author: config.author,
                         date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))
@@ -256,24 +252,6 @@ module.exports = function(gulp, $) {
             }
         });
         // js
-        // $.watch([config.src + '/**/js/*.js'], function(file) {
-        //     gulp.src(file.path, {base: config.src })
-        //         .pipe($.jshint(jshintConfig))
-        //         .pipe($.jshint.reporter())
-        //         // .pipe($.jslint())
-        //         .pipe($.if(!argv.d, $.uglify(uglifyConfig)))
-        //         .pipe($.wrap(banner, {
-        //             author: config.author,
-        //             time: $.moment().format("YYYY-MM-DD HH:mm:ss")
-        //         }))
-        //         .pipe($.convertEncoding({
-        //             to: 'gbk'
-        //         }))
-        //         .pipe(gulp.dest(config.path))
-        //         .pipe($.notify({
-        //             message: 'js 处理 ok !'
-        //         }))
-        // });
         $.watch([config.src + '/**/js/*.js'], function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
@@ -289,6 +267,7 @@ module.exports = function(gulp, $) {
                         time: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))*/
                     .pipe($.template({
+                        name: path.basename(file.path),
                         author: config.author,
                         date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))
@@ -321,6 +300,7 @@ module.exports = function(gulp, $) {
                     time: $.moment().format('YYYY-MM-DD HH:mm:ss')
                 }))*/
                 .pipe($.template({
+                    name: path.basename(file.path),
                     author: config.author,
                     date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                 }))
@@ -346,13 +326,13 @@ module.exports = function(gulp, $) {
                     gulp.src(file.path, {base: config.src })
                         .pipe($.if(fileExt == '.js', $.jshint(jshintConfig)))
                         .pipe($.if(fileExt == '.js', $.jshint.reporter()))
-                        .pipe($.if(
+                        /*.pipe($.if(
                             fileExt == '.js' || fileExt == '.scss', 
                             $.template({
                                 author: config.author,
                                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                             })
-                        ))
+                        ))*/
                         .pipe(gulp.dest(oSrc))
                         .pipe($.notify({
                             message: '复制 ' + file.basename + ' 到 ' + oSrc + ' ok !'
@@ -371,43 +351,53 @@ module.exports = function(gulp, $) {
         }
     });
     // build
-    gulp.task('build', ['server:init','copy','server:pack']);
-    gulp.task('copy', ['server:init'], function () {
+    gulp.task('build', ['init', 'copy', 'pack', 'scss']);
+    gulp.task('copy', ['init'], function () {
         return gulp.src(config.tpl + '/**/*', {base: config.tpl})
-            .pipe($.if('.html', $.convertEncoding({
-                        to: 'gbk'
-                    })))
-            .pipe(gulp.dest(config.path));
+                    .pipe($.if(function(file) {
+                                return path.extname(file.path) === '.html';
+                            }, $.convertEncoding({
+                                to: 'gbk'
+                            }))
+                    )
+                    .pipe(gulp.dest(config.path));
     });
-    gulp.task('server:pack', ['copy'], function() {   
+    gulp.task('pack', ['copy'], function() {   
         var glob = require('glob'),
             nSrc = !argv.all ? config.tpl + '/src' : config.src;
         // sprite
         glob(nSrc + '/**/images/!(static)/', function (err, files) {
+
             files.forEach(function(dir) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
                     cssPath = (argv.all ? '' : '../') + '../../css/img/' + sName + '.scss';
-
-                gulp.src(dir + '/*.{png,gif,jpg,jpeg}', {base: nSrc })
+                var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}', {base: nSrc })
                     .pipe($.spritesmith({
                         imgName: pathRelative + '.png',
                         imgPath: '../images/' + sName + '.png',
                         cssName: path.join(dir, cssPath),
-                        cssTemplate: './gulp/css/scss.template.handlebars',
-                        // cssSpritesheetName: sName,
+                        cssTemplate: './gulp/css/images.scss',
+                        // cssTemplate: './gulp/css/scss.template.handlebars',
+                        cssSpritesheetName: sName,
                         cssVarMap: function (sprite) {
                           sprite.name = sName + '-' + sprite.name;
                         },
                         padding: 10
                     }))
-                    .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                        message: 'sprite 生成 ok !'
-                    }));
+                    // .pipe(gulp.dest(config.path))
+                    .pipe($.if(function(file) {
+                            return path.extname(file.path) === '.scss';
+                        },
+                        gulp.dest(config.tpl), 
+                        gulp.dest(config.path) && $.notify({
+                            message: 'sprite 生成 ok !'
+                        }))
+                    );
             });
         });
-        // 处理自己的img
+
+        // 处理自定义的img
         gulp.src([nSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: nSrc})
             .pipe($.imagemin(imageminConfig))
             .pipe(gulp.dest(config.path));
@@ -417,10 +407,10 @@ module.exports = function(gulp, $) {
             files.forEach(function(dir) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
-                    cssPath = path.join(config.src,
-                        path.join(pathRelative, (argv.all ? '' : '../') + '../css/font/')
-                    );
-
+                    fontPathRelative = path.join(pathRelative, 
+                        (argv.all ? '' : '../') + '../css/font/'),
+                    cssPath = path.join(config.src, fontPathRelative),
+                    cssPathDemo = path.join(nSrc, fontPathRelative);
                 gulp.src(dir + '/*.svg', {base: nSrc })
                     .pipe($.iconfont({
                         fontName: pathRelative, // required
@@ -440,16 +430,49 @@ module.exports = function(gulp, $) {
                             }))
                             .pipe($.rename(sName + '.scss'))
                             .pipe(gulp.dest(cssPath))
+                            .pipe(gulp.dest(cssPathDemo))
                     })
-                    // .pipe($.plumber())
                     .pipe(gulp.dest(config.path))
                     .pipe($.notify({
                         message: 'fonts 生成 ok !'
                     }));
             });
         });
-        // 处理自己的scss
+        // concat js
+        glob(nSrc + '/**/js/!(plugin|static)/', function (err, files) {
+            files.forEach(function(dir) {
+                var pathRelative = path.relative(nSrc, dir);
+                gulp.src(dir + '/*.js', {base: nSrc })
+                    .pipe($.concat(pathRelative + '.js'))
+                    .pipe($.uglify(uglifyConfig))
+                    .pipe($.convertEncoding({
+                        to: 'gbk'
+                    }))
+                    .pipe(gulp.dest(config.path));
+            });
+        });
+        // 处理自定义的js
+        gulp.src([nSrc + '/**/js/*.js'], {base: nSrc})
+            .pipe($.uglify(uglifyConfig))
+            .pipe($.convertEncoding({
+                to: 'gbk'
+            }))
+            .pipe(gulp.dest(config.path))
+            .pipe($.notify({
+                message: 'js 压缩 ok !'
+            }));
+        // 直接复制核心
+        gulp.src([nSrc + '/**/{plugin,static}/*.js'], {base: nSrc})
+            // .pipe($.uglify(uglifyConfig))
+            .pipe(gulp.dest(config.path));
+    });
+    // scss 单独出来，异步处理
+    gulp.task('scss', ['pack'], function() {
+        var glob = require('glob'),
+            nSrc = !argv.all ? config.tpl + '/src' : config.src;
+
         gulp.src([nSrc + '/**/css/*.scss'], {base: nSrc })
+            .pipe($.plumber())
             .pipe($.if(!argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 outputStyle: 'nested', 
@@ -459,14 +482,14 @@ module.exports = function(gulp, $) {
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
             }))
             .pipe($.if(argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
-            /*.pipe($.wrap(banner, {
-                author: config.author,
-                time: $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))*/
-            .pipe($.template({
-                author: config.author,
-                date: $.moment().format('YYYY-MM-DD HH:mm:ss')
+            /*.pipe($.data(function(file) {
+                return {
+                    name: path.basename(file.path),
+                    author: config.author,
+                    date: $.moment().format('YYYY-MM-DD HH:mm:ss')
+                }
             }))
+            .pipe($.template())*/
             .pipe($.if(!argv.d, $.sourcemaps.write('./maps', {
                 includeContent: false,
                 sourcemaps: './'
@@ -476,52 +499,10 @@ module.exports = function(gulp, $) {
             .pipe($.notify({
                 message: 'css 处理 ok !'
             }));
-        // concat js
-        glob(nSrc + '/**/js/!(plugin|static)/', function (err, files) {
-            files.forEach(function(dir) {
-                var pathRelative = path.relative(nSrc, dir);
-                gulp.src(dir + '/*.js', {base: nSrc })
-                    .pipe($.concat(pathRelative + '.js'))
-                    .pipe($.uglify(uglifyConfig))
-                    /*.pipe($.wrap(banner, {
-                        author: config.author,
-                        time: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                    }))*/
-                    .pipe($.template({
-                        author: config.author,
-                        date: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                    }))
-                    .pipe($.convertEncoding({
-                        to: 'gbk'
-                    }))
-                    .pipe(gulp.dest(config.path));
-            });
-        });
-        // 处理自己的js
-        gulp.src([nSrc + '/**/js/*.js'], {base: nSrc})
-            .pipe($.uglify(uglifyConfig))
-            /*.pipe($.wrap(banner, {
-                author: config.author,
-                time: $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))*/
-            .pipe($.template({
-                author: config.author,
-                date: $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))
-            .pipe($.convertEncoding({
-                to: 'gbk'
-            }))
-            .pipe(gulp.dest(config.path))
-            .pipe($.notify({
-                message: 'js 压缩 ok !'
-            }));
-        // 不需要压缩的复制
-        gulp.src([nSrc + '/**/{plugin,static}/*.js'], {base: nSrc})
-            .pipe($.uglify(uglifyConfig))
-            .pipe(gulp.dest(config.path));
-    });
+    })
+
     // clean
-    gulp.task('server:clean', ['server:init'], function(cb) {
+    gulp.task('clean', ['init'], function(cb) {
         del([config.path + '/{css,js,images,fonts,maps}'], {force: true}, cb);
     });
 };

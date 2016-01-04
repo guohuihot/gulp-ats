@@ -1,7 +1,8 @@
 /**
- * @author ahuing
+ * @name <%= name %>
+ * @author <%= author %>
  * @link 08cms.com
- * @date 2015-12-30 09:30:04
+ * @date <%= date %>
  */
 
 define(function(require,exports,moudles){

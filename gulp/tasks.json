@@ -1,4 +1,10 @@
 {
+    "\t": {
+        "title": "查看任务列表"    
+    },
+    "init": {
+        "title": "查看当前配置"    
+    },
     "build": {
         "title": "初始化或同步一个项目",
         "argv": {
@@ -26,7 +32,7 @@
             "-p": "项目地址，会清理目录下css,js,images,fonts,maps，谨慎使用！"
         }
     },
-    "pack": {
+    "pack:patch": {
         "title": "压缩文件并删除原文件",
         "argv": {
             "-p": "项目地址",

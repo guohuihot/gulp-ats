@@ -21,6 +21,7 @@
     "gulp-convert-encoding": "^0.0.3",
     "gulp-csscomb": "^3.0.6",
     "gulp-csso": "^1.0.1",
+    "gulp-data": "^1.2.1",
     "gulp-ftp": "^1.1.0",
     "gulp-iconfont": "^5.0.1",
     "gulp-iconfont-css": "^2.0.0",
