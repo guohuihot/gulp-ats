@@ -1,12 +1,13 @@
 module.exports = function(gulp, $) {
     // banner
     var path = require('path'),
-        jsonFile     = require('json-file-plus'),
-        del          = require('del'),
-        extend       = require('node.extend'),
-        concatStream = require('concat-stream'),
-        argv         = require('yargs').argv,
-        jshintConfig = {
+            jsonFile     = require('json-file-plus'),
+            del          = require('del'),
+            extend       = require('node.extend'),
+            concatStream = require('concat-stream'),
+            argv         = require('yargs').argv,
+            async        = require('async'),
+            jshintConfig = {
             bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
             curly         : false, //循环或者条件语句必须使用花括号包围
             camelcase     : true, // 使用驼峰命名(camelCase)或全大写下划线命名(UPPER_CASE)
@@ -69,7 +70,12 @@ module.exports = function(gulp, $) {
             interlaced        : true, //类型：Boolean 默认：false 隔行扫描gif进行渲染
             multipass         : true //类型：Boolean 默认：false 多次优化svg直到完全优化
         },
-        config;
+        config,
+        message = function (info) {
+            return $.notify(function(file) {
+                return path.relative(config.path, file.path) + ' ' + info + ' ok !';
+            })
+        };
 
     argv.d = argv.d === 0 ? false : true;
 
@@ -125,9 +131,7 @@ module.exports = function(gulp, $) {
                         remotePath: '/housev7.08cms.com/template/blue/' + relativeDir + '/'
                     }))
                     .pipe($.livereload())
-                    .pipe($.notify({
-                        message: 'ftp ok !'
-                    }));
+                    .pipe(message('上传'));
             });
         } else {
             $.livereload.listen();
@@ -136,9 +140,7 @@ module.exports = function(gulp, $) {
                 gulp.src(config.path + '/**/*.html', {read: false})
                     .pipe(gulp.dest(config.path))
                     .pipe($.livereload())
-                    .pipe($.notify({
-                        message: 'html livereload!'
-                    }));
+                    .pipe(message('livereload'));
             });
         }
         // images
@@ -150,12 +152,10 @@ module.exports = function(gulp, $) {
                 gulp.src(file.path, {base: config.src})
                     .pipe($.imagemin(imageminConfig))
                     .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                        message: 'img 压缩 ok !'
-                    }));
+                    .pipe(message('复制并压缩'));
             }
         });
-        // sprite
+        // sprites
         $.watch(config.src + '/**/images/*/*.{png,gif,jpg,jpeg}', function(file) {
 
             var pathRelative = path.relative(config.src, file.dirname),
@@ -184,15 +184,14 @@ module.exports = function(gulp, $) {
                 }))
                 .pipe($.template())
                 .pipe($.rename(cssPath))
-                .pipe(gulp.dest(config.src));
+                .pipe(gulp.dest(config.src))
+                .pipe(message('sprites scss 生成'));
 
             spriteData.img
                 .pipe(gulp.dest(config.path))
-                .pipe($.notify({
-                        message: 'sprite 生成 ok !'
-                    }));
+                .pipe(message('sprites img 生成'));
         });
-        // font
+        // fonts
         $.watch(config.src + '/**/fonts/*/*.svg', function(file) {
             var pathRelative = path.relative(config.src, file.dirname),
                     sName = path.basename(file.dirname),
@@ -216,12 +215,11 @@ module.exports = function(gulp, $) {
                         }))
                         .pipe($.rename(sName + '.scss'))
                         .pipe(gulp.dest(cssPath))
+                        .pipe(message('font scss 生成'));
                 })
                 // .pipe($.plumber())
                 .pipe(gulp.dest(config.path))
-                .pipe($.notify({
-                    message: 'fonts 生成 ok !'
-                }));
+                .pipe(message('font 生成'));
         });
         // scss
         $.watch([config.src + '/**/css/*.scss'], function (file) {
@@ -257,9 +255,7 @@ module.exports = function(gulp, $) {
                     .pipe($.convertEncoding({to: 'gbk'}))
                     .pipe(gulp.dest(config.path))
                     .pipe($.livereload())
-                    .pipe($.notify({
-                        message: 'css 处理 ok !'
-                    }))
+                    .pipe(message('scss 生成'))
                     .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
                         includeContent: false,
                         sourcemaps: './'
@@ -290,9 +286,7 @@ module.exports = function(gulp, $) {
                         to: 'gbk'
                     }))
                     .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                        message: 'js 处理 ok !'
-                    }));
+                    .pipe(message('处理'));
             }
         });
         // concat js
@@ -323,9 +317,7 @@ module.exports = function(gulp, $) {
                     to: 'gbk'
                 }))
                 .pipe(gulp.dest(config.path))
-                .pipe($.notify({
-                    message: '压缩 js 处理 ok !'
-                }));
+                .pipe(message('合并 压缩'));
         });
         // 将项目中的atsui文件复制回atsui库中
         if (argv.r) {
@@ -349,9 +341,7 @@ module.exports = function(gulp, $) {
                             })
                         ))*/
                         .pipe(gulp.dest(oSrc))
-                        .pipe($.notify({
-                            message: '复制 ' + file.basename + ' 到 ' + oSrc + ' ok !'
-                        }))
+                        .pipe(message('到 ' + oSrc))
                         .pipe(gulp.dest(config.path));
                 }
             });
@@ -366,24 +356,67 @@ module.exports = function(gulp, $) {
         }
     });
     // build
-    gulp.task('build', ['init', 'copy', 'pack', 'scss']);
-    gulp.task('copy', ['init'], function () {
-        return gulp.src(config.tpl + '/**/*', {base: config.tpl})
-                    .pipe($.if(function(file) {
-                                return path.extname(file.path) === '.html';
-                            }, $.convertEncoding({
-                                to: 'gbk'
-                            }))
-                    )
-                    .pipe(gulp.dest(config.path));
+    gulp.task('build', ['init', 'copy', 'pack', 'sprites', 'fonts', 'scss']);
+    // 复制全部ats
+    gulp.task('copy', ['init'], function (cb) {
+        gulp.src(config.tpl + '/**/*', {base: config.tpl})
+            .pipe($.if(function(file) {
+                        return path.extname(file.path) === '.html';
+                    }, $.convertEncoding({
+                        to: 'gbk'
+                    }))
+            )
+            .pipe(gulp.dest(config.path));
+        cb();
     });
-    gulp.task('pack', ['copy'], function() {   
+    // 处理杂项可异步
+    gulp.task('pack', ['copy'], function(cb) {   
         var glob = require('glob'),
             nSrc = !argv.all ? config.tpl + '/src' : config.src;
-        // sprite
-        glob(nSrc + '/**/images/!(static)/', function (err, files) {
 
-            files.forEach(function(dir) {
+        // 处理自定义的img
+        gulp.src([nSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: nSrc})
+            .pipe($.imagemin(imageminConfig))
+            .pipe(gulp.dest(config.path));
+
+        // concat js
+        glob(nSrc + '/**/js/!(plugin|static)/', function (err, files) {
+            async.eachLimit(files, 10, function(dir, callback) {
+                var pathRelative = path.relative(nSrc, dir);
+                gulp.src(dir + '/*.js', {base: nSrc })
+                    .pipe($.concat(pathRelative + '.js'))
+                    .pipe($.uglify(uglifyConfig))
+                    .pipe($.convertEncoding({
+                        to: 'gbk'
+                    }))
+                    .pipe(gulp.dest(config.path));
+                    callback();
+            }, function(err) {
+                if (!err) {
+                    cb();
+                }
+            })
+        });
+        // 处理自定义的js
+        gulp.src([nSrc + '/**/js/*.js'], {base: nSrc})
+            .pipe($.uglify(uglifyConfig))
+            .pipe($.convertEncoding({
+                to: 'gbk'
+            }))
+            .pipe(gulp.dest(config.path))
+            .pipe(message('压缩'));
+        // 直接复制核心
+        gulp.src([nSrc + '/**/{plugin,static}/*.js'], {base: nSrc})
+            // .pipe($.uglify(uglifyConfig))
+            .pipe(gulp.dest(config.path));
+    });
+    // sprites 异步处理
+    gulp.task('sprites', ['pack'], function(cb) {
+        var glob = require('glob'),
+            nSrc = !argv.all ? config.tpl + '/src' : config.src;
+
+        glob(nSrc + '/**/images/!(static)/', function (err, files) {
+            async.eachLimit(files, 10, function(dir, callback) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
                     cssPath = path.join(pathRelative, '../../css/img/' + sName + '.scss');
@@ -396,11 +429,15 @@ module.exports = function(gulp, $) {
                         padding: 10
                     }));
 
+                spriteData.img
+                    .pipe(gulp.dest(config.path))
+                    .pipe(message('sprites img 生成'));
+
                 gulp.src('./gulp/css/images.scss', {base: './gulp/css/'})
-                    .pipe($.data(function(file, cb) {
+                    .pipe($.data(function(file, cb1) {
                         spriteData.css.pipe(concatStream(function(jsonArr) {
                             // console.log(JSON.parse(jsonArr[0].contents));
-                            cb(undefined, {
+                            cb1(undefined, {
                                 glyphs: JSON.parse(jsonArr[0].contents),
                                 imgPath: '../images/' + sName + '.png',
                                 sName: sName,
@@ -410,30 +447,29 @@ module.exports = function(gulp, $) {
                     }))
                     .pipe($.template())
                     .pipe($.rename(cssPath))
-                    .pipe(gulp.dest(nSrc));
-
-                spriteData.img
-                    .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                            message: 'sprite 生成 ok !'
-                        }));
-            });
+                    .pipe(gulp.dest(nSrc))
+                    .pipe(message('sprites css 生成'))
+                    .pipe($.if(!argv.all, gulp.dest(config.src)));
+                callback();
+            }, function(err) {
+                if (!err) {
+                    cb();
+                }
+            })
         });
 
-        // 处理自定义的img
-        gulp.src([nSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: nSrc})
-            .pipe($.imagemin(imageminConfig))
-            .pipe(gulp.dest(config.path));
+    });
+    // fonts 异步处理
+    gulp.task('fonts', ['sprites'], function(cb) {
+        var glob = require('glob'),
+            nSrc = !argv.all ? config.tpl + '/src' : config.src;
 
-        // fonts
         glob(nSrc + '/**/fonts/!(static)/', function (err, files) {
-            files.forEach(function(dir) {
+            async.eachLimit(files, 10, function(dir, callback) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
-                    fontPathRelative = path.join(pathRelative, 
-                        (argv.all ? '' : '../') + '../css/font/'),
-                    cssPath = path.join(config.src, fontPathRelative),
-                    cssPathDemo = path.join(nSrc, fontPathRelative);
+                    cssPath = path.join(pathRelative, '../../css/font/' + sName + '.scss');
+                
                 gulp.src(dir + '/*.svg', {base: nSrc })
                     .pipe($.iconfont({
                         fontName: pathRelative, // required
@@ -451,46 +487,23 @@ module.exports = function(gulp, $) {
                                 sName: sName,
                                 prefix: 'font'
                             }))
-                            .pipe($.rename(sName + '.scss'))
-                            .pipe(gulp.dest(cssPath))
-                            .pipe(gulp.dest(cssPathDemo))
+                            .pipe($.rename(cssPath))
+                            .pipe(gulp.dest(nSrc))
+                            .pipe(message('fonts css 生成'))
+                            .pipe($.if(!argv.all, gulp.dest(config.src)));
+                        callback();
                     })
                     .pipe(gulp.dest(config.path))
-                    .pipe($.notify({
-                        message: 'fonts 生成 ok !'
-                    }));
-            });
+                    .pipe(message('fonts 生成'));
+            }, function(err) {
+                if (!err) {
+                    cb();
+                }
+            })
         });
-        // concat js
-        glob(nSrc + '/**/js/!(plugin|static)/', function (err, files) {
-            files.forEach(function(dir) {
-                var pathRelative = path.relative(nSrc, dir);
-                gulp.src(dir + '/*.js', {base: nSrc })
-                    .pipe($.concat(pathRelative + '.js'))
-                    .pipe($.uglify(uglifyConfig))
-                    .pipe($.convertEncoding({
-                        to: 'gbk'
-                    }))
-                    .pipe(gulp.dest(config.path));
-            });
-        });
-        // 处理自定义的js
-        gulp.src([nSrc + '/**/js/*.js'], {base: nSrc})
-            .pipe($.uglify(uglifyConfig))
-            .pipe($.convertEncoding({
-                to: 'gbk'
-            }))
-            .pipe(gulp.dest(config.path))
-            .pipe($.notify({
-                message: 'js 压缩 ok !'
-            }));
-        // 直接复制核心
-        gulp.src([nSrc + '/**/{plugin,static}/*.js'], {base: nSrc})
-            // .pipe($.uglify(uglifyConfig))
-            .pipe(gulp.dest(config.path));
-    });
+    })
     // scss 单独出来，异步处理
-    gulp.task('scss', ['pack'], function() {
+    gulp.task('scss', ['fonts'], function(cb) {
         var glob = require('glob'),
             nSrc = !argv.all ? config.tpl + '/src' : config.src;
 
@@ -519,9 +532,8 @@ module.exports = function(gulp, $) {
             })))
             .pipe($.convertEncoding({to: 'gbk'}))
             .pipe(gulp.dest(config.path))
-            .pipe($.notify({
-                message: 'css 处理 ok !'
-            }));
+            .pipe(message('scss 生成'));
+        cb();
     })
 
     // clean
