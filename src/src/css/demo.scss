@@ -4,16 +4,17 @@
  * @link 08cms.com
  * @date <%= date %>
  */
+
+// 导入全部font css
 @import 'font/demo';
 @import 'img/demo';
 // 导入全部img css
-@include sprites($demo);
+@include img-demo($img-demo);
+.demo {
+	// 单独引入某一个img css
+	@include img-demo-single($img-demo-face1);
+}
 .home {
 	font-weight: bold;
 	color: #f00;
-}
-
-.demo {
-	// 单独引入某一个img css
-	@include sprites($demo-face1);
 }
