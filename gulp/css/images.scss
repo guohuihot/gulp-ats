@@ -4,22 +4,22 @@ $<%= prefix %>-<%= sName %>-<%= name %>:(<%= glyph.width ? glyph.width + 'px' : 
 $<%= prefix %>-<%= sName %>: (<% _.forEach(glyphs, function(glyph, name) { %>$<%= prefix %>-<%= sName %>-<%= name %>,<% }); %>);
 
 @mixin <%= prefix %>-<%= sName %>-single($sprite) {
-  width: nth($sprite, 1);
-  height: nth($sprite, 2);
-  background-image: url(<%= imgPath %>);
-  background-position: nth($sprite, 3)  nth($sprite, 4);
+  background: url(<%= imgPath %>) no-repeat nth($sprite, 3) nth($sprite, 4);
 }
 
 
 @mixin <%= prefix %>-<%= sName %>($sprites) {
   %ico {
+      display: inline-block;
+      *zoom: 1;
+      *display: inline;
       background-image: url(<%= imgPath %>);
   }
   @each $sprite in $sprites {
     .#{nth($sprite, 5)} {
         width: nth($sprite, 1);
         height: nth($sprite, 2);
-        background-position: nth($sprite, 3)  nth($sprite, 4);
+        background-position: nth($sprite, 3) nth($sprite, 4);
       @extend %ico;
     }
   }

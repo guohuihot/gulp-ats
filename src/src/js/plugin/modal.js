@@ -1,13 +1,12 @@
 /**
-* author : ahuing
-* date   : 2015-04-10
-* name   : jqModal v1.1
-* modify : 2015-9-10 08:41:09
+ * @name modal v1.1
+ * @author ahuing
+ * @link 08cms.com
+ * @date 2015-12-31 09:03:41
  */
 
 define(function(require,exports,moudles){
-     return function(jquery){
-        (function ($) {
+    var $ = require('$');
             // transition.js
             function transitionEnd(){var el=document.createElement('div')
             var transEndEventNames={WebkitTransition:'webkitTransitionEnd',MozTransition:'transitionend',OTransition:'oTransitionEnd otransitionend',transition:'transitionend'}
@@ -358,7 +357,7 @@ define(function(require,exports,moudles){
                 return this
             }
 
-            $('<link rel="stylesheet">').appendTo('head').attr('href', (typeof(tplurl) != 'undefined' ? tplurl : '') + 'css/jqmodal.css');
+            // $('<link rel="stylesheet">').appendTo('head').attr('href', (typeof(tplurl) != 'undefined' ? tplurl : '') + 'css/jqmodal.css');
 
             $(document).on('click', '.btn-jqModal', function(e) {
                 var $this   = $(this)
@@ -435,6 +434,4 @@ define(function(require,exports,moudles){
                     }
                 }
             }
-        })(jQuery);
-    }
 })

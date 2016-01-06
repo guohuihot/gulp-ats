@@ -8,9 +8,10 @@
 <link rel="stylesheet" href="css/demo.css" />
 </head>
 <body>
-<div class="ma">
+<div class="m0a">
 
-<h1>Hello, ats! 编辑文件测试下<a href="./" class="font-home home">Go index!</a></h1>
+<i class="font-home"></i> <i class="img-face1"></i> <a href="./">Go index!</a>
+<h1>Hello, ats! 编辑文件测试下</h1>
 <textarea style="border:none;width:90%;outline:none;height:600px">
 gulp init       查看当前配置
 
@@ -36,7 +37,9 @@ gulp clean      清理文件
 </div>
 <script type="text/javascript" src="js/seajs.js"></script>
 <script type="text/javascript">
-    seajs.use(['duang']);
+    seajs.use(['$', 'modal'], function($) {
+        $.jqModal.tip('Hello!');
+    });
 </script>
 </body>
 </html>

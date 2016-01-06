@@ -231,35 +231,32 @@ module.exports = function(gulp, $) {
                     .pipe($.plumber())
                     .pipe($.if(argv.d, $.sourcemaps.init()))
                     .pipe($.sass({
+                        includePaths: config.tpl + '/src/css/',
                         outputStyle: 'nested', 
                         //Type: String Default: nested Values: nested, expanded, compact, compressed
                         sourceMap: true
                     }).on('error', $.sass.logError))
-                    .pipe($.autoprefixer({
-                        browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
+                    /*.pipe($.autoprefixer({
+                        browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8']//,
                         //cascade: true, 是否美化属性值 默认：true 像这样：
                         //-webkit-transform: rotate(45deg);
                         //        transform: rotate(45deg);
                         //remove:true //是否去掉不必要的前缀 默认：true 
-                    }))
-                    .pipe($.if(!argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
-                    /*.pipe($.wrap(banner, {
-                        author: config.author,
-                        time: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))*/
+                    .pipe($.if(!argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
                     .pipe($.template({
                         name: path.basename(file.path),
                         author: config.author,
                         date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                     }))
                     .pipe($.convertEncoding({to: 'gbk'}))
-                    .pipe(gulp.dest(config.path))
-                    .pipe($.livereload())
-                    .pipe(message('scss 生成'))
                     .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
                         includeContent: false,
                         sourcemaps: './'
-                    })));
+                    })))
+                    .pipe(gulp.dest(config.path))
+                    .pipe($.livereload())
+                    .pipe(message('scss 生成'));
             }
         });
         // js
@@ -269,14 +266,12 @@ module.exports = function(gulp, $) {
                 del([config.path + '/' + pathRelative], {force: true});
             } else {
                 gulp.src(file.path, {base: config.src })
+                    .pipe($.plumber())
+                    .pipe($.if(argv.d, $.sourcemaps.init()))
                     .pipe($.jshint(jshintConfig))
                     .pipe($.jshint.reporter())
                     // .pipe($.jslint())
-                    // .pipe($.if(!argv.d, $.uglify(uglifyConfig)))
-                    /*.pipe($.wrap(banner, {
-                        author: config.author,
-                        time: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                    }))*/
+                    .pipe($.uglify(uglifyConfig))
                     .pipe($.template({
                         name: path.basename(file.path),
                         author: config.author,
@@ -285,6 +280,10 @@ module.exports = function(gulp, $) {
                     .pipe($.convertEncoding({
                         to: 'gbk'
                     }))
+                    .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
+                        includeContent: false,
+                        sourcemaps: './'
+                    })))
                     .pipe(gulp.dest(config.path))
                     .pipe(message('处理'));
             }
@@ -299,15 +298,12 @@ module.exports = function(gulp, $) {
             // return false;
             gulp.src(fileDir + '/*.js', {base: config.src })
                 .pipe($.plumber())
+                .pipe($.if(argv.d, $.sourcemaps.init()))
                 .pipe($.jshint(jshintConfig))
                 .pipe($.jshint.reporter())
                 // .pipe($.jslint())
                 .pipe($.concat(pathRelative + '.js'))
                 // .pipe($.uglify(uglifyConfig))
-                /*.pipe($.wrap(banner, {
-                    author: config.author,
-                    time: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                }))*/
                 .pipe($.template({
                     name: path.basename(file.path),
                     author: config.author,
@@ -316,6 +312,10 @@ module.exports = function(gulp, $) {
                 .pipe($.convertEncoding({
                     to: 'gbk'
                 }))
+                .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
+                    includeContent: false,
+                    sourcemaps: './'
+                })))
                 .pipe(gulp.dest(config.path))
                 .pipe(message('合并 压缩'));
         });
@@ -359,7 +359,10 @@ module.exports = function(gulp, $) {
     gulp.task('build', ['init', 'copy', 'pack', 'sprites', 'fonts', 'scss']);
     // 复制全部ats
     gulp.task('copy', ['init'], function (cb) {
-        gulp.src(config.tpl + '/**/*', {base: config.tpl})
+        gulp.src([
+                config.tpl + '/**/*',
+                '!' + config.tpl + '/**/units/**/*'
+            ], {base: config.tpl})
             .pipe($.if(function(file) {
                         return path.extname(file.path) === '.html';
                     }, $.convertEncoding({
@@ -367,7 +370,17 @@ module.exports = function(gulp, $) {
                     }))
             )
             .pipe(gulp.dest(config.path));
-        cb();
+
+        require('fs').exists(config.src + '/css/units/variables.scss',
+            function(exists) {
+                if (!exists) {
+                    gulp.src(config.tpl + '/src/css/units/variables.scss', {
+                            base: config.tpl
+                        })
+                        .pipe(gulp.dest(config.path));
+                };
+                cb();
+            })
     });
     // 处理杂项可异步
     gulp.task('pack', ['copy'], function(cb) {   
@@ -384,11 +397,17 @@ module.exports = function(gulp, $) {
             async.eachLimit(files, 10, function(dir, callback) {
                 var pathRelative = path.relative(nSrc, dir);
                 gulp.src(dir + '/*.js', {base: nSrc })
-                    .pipe($.concat(pathRelative + '.js'))
+                    .pipe($.plumber())
+                    .pipe($.if(argv.d, $.sourcemaps.init()))
                     .pipe($.uglify(uglifyConfig))
+                    .pipe($.concat(pathRelative + '.js'))
                     .pipe($.convertEncoding({
                         to: 'gbk'
                     }))
+                    .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
+                        includeContent: false,
+                        sourcemaps: './'
+                    })))
                     .pipe(gulp.dest(config.path));
                     callback();
             }, function(err) {
@@ -399,15 +418,23 @@ module.exports = function(gulp, $) {
         });
         // 处理自定义的js
         gulp.src([nSrc + '/**/js/*.js'], {base: nSrc})
+            .pipe($.plumber())
+            .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.uglify(uglifyConfig))
             .pipe($.convertEncoding({
                 to: 'gbk'
             }))
+            .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
+                includeContent: false,
+                sourcemaps: './'
+            })))
             .pipe(gulp.dest(config.path))
             .pipe(message('压缩'));
         // 直接复制核心
-        gulp.src([nSrc + '/**/{plugin,static}/*.js'], {base: nSrc})
-            // .pipe($.uglify(uglifyConfig))
+        gulp.src([nSrc + '/**/plugin/*.js'], {base: nSrc})
+            .pipe($.uglify(uglifyConfig))
+            .pipe(gulp.dest(config.path));
+        gulp.src([nSrc + '/**/static/*.js'], {base: nSrc})
             .pipe(gulp.dest(config.path));
     });
     // sprites 异步处理
@@ -448,8 +475,8 @@ module.exports = function(gulp, $) {
                     .pipe($.template())
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(nSrc))
-                    .pipe(message('sprites css 生成'))
-                    .pipe($.if(!argv.all, gulp.dest(config.src)));
+                    .pipe(message('sprites css 生成'));
+                    // .pipe($.if(!argv.all, gulp.dest(config.src)));
                 callback();
             }, function(err) {
                 if (!err) {
@@ -489,8 +516,8 @@ module.exports = function(gulp, $) {
                             }))
                             .pipe($.rename(cssPath))
                             .pipe(gulp.dest(nSrc))
-                            .pipe(message('fonts css 生成'))
-                            .pipe($.if(!argv.all, gulp.dest(config.src)));
+                            .pipe(message('fonts css 生成'));
+                            // .pipe($.if(!argv.all, gulp.dest(config.src)));
                         callback();
                     })
                     .pipe(gulp.dest(config.path))
@@ -509,28 +536,29 @@ module.exports = function(gulp, $) {
 
         gulp.src([nSrc + '/**/css/*.scss'], {base: nSrc })
             .pipe($.plumber())
-            .pipe($.if(!argv.d, $.sourcemaps.init()))
+            .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
+                includePaths: config.tpl + '/src/css/',
                 outputStyle: 'nested', 
                 sourceMap: true
             }).on('error', $.sass.logError))
             .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
             }))
-            .pipe($.if(argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
-            /*.pipe($.data(function(file) {
+            .pipe($.if(!argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
+            .pipe($.data(function(file) {
                 return {
                     name: path.basename(file.path),
                     author: config.author,
                     date: $.moment().format('YYYY-MM-DD HH:mm:ss')
                 }
             }))
-            .pipe($.template())*/
-            .pipe($.if(!argv.d, $.sourcemaps.write('./maps', {
+            .pipe($.template())
+            .pipe($.convertEncoding({to: 'gbk'}))
+            .pipe($.if(argv.d, $.sourcemaps.write('./maps', {
                 includeContent: false,
                 sourcemaps: './'
             })))
-            .pipe($.convertEncoding({to: 'gbk'}))
             .pipe(gulp.dest(config.path))
             .pipe(message('scss 生成'));
         cb();

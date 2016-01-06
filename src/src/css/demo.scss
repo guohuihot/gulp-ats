@@ -7,21 +7,28 @@
 
 // 导入继承
 @import 'units/inherit';
+// 导入mixins
+@import 'units/mixins';
 // 导入全部font css
 @import 'font/demo';
 // 导入全部img css
 @import 'img/demo';
 // 生成全部img css
 @include img-demo($img-demo);
-body {
 
-}
 .demo {
 	// 单独引入某一个img css
 	@include img-demo-single($img-demo-face1);
 }
 
-.home {
+.wrap {
+	// 调用继承
+	@extend %clearfix;
+	// 调用mixins
+	@include opacity(.5);
 	font-weight: bold;
 	color: #f00;
 }
+
+// 导入插件modal css
+@import 'units/modal';

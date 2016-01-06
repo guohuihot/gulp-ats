@@ -4,7 +4,7 @@
 
 
 .clearfix {
-  @include clearfix;
+  @extend clearfix;
 }
 // Floats
 // -------------------------
@@ -29,7 +29,7 @@
   visibility: hidden;
 }
 .text-hide {
-  @include text-overflow;
+  @extend text-overflow;
 }
 
 // -------------------------

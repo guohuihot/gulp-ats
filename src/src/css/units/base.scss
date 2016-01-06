@@ -41,7 +41,7 @@ a {
   }
 
   &:focus {
-    @include outline;
+    @extend outline;
   }
 }
 
