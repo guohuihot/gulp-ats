@@ -1,13 +1,13 @@
 module.exports = function(gulp, $) {
     // banner
     var path = require('path'),
-            jsonFile     = require('json-file-plus'),
-            del          = require('del'),
-            extend       = require('node.extend'),
-            concatStream = require('concat-stream'),
-            argv         = require('yargs').argv,
-            async        = require('async'),
-            jshintConfig = {
+        jsonFile     = require('json-file-plus'),
+        del          = require('del'),
+        extend       = require('node.extend'),
+        concatStream = require('concat-stream'),
+        argv         = require('yargs').argv,
+        async        = require('async'),
+        jshintConfig = {
             bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
             curly         : false, //循环或者条件语句必须使用花括号包围
             camelcase     : true, // 使用驼峰命名(camelCase)或全大写下划线命名(UPPER_CASE)
@@ -71,6 +71,8 @@ module.exports = function(gulp, $) {
             multipass         : true //类型：Boolean 默认：false 多次优化svg直到完全优化
         },
         config,
+        // url = require('url'),
+        sourceUrl = path.join(process.cwd(), './gulp/'),
         message = function (info) {
             return $.notify(function(file) {
                 return path.relative(config.path, file.path) + ' ' + info + ' ok !';
@@ -136,8 +138,13 @@ module.exports = function(gulp, $) {
         } else {
             $.livereload.listen();
 
-            $.watch(config.path + '/**/*.html', function () {
-                gulp.src(config.path + '/**/*.html', {read: false})
+            $.watch([
+                config.path + '/**/*.html',
+                '!' + config.path + '/**/{fonts,images}/*.html'
+            ], function(file) {
+                gulp.src(file.path, {
+                        read: false
+                    })
                     .pipe(gulp.dest(config.path))
                     .pipe($.livereload())
                     .pipe(message('livereload'));
@@ -160,7 +167,7 @@ module.exports = function(gulp, $) {
 
             var pathRelative = path.relative(config.src, file.dirname),
                 sName = path.basename(file.dirname),
-                cssPath = path.join(pathRelative, '../../css/img/' + sName + '.scss');
+                cssPath = path.join(file.dirname, '../../css/img/');
 
             var spriteData = gulp.src(file.dirname + '/*.{png,gif,jpg,jpeg}')
                 .pipe($.spritesmith({
@@ -170,7 +177,7 @@ module.exports = function(gulp, $) {
                     padding: 10
                 }))
 
-            gulp.src('./gulp/css/images.scss', {base: './gulp/css/'})
+            gulp.src(sourceUrl + 'css/images.scss')
                 .pipe($.data(function(file, cb) {
                     spriteData.css.pipe(concatStream(function(jsonArr) {
                         // console.log(JSON.parse(jsonArr[0].contents));
@@ -183,9 +190,25 @@ module.exports = function(gulp, $) {
                     }));
                 }))
                 .pipe($.template())
-                .pipe($.rename(cssPath))
-                .pipe(gulp.dest(config.src))
+                .pipe($.rename(sName + '.scss'))
+                .pipe(gulp.dest(cssPath))
                 .pipe(message('sprites scss 生成'));
+            // images 预览文件
+            gulp.src(sourceUrl + 'html/images.html')
+                .pipe($.data(function(file, cb) {
+                    spriteData.css.pipe(concatStream(function(jsonArr) {
+                        // console.log(JSON.parse(jsonArr[0].contents));
+                        cb(undefined, {
+                            glyphs: JSON.parse(jsonArr[0].contents),
+                            imgPath: '../images/' + sName + '.png',
+                            sName: sName,
+                            prefix: 'img'
+                        });
+                    }));
+                }))
+                .pipe($.template())
+                .pipe($.rename(pathRelative + '.html'))
+                .pipe(gulp.dest(config.path));
 
             spriteData.img
                 .pipe(gulp.dest(config.path))
@@ -206,7 +229,7 @@ module.exports = function(gulp, $) {
                 .on('glyphs', function(glyphs, options) {
                     // CSS templating, e.g.
                     // console.log(glyphs, options);
-                    gulp.src('./gulp/css/fonts.scss')
+                    gulp.src(sourceUrl + 'css/fonts.scss')
                         .pipe($.template({
                             glyphs: glyphs,
                             fontPath: '../fonts/',
@@ -216,6 +239,17 @@ module.exports = function(gulp, $) {
                         .pipe($.rename(sName + '.scss'))
                         .pipe(gulp.dest(cssPath))
                         .pipe(message('font scss 生成'));
+
+                    gulp.src(sourceUrl + 'html/fonts.html')
+                        .pipe($.template({
+                            glyphs: glyphs,
+                            sourceUrl: sourceUrl,
+                            sName: sName,
+                            prefix: 'font'
+                        }))
+                        .pipe($.rename(pathRelative + '.html'))
+                        .pipe($.convertEncoding({to: 'gbk'}))
+                        .pipe(gulp.dest(config.path))
                 })
                 // .pipe($.plumber())
                 .pipe(gulp.dest(config.path))
@@ -243,7 +277,7 @@ module.exports = function(gulp, $) {
                         //        transform: rotate(45deg);
                         //remove:true //是否去掉不必要的前缀 默认：true 
                     }))*/
-                    .pipe($.if(!argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
+                    .pipe($.if(!argv.d, $.csso(), $.csscomb(sourceUrl + 'css/csscomb.json')))
                     .pipe($.template({
                         name: path.basename(file.path),
                         author: config.author,
@@ -446,7 +480,7 @@ module.exports = function(gulp, $) {
             async.eachLimit(files, 10, function(dir, callback) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
-                    cssPath = path.join(pathRelative, '../../css/img/' + sName + '.scss');
+                    cssPath = path.join(dir, '../../css/img/');
 
                 var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}', {base: nSrc})
                     .pipe($.spritesmith({
@@ -456,11 +490,7 @@ module.exports = function(gulp, $) {
                         padding: 10
                     }));
 
-                spriteData.img
-                    .pipe(gulp.dest(config.path))
-                    .pipe(message('sprites img 生成'));
-
-                gulp.src('./gulp/css/images.scss', {base: './gulp/css/'})
+                gulp.src(sourceUrl + 'css/images.scss', {base: sourceUrl + 'css/'})
                     .pipe($.data(function(file, cb1) {
                         spriteData.css.pipe(concatStream(function(jsonArr) {
                             // console.log(JSON.parse(jsonArr[0].contents));
@@ -473,10 +503,31 @@ module.exports = function(gulp, $) {
                         }));
                     }))
                     .pipe($.template())
-                    .pipe($.rename(cssPath))
-                    .pipe(gulp.dest(nSrc))
+                    .pipe($.rename(sName + '.scss'))
+                    .pipe(gulp.dest(cssPath))
                     .pipe(message('sprites css 生成'));
                     // .pipe($.if(!argv.all, gulp.dest(config.src)));
+
+                // images 预览文件
+                gulp.src(sourceUrl + 'html/images.html')
+                    .pipe($.data(function(file, cb) {
+                        spriteData.css.pipe(concatStream(function(jsonArr) {
+                            // console.log(JSON.parse(jsonArr[0].contents));
+                            cb(undefined, {
+                                glyphs: JSON.parse(jsonArr[0].contents),
+                                imgPath: '../images/' + sName + '.png',
+                                sName: sName,
+                                prefix: 'img'
+                            });
+                        }));
+                    }))
+                    .pipe($.template())
+                    .pipe($.rename(pathRelative + '.html'))
+                    .pipe(gulp.dest(config.path));
+
+                spriteData.img
+                    .pipe(gulp.dest(config.path))
+                    .pipe(message('sprites img 生成'));
                 callback();
             }, function(err) {
                 if (!err) {
@@ -495,7 +546,7 @@ module.exports = function(gulp, $) {
             async.eachLimit(files, 10, function(dir, callback) {
                 var pathRelative = path.relative(nSrc, dir),
                     sName = path.basename(dir),
-                    cssPath = path.join(pathRelative, '../../css/font/' + sName + '.scss');
+                    cssPath = path.join(dir, '../../css/font/');
                 
                 gulp.src(dir + '/*.svg', {base: nSrc })
                     .pipe($.iconfont({
@@ -507,17 +558,29 @@ module.exports = function(gulp, $) {
                     .on('glyphs', function(glyphs, options) {
                         // CSS templating, e.g.
                         // console.log(glyphs, options);
-                        gulp.src('./gulp/css/fonts.scss')
+                        gulp.src(sourceUrl + 'css/fonts.scss')
                             .pipe($.template({
                                 glyphs: glyphs,
                                 fontPath: '../fonts/',
                                 sName: sName,
                                 prefix: 'font'
                             }))
-                            .pipe($.rename(cssPath))
-                            .pipe(gulp.dest(nSrc))
+                            .pipe($.rename(pathRelative + '.scss'))
+                            .pipe(gulp.dest(cssPath))
                             .pipe(message('fonts css 生成'));
                             // .pipe($.if(!argv.all, gulp.dest(config.src)));
+                        // 生成字体预览文件
+                        gulp.src(sourceUrl + 'html/fonts.html')
+                            .pipe($.template({
+                                glyphs: glyphs,
+                                fontPath: '../fonts/',
+                                sName: sName,
+                                prefix: 'font'
+                            }))
+                            .pipe($.rename(pathRelative + '.html'))
+                            .pipe($.convertEncoding({to: 'gbk'}))
+                            .pipe(gulp.dest(config.path))
+
                         callback();
                     })
                     .pipe(gulp.dest(config.path))
@@ -545,7 +608,7 @@ module.exports = function(gulp, $) {
             .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
             }))
-            .pipe($.if(!argv.d, $.csso(), $.csscomb('./gulp/css/csscomb.json')))
+            .pipe($.if(!argv.d, $.csso(), $.csscomb(sourceUrl + 'css/csscomb.json')))
             .pipe($.data(function(file) {
                 return {
                     name: path.basename(file.path),
