@@ -1,28 +1,28 @@
 @font-face {
-	font-family: "<%= sName %>";
+	font-family: "<%= fName %>";
     font-weight: normal;
     font-style: normal;
-	src: url('<%= fontPath %><%= sName %>.eot');
-	src: url('<%= fontPath %><%= sName %>.eot?#iefix') format('embedded-opentype'),
-		url('<%= fontPath %><%= sName %>.woff') format('woff');/*,
-		url('<%= fontPath %><%= sName %>.ttf') format('truetype'),
-		url('<%= fontPath %><%= sName %>.svg#<%= sName %>') format('svg');*/
+	src: url('<%= fUrl %><%= fName %>.eot');
+	src: url('<%= fUrl %><%= fName %>.eot?#iefix') format('embedded-opentype'),
+		url('<%= fUrl %><%= fName %>.woff') format('woff');/*,
+		url('<%= fUrl %><%= fName %>.ttf') format('truetype'),
+		url('<%= fUrl %><%= fName %>.svg#<%= fName %>') format('svg');*/
 }
 
-[class^="<%= prefix %>-"], [class*=" <%= prefix %>-"]:before {
-	font-family: "<%= sName %>";
+[class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
+	font-family: "<%= fName %>";
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;
-	/* speak: none; only necessary if not using the private unicode range (firstGlyph option) */
+	/* speak: none; only necessary if not using the private unicode range (firstdata option) */
 	text-decoration: none;
 	text-transform: none;
 }
 
-<% _.each(glyphs, function(glyph) { %>
-.<%= prefix %>-<%= glyph.name %>:before {
-	content: "\<%= glyph.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+<% _.each(cssData, function(data) { %>
+.<%= sign %>-<%= fName %>-<%= data.name %>:before {
+	content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
 }
 <% }); %>

@@ -2,36 +2,35 @@
 <html lang="zh">
 <head>
 	<meta charset="gbk">
-	<title><%= sName %></title>
-	<script type="text/javascript" src="<%= sourceUrl %>js\jquery.js"></script>
-	<script type="text/javascript" src="<%= sourceUrl %>js\jquery.zeroclipboard.min.js"></script>
+	<title><%= fName %></title>
+	<script type="text/javascript" src="<%= sourceUrl %>js/seajs.js"></script>
 	<style type="text/css">
 		@font-face {
-		font-family: "<%= sName %>";
+		font-family: "<%= fName %>";
 	    font-weight: normal;
 	    font-style: normal;
-		src: url('<%= sName %>.eot');
-		src: url('<%= sName %>.eot?#iefix') format('embedded-opentype'),
-			url('<%= sName %>.woff') format('woff');/*,
-			url('<%= sName %>.ttf') format('truetype'),
-			url('<%= sName %>.svg#<%= sName %>') format('svg');*/
+		src: url('<%= fName %>.eot');
+		src: url('<%= fName %>.eot?#iefix') format('embedded-opentype'),
+			url('<%= fName %>.woff') format('woff');/*,
+			url('<%= fName %>.ttf') format('truetype'),
+			url('<%= fName %>.svg#<%= fName %>') format('svg');*/
 	}
 
-	[class^="<%= prefix %>-"], [class*=" <%= prefix %>-"]:before {
-		font-family: "<%= sName %>";
+	[class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
+		font-family: "<%= fName %>";
 			-webkit-font-smoothing: antialiased;
 			-moz-osx-font-smoothing: grayscale;
 		font-style: normal;
 		font-variant: normal;
 		font-weight: normal;
-		/* speak: none; only necessary if not using the private unicode range (firstGlyph option) */
+		/* speak: none; only necessary if not using the private unicode range (firstdata option) */
 		text-decoration: none;
 		text-transform: none;
 	}
 
-	<% _.each(glyphs, function(glyph) { %>
-	.<%= prefix %>-<%= glyph.name %>:before {
-		content: "\<%= glyph.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+	<% _.each(cssData, function(data) { %>
+	.<%= sign %>-<%= fName %>-<%= data.name %>:before {
+		content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
 	}
 	<% }); %>	
 
@@ -58,47 +57,31 @@
 <body>
 <div class="container">
 	<ul>
-	<% _.each(glyphs, function(glyph) { %>
+	<% _.each(cssData, function(data) { %>
 	<li>
-		<i class="<%= prefix %>-<%= glyph.name %>"></i>
-		<div class="class">.<%= prefix %>-<%= glyph.name %></div>
-		<div class="text"><span>&</span>#x<%= glyph.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
+		<i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
+		<div class="class">.<%= sign %>-<%= fName %>-<%= data.name %></div>
+		<div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
 	</li>
 	<% }); %>	
 	</ul>
 </div>
 <script type="text/javascript">
- // $(function() {
- // 	$.event.special.copy.options.trustedDomains = ["*"];
- //    $("body")
- //      .on("copy", ".class, .text", function(/* ClipboardEvent */ e) {
- //        e.clipboardData.clearData();
- //        e.clipboardData.setData("text/plain", $(this).text());
- //        e.preventDefault();
- //      });
- //  });
-jQuery(document).ready(function($) {
-  var eventsMap = {
-    "beforecopy": function(e) {
-      // Select the text of this element; this will be copied by default
-      $(e.target).range().select();  // ** Using the jQuery.Range plugin
-    },
-    "aftercopy": function(e) {
-      // NOTE: The `aftercopyEvent` event interface is not based on any existing DOM event, so the event model
-      // is still just a draft version. If you have any suggestions, please submit a new issue in this repo!
-      if (e.status["text/plain"] === true) {
-        alert("Copy succeeded. Yay! Text: " + e.data["text/plain"]);
-      }
-      else {
-        alert("Copy failed... BOOOOOO!!!");
-      }
-    },
-    "copy-error": function(errorEvent) {
-      alert("ERROR! " + errorEvent);
-    }
-  };
-  $("body").on(eventsMap, ".class");
-});
+seajs.use(['$','clipboard'], function($) {
+	$(function() {
+	    var $icons = $('.class,.text');
+	    $icons.on('click', function(e) {
+	        e.preventDefault();
+	    })
+	    .clipboard({
+	        path: '<%= sourceUrl %>js/static/jquery.clipboard.swf',
+	        copy: function() {
+	            $icons.removeAttr('style');
+	            return $(this).css({color:'#f00'}).text();
+	        }
+	    });
+	});
+})
 </script>
 </body>
 </html>

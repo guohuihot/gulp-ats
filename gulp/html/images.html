@@ -2,23 +2,24 @@
 <html lang="zh">
 <head>
 	<meta charset="gbk">
-	<title><%= sName %></title>  
+	<title><%= fName %></title>  
+	<script type="text/javascript" src="<%= sourceUrl %>js/seajs.js"></script>
 	<style type="text/css">
 
-<% _.forEach(glyphs, function(glyph, name) { %> 
-	.<%= prefix %>-<%= name %>,
+<% _.forEach(cssData, function(data, name) { %> 
+	.<%= sign %>-<%= fName %>-<%= name %>,
 <% }); %>
 	.a {
 		display: inline-block;
 		*zoom: 1;
 		*display: inline;
-		background-image: url(<%= sName %>.png);
+		background-image: url(<%= fName %>.png);
 	}
-<% _.forEach(glyphs, function(glyph, name) { %>
-	.<%= prefix %>-<%= name %> {
-		width: <%= glyph.width ? glyph.width + 'px' : 0 %>;
-		height: <%= glyph.height ? glyph.height + 'px' : 0 %>;
-		background-position: <%= glyph.offset_x ? glyph.offset_x + 'px' : 0 %> <%= glyph.offset_y ? glyph.offset_y + 'px' : 0 %>;
+<% _.forEach(cssData, function(data, name) { %>
+	.<%= sign %>-<%= fName %>-<%= name %> {
+		width: <%= data.width ? data.width + 'px' : 0 %>;
+		height: <%= data.height ? data.height + 'px' : 0 %>;
+		background-position: <%= data.offset_x ? data.offset_x + 'px' : 0 %> <%= data.offset_y ? data.offset_y + 'px' : 0 %>;
 	}
 <% }); %>
 
@@ -45,13 +46,30 @@
 <body>
 <div class="container">
 	<ul>
-	<% _.forEach(glyphs, function(glyph, name) { %>
+	<% _.forEach(cssData, function(data, name) { %>
 	<li>
-		<i class="<%= prefix %>-<%= name %>"></i>
-		<div>.<%= prefix %>-<%= name %></div>
+		<i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
+		<div class="class">.<%= sign %>-<%= fName %>-<%= name %></div>
 	</li>
 	<% }); %>
 	</ul>
 </div>
+<script type="text/javascript">
+seajs.use(['$','clipboard'], function($) {
+	$(function() {
+	    var $icons = $('.class,.text');
+	    $icons.on('click', function(e) {
+	        e.preventDefault();
+	    })
+	    .clipboard({
+	        path: '<%= sourceUrl %>js/static/jquery.clipboard.swf',
+	        copy: function() {
+	            $icons.removeAttr('style');
+	            return $(this).css({color:'#f00'}).text();
+	        }
+	    });
+	});
+})
+</script>
 </body>
 </html>

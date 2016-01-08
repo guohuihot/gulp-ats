@@ -6,11 +6,12 @@
  */
 
 seajs.config({
-	base: './js',
+	// base: './js',
     alias:{
 		'$'           : 'static/jquery',
 		'template'    : 'static/template.js',
 		'highcharts'  : 'static/highcharts.js',
+		'clipboard'   : 'static/jquery.clipboard.js',
 		'login'       : 'common.js',
 		'uri2MVC'     : 'common.js',
 		'placeholder' : 'common.js',
