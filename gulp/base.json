@@ -2,7 +2,9 @@
     "web": {
         "path": "C:\\Users\\Administrator\\Desktop\\test",
         "author": "ahuing",
+        "libs": "./src/libs",
         "src": "./src",
+        "dist": "./",
         "tpl": "./src"
     },
     "webdown": {
