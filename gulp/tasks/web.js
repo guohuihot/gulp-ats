@@ -1,7 +1,7 @@
 module.exports = function(gulp, $) {
     // base
     var path      = require('path'),
-        configs   = require('../configs');
+        configs   = require('../configs'),
         argv      = $.yargs
                         .alias({
                             path    : 'p',
@@ -20,7 +20,8 @@ module.exports = function(gulp, $) {
         sign      = {
             img  : 'img',
             font : 'font'
-        };
+        },
+        rPath;
     // functions
     var message = function (info) {
             return $.notify(function(file) {
@@ -29,9 +30,8 @@ module.exports = function(gulp, $) {
         };
 
     var sprites = function(dir, cb) {
-        var isBuild      = cb && !argv.all,
-            src          = isBuild ? config.tpl : config.src,
-            dist         = path.join(config.dist, isBuild ? config.libs : './'),
+        var src          = config.isBuild ? config.tpl : config.src,
+            dist         = path.join(config.dist, config.isBuild ? config.libs : './'),
 
             pathRelative = path.relative(src, dir),
             fName        = path.basename(dir),
@@ -78,9 +78,8 @@ module.exports = function(gulp, $) {
     }
 
     var fonts = function(dir, cb) {
-        var isBuild      = cb && !argv.all,
-            src          = isBuild ? config.tpl : config.src,
-            dist         = path.join(config.dist, isBuild ? config.libs : './'),
+        var src          = config.isBuild ? config.tpl : config.src,
+            dist         = path.join(config.dist, config.isBuild ? config.libs : './'),
             
             pathRelative = path.relative(src, dir),
             fName        = path.basename(dir),
@@ -125,10 +124,8 @@ module.exports = function(gulp, $) {
     }
     // scss
     var scss = function(filePath, cb) {
-        var isBuild      = cb && !argv.all,
-            src          = isBuild ? config.tpl : config.src,
-            dist         = path.join(config.dist, isBuild ? config.libs : './'),
-            sourcemapUrl = config.libs ? '../maps/' + config.libs : './maps';
+        var src          = config.isBuild ? config.tpl : config.src,
+            dist         = path.join(config.dist, config.isBuild ? config.libs : './');
 
         gulp.src(filePath, {base: src})
             .pipe($.plumber())
@@ -146,14 +143,14 @@ module.exports = function(gulp, $) {
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true 
             }))*/
-            .pipe($.if(!argv.d || isBuild, $.csso(), $.csscomb(sourceUrl + 'css/csscomb.json')))
+            .pipe($.if(!argv.d || config.isBuild, $.csso(), $.csscomb(sourceUrl + 'css/csscomb.json')))
             .pipe($.template({
                 name: path.basename(filePath),
                 author: config.author,
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
             .pipe($.convertEncoding({to: 'gbk'}))
-            .pipe($.if(argv.d, $.sourcemaps.write(sourcemapUrl, {
+            .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
             .pipe(gulp.dest(dist))
@@ -163,19 +160,16 @@ module.exports = function(gulp, $) {
     }
     // concatjs
     var concatJS = function(dir, cb) {
-        var isBuild      = cb && !argv.all,
-            src          = isBuild ? config.tpl : config.src,
-            dist         = path.join(config.dist, isBuild ? config.libs : './'),
-            sourcemapUrl = config.libs ? '../maps/' + config.libs : './maps';
+        var src          = config.isBuild ? config.tpl : config.src,
+            dist         = path.join(config.dist, config.isBuild ? config.libs : './');
 
             pathRelative = path.relative(src, dir),
             fName        = path.basename(dir);
-        // return false;
         gulp.src(dir + '/*.js', {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.if(!isBuild, $.jshint(configs.jshint)))
-            .pipe($.if(!isBuild, $.jshint.reporter()))
+            .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
+            .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
                 return {
                     name: path.basename(file.path),
@@ -190,24 +184,23 @@ module.exports = function(gulp, $) {
             .pipe($.convertEncoding({
                 to: 'gbk'
             }))
-            .pipe($.if(argv.d, $.sourcemaps.write(sourcemapUrl, {
+            .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
             .pipe(gulp.dest(dist))
             .pipe(message('合并 压缩'));
+            console.log(config.sourcemap);
         cb && cb();
     }
     // js
     var JS = function(filePath, cb) {
-        var isBuild      = cb && !argv.all,
-            src          = isBuild ? config.tpl : config.src,
-            dist         = path.join(config.dist, isBuild ? config.libs : './'),
-            sourcemapUrl = config.libs ? '../maps/' + config.libs : './maps';
+        var src          = config.isBuild ? config.tpl : config.src,
+            dist         = path.join(config.dist, config.isBuild ? config.libs : './');
         gulp.src(filePath, {base: src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.if(!isBuild, $.jshint(configs.jshint)))
-            .pipe($.if(!isBuild, $.jshint.reporter()))
+            .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
+            .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.jslint())
             .pipe($.uglify(configs.uglify))
             .pipe($.template({
@@ -218,7 +211,7 @@ module.exports = function(gulp, $) {
             .pipe($.convertEncoding({
                 to: 'gbk'
             }))
-            .pipe($.if(argv.d, $.sourcemaps.write(sourcemapUrl, {
+            .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
             .pipe(gulp.dest(dist))
@@ -282,11 +275,13 @@ module.exports = function(gulp, $) {
             cb('err: 请指定项目目录！');
         }
         console.log('\n');
-
-        config.libs = path.relative(config.src, config.libs);
-        config.src  = path.join(config.path, config.src);
-        config.dist = path.join(config.path, config.dist);
-        config.oSrc = !argv.all && config.tpl || config.src;
+        rPath            = path.relative(config.libs, config.src);
+        config.libs      = path.relative(config.src, config.libs);
+                            
+        config.src       = path.join(config.path, config.src);
+        config.dist      = path.join(config.path, config.dist);
+        config.oSrc      = !argv.all ? config.tpl : config.src;
+        config.sourcemap = './maps';
 
         cb();
     });
@@ -421,6 +416,11 @@ module.exports = function(gulp, $) {
     // 复制核心到项目
     gulp.task('copy', ['init'], function (cb) {
         var dist = path.join(config.src, config.libs);
+        config.isBuild = !argv.all;
+        if (config.isBuild) {
+            config.sourcemap = rPath + '/maps/' + config.libs;
+        }
+
         gulp.src([
                 config.tpl + '/**/*',
                 '!' + config.tpl + '/**/units/**/*'
