@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-	<meta charset="gbk">
+	<meta charset="utf-8">
 	<title><%= fName %></title>  
 	<script type="text/javascript" src="<%= sourceUrl %>js/seajs.js"></script>
 	<style type="text/css">
@@ -41,10 +41,37 @@
 		font-family: arial;
 		line-height: 1.5;
 	}
+	textarea {
+		height: 150px;
+		border: none;
+		resize: none;
+		outline: none;
+		width: 100%;
+	}
 	</style>
 </head>
 <body>
 <div class="container">
+	<div class="row">
+		<h2>
+			<a href="/"><i class="img-demo-face1"></i>返回首页</a>
+		</h2>
+	</div>
+	<div class="row">
+	调用方式
+	<textarea>
+	css
+		@import 'img/demo'; //导入css 标识/文件名
+		@include img-demo($img-demo); //调用全部样式， 标识-文件名($标识-文件名);
+		.demo {
+			// 单独引入某一个img css
+			@include img-demo-single($img-demo-face1); //标识-合成后文件名-single($标识-文件名-单个文件名)
+		}
+	html
+		<i class="img-demo-home"></i> //class 标识+合成后文件名+单个文件名
+	</textarea> 
+	点击下面文字直接复制到剪切板
+	</div>
 	<ul>
 	<% _.forEach(cssData, function(data, name) { %>
 	<li>

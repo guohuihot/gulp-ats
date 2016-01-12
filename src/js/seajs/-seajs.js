@@ -1,10 +1,4 @@
-/**
- * @author ahuing
- * @link 08cms.com
- * @date 2015-12-30 16:57:17
- */
-
-/**
+/*!
  * Sea.js 3.0.1 | seajs.org/LICENSE.md
  */
 (function(global, undefined) {

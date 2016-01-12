@@ -1,7 +1,6 @@
-/**
+/*!
  * @name <%= name %>
  * @author <%= author %>
- * @link 08cms.com
  * @date <%= date %>
  */
 

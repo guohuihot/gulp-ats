@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-	<meta charset="gbk">
+	<meta charset="utf-8">
 	<title><%= fName %></title>
 	<script type="text/javascript" src="<%= sourceUrl %>js/seajs.js"></script>
 	<style type="text/css">
@@ -53,10 +53,33 @@
 		font-family: arial;
 		line-height: 1.5;
 	}
+	textarea {
+		height: 100px;
+		border: none;
+		resize: none;
+		outline: none;
+		width: 100%;
+	}
 	</style>
 </head>
 <body>
 <div class="container">
+<div class="row">
+	<h2>
+		<a href="/"><i class="font-demo-home"></i>返回首页</a>
+	</h2>
+</div>
+<div class="row">
+调用方式
+<textarea>
+	css
+		@import 'font/demo'; //导入css 标识/文件名
+	html
+		<i class="font-demo-home"></i> //class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
+		<i class="font-demo">& #xEA01;</i>//class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
+</textarea> 
+点击下面文字直接复制到剪切板
+</div>
 	<ul>
 	<% _.each(cssData, function(data) { %>
 	<li>

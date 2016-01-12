@@ -1,5 +1,4 @@
-module.exports = function() {
-	return {
+module.exports =  {
 		jshint: {
             bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
             curly         : false, //循环或者条件语句必须使用花括号包围
@@ -48,11 +47,11 @@ module.exports = function() {
                 conditionals  : true, //优化条件表达式(转换成二元)
                 dead_code     : true, //删除运行不到的代码
                 booleans      : true, //优化布尔表达式
-                // source_map : true,//source_map
                 properties    : false, //类似a["foo"] 智能优化为 a.foo
                 unsafe        : false, //不安全的优化
                 join_vars     : true //合并多个变量声明
             },
+            preserveComments: 'some',
             mangle: {
                 except: ['$', 'require', 'exports']
             }
@@ -64,4 +63,3 @@ module.exports = function() {
             multipass         : true //类型：Boolean 默认：false 多次优化svg直到完全优化
         }
 	}
-}

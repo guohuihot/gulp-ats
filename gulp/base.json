@@ -2,8 +2,8 @@
     "web": {
         "path": "C:\\Users\\Administrator\\Desktop\\test",
         "author": "ahuing",
-        "libs": "./src/libs",
-        "src": "./src",
+        "libs": "./src/",
+        "src": "./src/",
         "dist": "./",
         "tpl": "./src"
     },

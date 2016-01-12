@@ -1,8 +1,7 @@
-/**
- * @name uri2MVC
- * @author ahuing
- * @link 08cms.com
- * @date 2015-12-31 10:18:23
+/*!
+ * @name <%= name %>
+ * @author <%= author %>
+ * @date <%= date %>
  */
  
 define('uri2MVC', [], function(require, exports, module) {
