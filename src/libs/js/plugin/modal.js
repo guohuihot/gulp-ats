@@ -1,4 +1,4 @@
-/**
+/*!
  * @name modal v1.1
  * @author ahuing
  * @link 08cms.com

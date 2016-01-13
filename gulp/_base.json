@@ -1,9 +1,11 @@
 {
     "web": {
-        "path": "C:\\Users\\Administrator\\Desktop\\test",
+        "path": "C:\\Users\\guohui\\Desktop\\test",
         "author": "ahuing",
-        "libs": "./src/libs",
-        "tpl": "./src/"
+        "libs": "./src/",
+        "src": "./src/",
+        "dist": "./",
+        "tpl": "./src"
     },
     "webdown": {
         "ignore": [

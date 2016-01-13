@@ -2,8 +2,11 @@
 <html lang="zh">
 <head>
 	<meta charset="utf-8">
-	<title><%= fName %></title>  
-	<script type="text/javascript" src="<%= sourceUrl %>js/seajs.js"></script>
+	<title><%= fName %></title>
+	<script type="text/javascript">
+        var base = '<%= host %>';
+    </script>
+	<script type="text/javascript" src="<%= host %><%= libs %>/js/seajs.js"></script>
 	<style type="text/css">
 
 <% _.forEach(cssData, function(data, name) { %> 
@@ -89,7 +92,7 @@ seajs.use(['$','clipboard'], function($) {
 	        e.preventDefault();
 	    })
 	    .clipboard({
-	        path: '<%= sourceUrl %>js/static/jquery.clipboard.swf',
+	        path: '<%= host %><%= libs %>/js/static/jquery.clipboard.swf',
 	        copy: function() {
 	            $icons.removeAttr('style');
 	            return $(this).css({color:'#f00'}).text();

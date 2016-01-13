@@ -1,4 +1,4 @@
-/**
+/*!
  * @name duang v1.15
  * @author ahuing
  * @link 08cms.com

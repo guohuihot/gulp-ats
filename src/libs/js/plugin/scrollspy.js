@@ -1,4 +1,4 @@
-/**
+/*!
 * author : ahuing
 * date   : 2015-8-7
 * name   : jqscrollspy v1.0

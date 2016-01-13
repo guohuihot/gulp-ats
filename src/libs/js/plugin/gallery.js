@@ -1,9 +1,9 @@
-/***
-name:gallery.js
-author:ahuing
-date:2014-01-15
-modify:2014-01-15
-***/
+/*!
+* @name:gallery.js
+* @author:ahuing
+* @date:2014-01-15
+* @modify:2014-01-15
+*/
 ;(function($) {
 	$.extend(jQuery.easing,{
 		easeOutQuint: function (x, t, b, c, d) {

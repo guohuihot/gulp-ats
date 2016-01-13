@@ -1,4 +1,4 @@
-/**
+/*!
  * @author ahuing
  * @link 08cms.com
  * @date 2015-12-30 14:53:50

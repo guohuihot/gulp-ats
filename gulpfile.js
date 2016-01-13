@@ -14,7 +14,7 @@ gulpTaskList.forEach(function(taskfile) {
 });
 
 gulp.task('default', function() {
-    var tasks = $.jsonFilePlus.sync('./gulp/tasks.json').data,
+    var tasks = require('./gulp/tasks'),
         taskInfo = '',
         params;
     taskInfo += '\ngulp\t显示帮助信息(参数一个字母一个中线，>一个字母两个中线)\n\n';
