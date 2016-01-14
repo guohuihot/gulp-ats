@@ -6,6 +6,7 @@ module.exports = function(gulp, $) {
                         .alias({
                             path    : 'p',
                             author  : 'a',
+                            all     : 'al',
                             libs    : 'l',
                             dev     : 'd',
                             server  : 's',
