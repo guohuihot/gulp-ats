@@ -158,8 +158,8 @@ module.exports = function(gulp, $) {
         gulp.src(dir + '/*.js', {base: config.src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
-            .pipe($.if(!config.isBuild, $.jshint.reporter()))
+            // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
+            // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
                 return {
                     name   : path.basename(file.path),
@@ -188,8 +188,8 @@ module.exports = function(gulp, $) {
         gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
-            .pipe($.if(!config.isBuild, $.jshint.reporter()))
+            // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
+            // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.jslint())
             .pipe($.uglify(configs.uglify))
             .pipe($.template({
@@ -228,19 +228,22 @@ module.exports = function(gulp, $) {
                 path   : argv.p,
                 author : argv.a,
                 libs   : './src/',
-                tpl : './src/libs/'
+                tpl    : './src/libs/',
+                mode   : argv.m
             });
         } else if (argv.m == 2 || argv.m == 3) {
             config = $.extend(baseConfig, {
                 path   : argv.p,
                 author : argv.a,
                 libs   : './src/libs',
-                tpl : './src/'
+                tpl    : './src/',
+                mode   : argv.m
             });
         } else {
             config = $.extend(baseConfig, {
                 path   : argv.p,
-                author : argv.a
+                author : argv.a,
+                mode   : argv.m
             });
         };
 
@@ -377,8 +380,8 @@ module.exports = function(gulp, $) {
                 } else {
                     var fileExt = path.extname(file.path);
                     gulp.src(file.path, {base: config.src })
-                        .pipe($.if(fileExt == '.js', $.jshint(configs.jshint)))
-                        .pipe($.if(fileExt == '.js', $.jshint.reporter()))
+                        // .pipe($.if(fileExt == '.js', $.jshint(configs.jshint)))
+                        // .pipe($.if(fileExt == '.js', $.jshint.reporter()))
                         /*.pipe($.if(
                             fileExt == '.js' || fileExt == '.scss', 
                             $.template({
@@ -390,11 +393,6 @@ module.exports = function(gulp, $) {
                         .pipe(message('到 ' + config.tpl))
                         .pipe(gulp.dest(config.dist));
                 }
-            });
-            $.watch('./gulp/**/*.js', function(file) {
-                gulp.src(file.path)
-                    .pipe($.jshint(configs.jshint))
-                    .pipe($.jshint.reporter());
             });
         }
         if (argv.s) {
@@ -429,16 +427,11 @@ module.exports = function(gulp, $) {
             )
             .pipe(gulp.dest(toSrc));
 
-        require('fs').exists(toSrc + '/css/units/variables.scss',
-            function(exists) {
-                if (!exists) {
-                    gulp.src(config.src + '/**/variables.scss', {
-                            base: config.src
-                        })
-                        .pipe(gulp.dest(toSrc));
-                };
-                cb();
-            })
+            gulp.src(config.src + '/**/variables.scss', {
+                    base: config.src
+                })
+                .pipe(gulp.dest(toSrc));
+            cb();
     });
     // 打包项目文件
     gulp.task('pack', ['copy'], function(cb) {

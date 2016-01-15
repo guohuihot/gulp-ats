@@ -1,10 +1,19 @@
 /*!
- * @name <%= name %>
- * @author <%= author %>
- * @link 08cms.com
- * @date <%= date %>
+ * @name demo
+ * @author ahuing
+ * @date 2016-1-15
  */
 
+// 这个可以自己定义变量，请参考variables.scss,没有定义的话使用默认的
+// @import 'xxx/xxxvariables';
+// 全局变量
+@import 'units/variables';
+// 重置css
+@import 'units/reset';
+// 基本设置
+@import 'units/base';
+// 通用类
+@import 'units/utilities';
 // 导入继承
 @import 'units/inherit';
 // 导入mixins

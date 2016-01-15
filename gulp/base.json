@@ -1,9 +1,10 @@
 {
     "web": {
-        "path": "C:\\Users\\Administrator\\Desktop\\test1",
+        "path": "E:\\wwwroot\\tripod-dev\\web\\sources",
         "author": "ahuing",
         "libs": "./src/libs",
-        "tpl": "./src/"
+        "tpl": "./src/",
+        "mode": 3
     },
     "webdown": {
         "ignore": [

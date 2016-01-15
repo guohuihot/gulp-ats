@@ -3,7 +3,7 @@
  */
 
 var cfg = {
-    base : base,
+    base : BASE_URL,
     alias: {
 		'$'           : '<%= libs %>/js/static/jquery',
 		'template'    : '<%= libs %>/js/static/template.js',

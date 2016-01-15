@@ -1,14 +1,17 @@
-$screen: 1000px; // 页面宽度
+// 规范：
+// 变量名用中线连接
+
+$screen: 1000px !default; // 页面宽度
 
 // 字体
-$color : #333; // 字体颜色
-$fz    : 12px; // 字号
-$ff    : microsoft yahei; // 字体
-$lh    : 1.5; // 行高
-$bgc   : none; // 背景
+$color : #333 !default; // 字体颜色
+$fz    : 12px !default; // 字号
+$ff    : microsoft yahei !default; // 字体
+$lh    : 1.5 !default; // 行高
+$bgc   : none !default; // 背景
 
 // link
-$link-color       : #333; // 颜色
-$hover-color      : #f00; // hover颜色
-$hover-decoration : underline; // 下划线
+$link-color       : #333 !default; // 颜色
+$hover-color      : #f00 !default; // hover颜色
+$hover-decoration : underline !default; // 下划线
 
