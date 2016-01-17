@@ -142,7 +142,7 @@ module.exports = function(gulp, $) {
                 author: config.author,
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
-            .pipe($.convertEncoding({to: 'gbk'}))
+            // .pipe($.convertEncoding({to: 'gbk'}))
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
@@ -173,9 +173,7 @@ module.exports = function(gulp, $) {
             .pipe($.uglify(configs.uglify))
             // .pipe($.jslint())
             .pipe($.concat(pathRelative + '.js'))
-            .pipe($.convertEncoding({
-                to: 'gbk'
-            }))
+            // .pipe($.convertEncoding({to: 'gbk'}))
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
@@ -197,9 +195,7 @@ module.exports = function(gulp, $) {
                 author : config.author,
                 date   : $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
-            .pipe($.convertEncoding({
-                to: 'gbk'
-            }))
+            // .pipe($.convertEncoding({to: 'gbk'}))
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 includeContent: false
             })))
@@ -221,8 +217,9 @@ module.exports = function(gulp, $) {
     argv.d = argv.d === 0 ? false : true;
 
     gulp.task('init', function(cb) {
-        var base = $.jsonFilePlus.sync(sourceUrl + 'base.json'),
-        baseConfig = base.data.web;
+        var base       = $.jsonFilePlus.sync(sourceUrl + 'base.json'),
+            baseConfig = base.data.web;
+
         if (argv.m == 1) {
             config = $.extend(baseConfig, {
                 path   : argv.p,
@@ -239,38 +236,42 @@ module.exports = function(gulp, $) {
                 tpl    : './src/',
                 mode   : argv.m
             });
+        } else if (argv.m == 'd') {
+            config = $.extend(baseConfig, {
+                path   : process.cwd(),
+                author : argv.a,
+                libs   : './src/libs',
+                tpl    : './src/',
+                mode   : argv.m
+            });
         } else {
             config = $.extend(baseConfig, {
                 path   : argv.p,
-                author : argv.a,
-                mode   : argv.m
+                author : argv.a
             });
         };
 
         base.saveSync();
 
         console.log('\n');
-        if (config.path) {
-            console.log('当前配置:\n');
-            console.log(config);
-        } else {
-            cb('err: 请指定项目目录！');
-        }
+        console.log('当前配置:\n');
+        console.log(config);
         console.log('\n');
 
         config.src       = './src/';
         config.libs      = path.relative(config.src, config.libs);
         
         config.src       = path.join(config.path, config.src);
-        config.dist      = path.join(config.path, './');
-        config.from      = argv.m == 2 ? '/libs' : '';
+        config.dist      = path.join(config.path, config.mode == 'd' ? './test/' : './');
+        config.from      = config.mode == 2 ? '/libs' : '';
         config.sourcemap = './maps';
         cb();
     });
     // connect
     gulp.task('connect', function() {
+            var dist = config.mode == 'd' ? './test/' : './';
             $.connect.server({
-                root: config.path,
+                root: path.join(config.path, dist),
                 port: 8080,
                 livereload: true
             });
@@ -369,32 +370,6 @@ module.exports = function(gulp, $) {
         ], function(file) {
             concatJS(file.dirname);
         });
-        // 将项目中的atsui文件复制回atsui库中
-        if (argv.r) {
-            $.watch([
-                config.src + '/**/*'
-            ], function(file) {
-                if (file.event == 'unlink') {
-                    var pathRelative = path.relative(config.src, file.path);
-                    $.del([config.tpl + '/' + pathRelative], {force: true});
-                } else {
-                    var fileExt = path.extname(file.path);
-                    gulp.src(file.path, {base: config.src })
-                        // .pipe($.if(fileExt == '.js', $.jshint(configs.jshint)))
-                        // .pipe($.if(fileExt == '.js', $.jshint.reporter()))
-                        /*.pipe($.if(
-                            fileExt == '.js' || fileExt == '.scss', 
-                            $.template({
-                                author: config.author,
-                                date: $.moment().format('YYYY-MM-DD HH:mm:ss')
-                            })
-                        ))*/
-                        .pipe(gulp.dest(config.tpl))
-                        .pipe(message('到 ' + config.tpl))
-                        .pipe(gulp.dest(config.dist));
-                }
-            });
-        }
         if (argv.s) {
             gulp.start('connect');
         }
@@ -404,7 +379,6 @@ module.exports = function(gulp, $) {
     // 复制核心到项目
     gulp.task('copy', ['init'], function (cb) {
         var toSrc = config.src;
-
         config.isBuild = !argv.all;
         if (config.isBuild) {
             // config.sourcemap = rPath + '/maps/';
@@ -413,25 +387,30 @@ module.exports = function(gulp, $) {
         }
         // return false;
         config.from = config.src + config.from;
-        gulp.src([
-                config.from + '/**/*',
-                '!' + config.src + '/**/units/**/*'
-            ], {base: config.src})
-            .pipe($.if(function(file) {
-                        return path.basename(file.path) === 'seajs.config.js' || 
-                                path.extname(file.path) === '.html';
-                    }, $.template({
-                        host: host,
-                        libs: config.libs
-                    }))
-            )
-            .pipe(gulp.dest(toSrc));
-
-            gulp.src(config.src + '/**/variables.scss', {
-                    base: config.src
-                })
-                .pipe(gulp.dest(toSrc));
+        // 开发模式不用复制
+        if (config.mode == 'd') {
             cb();
+        } else {
+            gulp.src([
+                    config.from + '/**/*',
+                    '!' + config.src + '/**/units/**/*'
+                ], {base: config.src})
+                .pipe($.if(function(file) {
+                            return path.basename(file.path) === 'seajs.config.js' || 
+                                    path.extname(file.path) === '.html';
+                        }, $.template({
+                            host: host,
+                            libs: config.libs
+                        }))
+                )
+                .pipe(gulp.dest(toSrc));
+
+                gulp.src(config.src + '/**/variables.scss', {
+                        base: config.src
+                    })
+                    .pipe(gulp.dest(toSrc));
+                cb();
+        }
     });
     // 打包项目文件
     gulp.task('pack', ['copy'], function(cb) {

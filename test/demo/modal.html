@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>Hello, ats!</title>   
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <script type="text/javascript">
+        var BASE_URL = 'http://localhost:8080/';
+    </script>
+    <link rel="stylesheet" href="/libs/css/demo.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>Tip</h2>
+        <input type="submit" data-tip="load"  value="加载中..."/>
+        <input type="submit" data-tip="success" value="操作成功"/>
+        <input type="submit" data-tip="error" value="操作失败"/>
+        <input type="submit" data-tip="info" value="提示信息"/>
+        <input type="submit" data-tip="ask" value="问题"/>
+        <input type="submit" data-tip="pop" value="气泡"/>
+        <br/><br/>
+        <input type="submit" data-tip="load1"  value="加载中..."/>
+        <input type="submit" data-tip="success1" value="操作成功"/>
+        <input type="submit" data-tip="error1" value="操作失败"/>
+        <input type="submit" data-tip="info1" value="提示信息"/>
+        <input type="submit" data-tip="ask1" value="问题"/>
+        <input type="submit" data-tip="pop1" value="气泡"/>
+        <br/><br/>
+        <input type="submit" id="load-success-tip" value="正在操作->操作成功"/>
+        <h2>Alert</h2>
+        <input type="submit" data-alert="load"  value="加载中..."/>
+        <input type="submit" data-alert="success" value="操作成功"/>
+        <input type="submit" data-alert="error" value="操作失败"/>
+        <input type="submit" data-alert="info" value="提示信息"/>
+        <input type="submit" data-alert="ask" value="问题"/>
+        <input type="submit" data-alert="pop" value="气泡"/>
+        <br/><br/>
+        <input type="submit" data-alert="load1"  value="加载中..."/>
+        <input type="submit" data-alert="success1" value="操作成功"/>
+        <input type="submit" data-alert="error1" value="操作失败"/>
+        <input type="submit" data-alert="info1" value="提示信息"/>
+        <input type="submit" data-alert="ask1" value="问题"/>
+        <input type="submit" data-alert="pop1" value="气泡"/>
+        <br/><br/>
+        <input type="submit" id="load-success-alert" value="正在操作->操作成功"/>
+        <h2>confirm</h2>
+        <input type="submit" id="confirm"  value="您确定要删除吗?"/>
+    </div>
+<script type="text/javascript" src="/libs/js/seajs.js"></script>
+<script type="text/javascript">
+    seajs.use(['$', 'modal'], function($, modal) {
+        $('[data-tip]').click(function() {
+            modal.tip(this.value, $(this).data('tip'));
+        });
+        $('[data-alert]').click(function() {
+            modal.alert(this.value, $(this).data('alert'));
+        });
+        $('body').on('click', '.m-overlay', function(event) {
+            $('.jqtip').jqModal('hide');
+        });
+        // load-success
+        var timer;
+        $('#load-success-tip').click(function(event) {
+            modal.tip('正在操作...', 'load');
+            timer = setTimeout(function() {
+                $('.jqtip')
+                    .html('<i class="font-modal-success"></i>操作成功!')
+                    .jqModal('hide', 1000)
+                    .on('hideFun', function() {
+                        // 模拟ajax,如果是真正的ajax,请结束ajax请求
+                        clearTimeout(timer);
+                    });
+            }, 3000);
+        });
+        $('#load-success-alert').click(function(event) {
+            modal.alert('正在操作...', 'load');
+            timer = setTimeout(function() {
+                $('.jqalert')
+                    .html('<i class="font-modal-success"></i>操作成功!')
+                    .on('hideFun', function() {
+                        clearTimeout(timer);
+                    });//.jqModal('hide', 1000);
+            }, 3000);
+        });
+        // confirm
+        $('#confirm').click(function(event) {
+            modal.confirm('您确定要删除吗?', '删除提示');
+            $('.jqconfirm')
+            .on('ok', function() {
+                alert('您点击确定!');
+            })
+            .on('no', function() {
+                console.log('您点击取消!');
+            })
+        });
+    });
+</script>
+</body>
+</html>

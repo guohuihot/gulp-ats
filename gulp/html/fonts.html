@@ -76,10 +76,10 @@
 调用方式
 <textarea>
 	css
-		@import 'font/demo'; //导入css 标识/文件名
+		@import 'font/<%= fName %>'; //导入css 标识/文件名
 	html
-		<i class="font-demo-home"></i> //class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
-		<i class="font-demo">& #xEA01;</i>//class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
+		<i class="font-<%= fName %>-xxx"></i> //class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
+		<i class="font-<%= fName %>">& #xEA01;</i>//class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
 </textarea> 
 点击下面文字直接复制到剪切板
 </div>

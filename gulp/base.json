@@ -1,10 +1,10 @@
 {
     "web": {
-        "path": "E:\\wwwroot\\tripod-dev\\web\\sources",
+        "path": "D:\\nodejs",
         "author": "ahuing",
         "libs": "./src/libs",
         "tpl": "./src/",
-        "mode": 3
+        "mode": "d"
     },
     "webdown": {
         "ignore": [

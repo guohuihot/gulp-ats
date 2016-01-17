@@ -1,0 +1,7 @@
+/*!
+* author : ahuing
+* date   : 2015-8-7
+* name   : jqscrollspy v1.0
+* modify : 2015-8-12 15:17:32
+ */
+define(function(require,exports,o){return function(o){!function($){function o(o){return this.each(function(){var t=$(this),l=t.data("jqScrollspy"),c="object"==typeof o&&o;l||(t.data("jqScrollspy",l=new n(this,c)),l.init())})}var t,n=function(o,t){this.o=$.extend({},n.defaults,t),this.$cell=$(o).find(this.o.obj)};n.defaults={offset:10,obj:"a"},n.prototype={init:function(){var o=this,t=$(window),n=t.height(),l=$("body").height(),c=o.$cell.eq(0).hasClass("act"),e=function(){var e,a=t.scrollTop()+o.o.offset,i=c?0:void 0;if(l-n>a)for(e=0;e<o.aTop.length;e++)a>=o.aTop[e]&&o.aTop[e]>0&&(i=e);else i=-1;o.$cell.removeClass("act").eq(i).addClass("act")};o.aTop=[],o.$cell.each(function(t,n){var l=$($(n).attr("href"));o.aTop.push(l.length?l.offset().top:null)}).on("click",function(){var t=o.aTop[o.$cell.index(this)];return null!=t&&$("body,html").animate({scrollTop:t-o.o.offset}),!1}),o.aTop.length<2||(e(),t.on("scroll",e))}},t=$.fn.jqScrollspy,$.fn.jqScrollspy=o,$.fn.jqScrollspy.Constructor=n,$.fn.jqScrollspy.noConflict=function(){return $.fn.jqScrollspy=t,this},$(window).on("load",function(){$(".jqScrollspy").each(function(){var t=$(this);o.call(t,t.data())})})}(jQuery)}});

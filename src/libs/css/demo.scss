@@ -10,14 +10,14 @@
 @import 'units/variables';
 // 重置css
 @import 'units/reset';
-// 基本设置
-@import 'units/base';
-// 通用类
-@import 'units/utilities';
 // 导入继承
 @import 'units/inherit';
 // 导入mixins
 @import 'units/mixins';
+// 基本设置
+@import 'units/base';
+// 通用类
+@import 'units/utilities';
 // 导入全部font css
 @import 'font/demo';
 // 导入全部img css
@@ -30,7 +30,7 @@
 	@include img-demo-single($img-demo-face1);
 }
 
-.wrap {
+.demo1 {
 	// 调用继承
 	@extend %clearfix;
 	// 调用mixins

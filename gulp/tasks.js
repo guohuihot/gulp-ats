@@ -42,7 +42,7 @@ module.exports = {
                 '1.src/ 直接src为核心(常用)',
                 '2.src/libs libs为核心(新核心)',
                 '3.在2的基础上加入后台和会员中心核心(新核心)'
-            ].join('\n\t\t\t')
+            ].join('\n\t\t\t'),
         }
     },
     
@@ -52,7 +52,7 @@ module.exports = {
         
         argv: {
             
-            '-p -d -a': '同build',
+            '-p -d -a -m': '同build',
             
             '-s(--server)': [
                 '创建一个web服务器(写静态页面时需要)',
@@ -66,11 +66,6 @@ module.exports = {
             
             '-f(--ftp)': [
                 '处理的文件后直接上传到远程ftp',
-                '类型：bool, 默认值：false'
-            ].join('\n\t\t\t'),
-            
-            '-r(--reverse)': [
-                '反向复制，用于将测试好的核心代码复制到atsui库中',
                 '类型：bool, 默认值：false'
             ].join('\n\t\t\t')
         }
