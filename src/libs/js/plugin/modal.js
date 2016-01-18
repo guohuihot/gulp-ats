@@ -21,9 +21,6 @@ define(function(require,exports,moudles){
     $(function(){$.support.transition=transitionEnd()
     if(!$.support.transition)return
     $.event.special.bsTransitionEnd={bindType:$.support.transition.end,delegateType:$.support.transition.end,handle:function(e){if($(e.target).is(this))return e.handleObj.handler.apply(this,arguments)}}})
-    // 公用
-    var isIE6 = !-[1,] && !window.XMLHttpRequest;
-
     /**
      * 得到拖拽范围
      * @param  {sting} o 对象本身
@@ -32,20 +29,20 @@ define(function(require,exports,moudles){
      * @return {json}   minL:最小left,minT最小top,h:对象的高度
      */
     var showRange = function(o, p, f) {
-        var $p = $(!f ? 'body' : (p || window))
-        , st = $(window).scrollTop()
-        , w = o.outerWidth()
-        , h = o.outerHeight()
-        , pw = $p.width()
-        , ph = $p.height()
+        var $p = $(!f ? 'body' : (p || window)),
+            st = $(window).scrollTop(),
+            w  = o.outerWidth(),
+            h  = o.outerHeight(),
+            pw = $p.width(),
+            ph = $p.height()
 
         return {
-            minL   : pw < w ? pw - w : 0
-            , minT : ph < h ? ph - h : 0
-            , maxL : pw < w ? 0 : $p.width() - w
-            , maxT : ph < h ? 0 : $p.height() - h
-            , st   : st
-            , h    : h
+            minL: pw < w ? pw - w : 0,
+            minT: ph < h ? ph - h : 0,
+            maxL: pw < w ? 0 : $p.width() - w,
+            maxT: ph < h ? 0 : $p.height() - h,
+            st: st,
+            h: h
         };
     }
 
@@ -65,7 +62,7 @@ define(function(require,exports,moudles){
 
     Drag.prototype.init = function () {
         var o = this.o;
-        var $self = this.$self.css('animation-fill-mode','backwards');
+        var $self = this.$self//.css('animation-fill-mode','backwards');
         var $handle = this.$handle;
 
         $handle
@@ -86,12 +83,13 @@ define(function(require,exports,moudles){
             return false;
         })
         .on('_mousemove', function (e, x, y) {
-            var R = showRange($self, o.attachment, o.fixed)
-            , p = $self.position()
-            , pl = p.left - x
-            , pt = p.top - y
-            , dT = null
-            , l, t;
+            var R  = showRange($self, o.attachment, o.fixed),
+                p  = $self.position(),
+                pl = p.left - x,
+                pt = p.top - y,
+                dT = null,
+                l,
+                t;
 
             $self.trigger('dragStart', [R])
             $(document).on('mousemove', function(de) {
@@ -105,7 +103,7 @@ define(function(require,exports,moudles){
 
                 $self.css({
                     left : l
-                    , top : t + (isIE6 && o.fixed && R.st || 0)
+                    , top :  t
                 }).trigger('drag', [l, t])
 
             }).on('mouseup',function() {
@@ -141,13 +139,13 @@ define(function(require,exports,moudles){
     }
 
     Modal.defaults = {
-        mclass          : 'modal' //[ modal | tip | lay ]
+        mclass          : '' //[ modal | tip | lay ]
         , head         : ''//标题
         , foot         : '' // 内容
         , remote       : ''
         , fixed        : 1 //fixed效果
         , overlay      : .3 //显示遮罩层, 0为不显示
-        , drag         : 1 //拖拽 1
+        , drag         : 1 //拖拽 1 2
         , lock         : 0 //锁定遮罩层
         , timeout      : 0
         , css          : {}
@@ -159,58 +157,63 @@ define(function(require,exports,moudles){
 
     Modal.prototype = {
         init : function () {            
-            var _this = this
-            , o       = _this.o
-            , _target = o.target
-            , html    = '<div class="jqModal animated">'
-                        + '    <div class="m-content m-' + o.mclass + '">'
-                        + '        <div class="m-head">' + o.head + '</div>'
-                        + '        <div class="m-body"></div>'
-                        + '        <div class="m-foot">' + o.foot + '</div>'
-                        + '        <i class="font-modal-close" data-close="1" title="关闭" href="#"></i>'
-                        + '    </div>'
-                        + '</div>';
+            var _this   = this,
+                o       = _this.o,
+                _target = o.target,
+                html    = '<div class="jqModal animated">\
+                                <div class="m-content m-' + o.mclass + '">\
+                                    <div class="m-head">' + o.head + '</div>\
+                                    <div class="m-body"></div>\
+                                    <div class="m-foot">' + o.foot + '</div>\
+                                    <i class="font-modal-close ' + (o.head ? '' : 'dn') + '" data-close="1" title="关闭"></i>\
+                                </div>\
+                            </div>';
 
             //加载遮罩层
             if (o.overlay) {
-                _this.$overlay = $('<div class="m-overlay"></div>').appendTo('body')
-                                .css({
-                                    opacity : o.overlay
-                                    , zIndex : _this.Z
-                                })
-                                .on('click', !o.lock && $.proxy(_this.hide, _this) || $.noop);
+                _this.$overlay = $('<div class="m-overlay"></div>')
+                                    .appendTo('body')
+                                    .css({
+                                        opacity: o.overlay,
+                                        zIndex: _this.Z
+                                    })
+                                    .on('click', !o.lock && $.proxy(_this.hide, _this) || $.noop);
             }
             // 装载弹出层
-            _this.$box = $(html).appendTo('body')
-                        .css($.extend({}, o.css, {
-                            zIndex : _this.Z
-                            , position : o.fixed && !isIE6 && 'fixed' || 'absolute'
-                        }))
-                        // close
-                        .on('click', '[data-close]', $.proxy(_this.hide, _this));
+            _this.$box = $(html)
+                            .appendTo('body')
+                            .css($.extend({}, o.css, {
+                                zIndex: _this.Z,
+                                position: o.fixed && 'fixed' || 'absolute'
+                            }))
+                            // close
+                            .on('click', '[data-close]', $.proxy(_this.hide, _this));
 
-            _this.$hd  = _this.$box.find('.m-head')
-                        .css($.extend({}, o.headcss, !o.head && {display : 'none'}));
+            _this.$hd = _this.$box.find('.m-head')
+                .css($.extend({}, o.headcss, !o.head && {
+                    display: 'none'
+                }));
 
-            _this.$bd  = _this.$box.find('.m-body').css(o.bodycss);
+            _this.$bd = _this.$box.find('.m-body').css(o.bodycss);
 
-            _this.$ft  = _this.$box.find('.m-foot')
-                        .css($.extend({}, o.footcss, !o.foot && {display : 'none'}));
-
-            //ie6隐藏select
-            isIE6 && $('select').css('visibility','hidden');
+            _this.$ft = _this.$box
+                .find('.m-foot')
+                .css($.extend({}, o.footcss, !o.foot && {
+                    display: 'none'
+                }));
 
             if (_this.$self.is('iframe')) {
-                _this.$self.attr({
-                    scrolling           : 'no'
-                    , allowtransparency : true
-                    , frameborder       : 0
-                    , src               : o.remote
-                })
-                .appendTo(this.$bd)
-                .load(function () {
-                    _this.setPos(1);
-                })
+                _this.$self
+                    .attr({
+                        scrolling: 'no',
+                        allowtransparency: true,
+                        frameborder: 0,
+                        src: o.remote
+                    })
+                    .appendTo(this.$bd)
+                    .load(function() {
+                        _this.setPos(1);
+                    })
             }
             else {
                 _this.$bd.append(_this.$self.css('display', 'block'));
@@ -218,28 +221,31 @@ define(function(require,exports,moudles){
 
             if (o.drag) {
                 _this.$drag = $('<div class="jqModal-drag"></div>').insertAfter(_this.$box);
-                _this.$hd.on('mousedown', function (e) {
-                    _this.$drag.css('display', 'block').trigger('_mousemove', [e.pageX, e.pageY]);
-                    o.drag > 1 && _this.$drag.addClass('jqModal-drag-style');
-                })
+                _this.$hd
+                    .on('mousedown', function(e) {
+                        // 分开写,先显示再定位
+                        _this.$drag.addClass('jqModal-drag' + o.drag);
+                            
+                        _this.$drag.trigger('_mousemove', [e.pageX, e.pageY])
+                    })
+                    .css('cursor', 'move');
 
-                $(document).on('mouseup', function () {
-                    _this.$drag.css('display', 'none');
-                    o.drag > 1 && _this.$drag.removeClass('jqModal-drag-style');
+                $(document).on('mouseup', function() {
+                    _this.$drag.removeClass('jqModal-drag' + o.drag);
                 });
 
-                _this.$drag.on(o.drag > 1 ? 'dragEnd' : 'drag', function (el, l, t) {
-                    _this.$box.css({
-                        left: l
-                        , top: t
-                    });
-                })
+                _this.$drag
+                    .on(o.drag > 1 ? 'dragEnd' : 'drag', function(el, l, t) {
+                        _this.$box.css({
+                            left: l,
+                            top: t
+                        });
+                    })
 
-                isIE6 && _this.$drag.on('dragEnd', function (el, l, t) {
-                    _this.fixedT = t;
+                PluginDrag.call(_this.$drag, {
+                    fixed: _this.o.fixed
                 })
-            } 
-
+            }
             this.setPos();
 
             $(document).on('keydown.modal', function(e){
@@ -249,15 +255,14 @@ define(function(require,exports,moudles){
 
             o.fixed && $(window).on('resize', $.proxy(_this.setPos, _this));
 
-        }
-        , show : function (delay) {
+        },
+        show : function (delay) {
             var _this = this;
 
             if (_this.isShown) return
-            _this.$self.trigger('showFun');
-            _this.$overlay && _this.$overlay.css('display', 'block')
-            _this.$box.css('display','block')
-            $.support.transition && _this.$box.addClass(_this.o.animate)
+            _this.$overlay && _this.$overlay.fadeIn();
+            _this.$box.css('display', 'block');
+            $.support.transition && _this.$box.addClass(_this.o.animate);
             _this.$self.trigger('shownFun');
             _this.isShown = true
 
@@ -265,27 +270,22 @@ define(function(require,exports,moudles){
                 clearTimeout(this.t);
                 this.t = setTimeout($.proxy(this.hide, this), delay || this.o.timeout);
             }
-        }
-        , hideModal : function () {
+        },
+        hideModal : function () {
             this.$box.removeClass(this.o.animate + 'H').hide()
             this.$overlay && this.$overlay.hide();
             this.$self.trigger('hidenFun');
-        }
-        , hide : function (speed) {
-            this.$self.trigger('hideFun');
-
+        },
+        hide : function (speed) {
             setTimeout($.proxy(function() {
                 this.$box.removeClass(this.o.animate).addClass(this.o.animate + 'H');
                 $.support.transition && 
-                this.$box.one('bsTransitionEnd', $.proxy(this.hideModal, this))
-                .emulateTransitionEnd(500) ||
-                this.hideModal()
+                    this.$box
+                        .one('bsTransitionEnd', $.proxy(this.hideModal, this))
+                        .emulateTransitionEnd(500) ||
+                    this.hideModal()
             }, this), speed || 0)
 
-            if(isIE6){
-                $('select').css('visibility','visible');
-                $(window).off('scroll.modal');
-            }
             this.isShown = false;
             return false;
         }
@@ -294,38 +294,39 @@ define(function(require,exports,moudles){
         }
         , setSize : function () {
             if (this.$self.is('iframe')) {
-                this.$self.add(this.$bd).height(this.$self.css('background','none').contents().find('body').height());
-            } 
-        }
+                this.$self
+                    .add(this.$bd)
+                    .height(
+                        this.$self.css('background', 'none')
+                        .contents()
+                        .find('body')
+                        .height()
+                    );
+            }
+        },
         // 设置位置
-        , setPos : function (isComplete){
+        setPos: function(isComplete) {
             isComplete && this.setSize();
-            var _this = this
-            o = _this.o
-            , R = showRange(_this.$box, null, o.fixed)
-            , _this.fixedT = o.css.bottom >= 0 ? R.maxT - o.css.bottom : (o.css.top || ($(window).height() - R.h) / 2);
+            var _this = this,
+                    o = _this.o, 
+                    R = showRange(_this.$box, null, o.fixed);
+
+            _this.fixedT = o.css.bottom >= 0 ?
+                                R.maxT - o.css.bottom :
+                                (o.css.top || ($(window).height() - R.h) / 2);
 
             _this.$box.css({
-                left: o.css.right >= 0 ? 'auto' : (o.css.left || R.maxL / 2)
-                , top: _this.fixedT + ((isIE6 || !o.fixed) && R.st)
+                left: o.css.right >= 0 ? 'auto' : (o.css.left || R.maxL / 2),
+                top: _this.fixedT + (!o.fixed && R.st)
             });
 
-            if (isIE6 && o.fixed) {
-                var $w = $(window);
-                $w.on('scroll.modal',function(){
-                    _this.$box.css({'top' : _this.fixedT + $w.scrollTop()})
-                });
-            };
 
             if (o.drag) {
                 _this.$drag[0].style.cssText = _this.$box[0].style.cssText;
                 _this.$drag.css({
-                    width: _this.$box.width() - 6
-                    , height: _this.$box.height() - 6
-                })
-                PluginDrag.call(_this.$drag, {
-                    fixed : _this.o.fixed
-                })
+                    width: _this.$box.width() - 6,
+                    height: _this.$box.height() - 6
+                });
             }
         }
     }

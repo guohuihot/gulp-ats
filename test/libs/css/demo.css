@@ -694,109 +694,52 @@ img {
     content: '\EA03';
 }
 
-.font-modal-cry:before {
+.font-modal-error:before {
     content: '\EA04';
 }
 
-.font-modal-error:before {
+.font-modal-error1:before {
     content: '\EA05';
 }
 
-.font-modal-error1:before {
+.font-modal-info:before {
     content: '\EA06';
 }
 
-.font-modal-info:before {
+.font-modal-info1:before {
     content: '\EA07';
 }
 
-.font-modal-info1:before {
+.font-modal-laugh:before {
     content: '\EA08';
 }
 
-.font-modal-laugh:before {
+.font-modal-laugh1:before {
     content: '\EA09';
 }
 
-.font-modal-laugh1:before {
+.font-modal-load:before {
     content: '\EA0A';
 }
 
-.font-modal-load:before {
+.font-modal-load1:before {
     content: '\EA0B';
 }
 
-.font-modal-load1:before {
+.font-modal-pop:before {
     content: '\EA0C';
 }
 
-.font-modal-pop:before {
+.font-modal-pop1:before {
     content: '\EA0D';
 }
 
-.font-modal-pop1:before {
+.font-modal-success:before {
     content: '\EA0E';
 }
 
-.font-modal-success:before {
-    content: '\EA0F';
-}
-
 .font-modal-success1:before {
-    content: '\EA10';
-}
-
-/*通用*/
-.jqModal {
-    display: none;
-}
-
-.jqModal .m-content {
-    font-size: 14px;
-
-    position: relative;
-    z-index: 2;
-
-    text-align: left;
-
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background: #fefefe;
-    box-shadow: 0 0 10px rgba(0, 0, 0, .3), 0 0 10px rgba(0, 0, 0, .1) inset;
-
-    _float: left;
-}
-
-.jqModal .m-head {
-    position: relative;
-}
-
-.jqModal .m-body {
-    padding: 15px;
-}
-
-.jqModal iframe {
-    position: relative;
-    z-index: 10;
-
-    width: 100%;
-
-    background: url(../images/m-loading1.gif) no-repeat center;
-}
-
-/*处理拖拽iframe层的问题*/
-.jqModal .ifrlay {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-}
-
-.jqModal img {
-    vertical-align: top;
+    content: '\EA0F';
 }
 
 @-webkit-keyframes load {
@@ -813,32 +756,44 @@ img {
 
 [class^='font-modal-'],
 [class*=' font-modal-'] {
-    font-size: 34px;
+    font-size: 32px;
 
-    margin-right: 5px;
+    float: left; 
 
-    vertical-align: middle;
+    margin-left: -37px;
 }
 
 [class^='font-modal-load'],
 [class*=' font-modal-load'] {
     -webkit-animation: load 1.2s infinite linear;
             animation: load 1.2s infinite linear;
+
+    color: #ea8214;
 }
 
 [class^='font-modal-success'],
 [class*=' font-modal-success'] {
-    color: green;
+    color: #2ecc71;
 }
 
 [class^='font-modal-info'],
 [class*=' font-modal-info'] {
-    color: blue;
+    color: #5bade5;
 }
 
 [class^='font-modal-error'],
 [class*=' font-modal-error'] {
-    color: red;
+    color: #e74d3e;
+}
+
+[class^='font-modal-ask'],
+[class*=' font-modal-ask'] {
+    color: #3498db;
+}
+
+[class^='font-modal-pop'],
+[class*=' font-modal-pop'] {
+    color: #3bb4f2;
 }
 
 [class^='font-modal-close'],
@@ -851,17 +806,17 @@ img {
     right: 0;
 
     cursor: pointer;
-    transition: all .3s; 
+    transition: animation .3s; 
 
-    color: gray;
+    color: #666;
 }
 
 [class^='font-modal-close']:hover,
 [class*=' font-modal-close']:hover {
-    -webkit-animation: load .5s linear;
-            animation: load .5s linear; 
+    -webkit-animation: load .3s linear;
+            animation: load .3s linear; 
 
-    color: red;
+    color: #c00;
 }
 
 /*遮罩层*/
@@ -879,52 +834,92 @@ img {
     background: #000;
 }
 
-/*modal*/
-.jqModal .m-modal {
-    overflow: hidden;
+.jqModal-drag {
+    display: none;
 
-    min-width: 200px;
+    cursor: move;
+
+    border: 3px solid transparent;
 }
 
-.jqModal .m-modal .m-head {
+.jqModal-drag1 {
+    display: block;
+}
+
+.jqModal-drag2 {
+    display: block;
+
+    opacity: .5;
+    border-color: #888;
+    border-radius: 6px;
+    background-color: #eee;
+
+    filter: alpha(opacity=50);
+}
+
+/*通用*/
+.jqModal {
+    display: none;
+    /*lay*/
+    /*alert*/
+    /*tip*/
+}
+.jqModal .dn {
+    display: none;
+}
+.jqModal .m-content {
+    font-size: 14px;
+
+    position: relative;
+    z-index: 2;
+
+    overflow: hidden;
+
+    min-width: 150px;
+
+    text-align: left;
+
+    border: 0 solid rgba(0, 0, 0, .3);
+    border-radius: 6px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .2), 0 0 5px rgba(0, 0, 0, .1) inset;
+}
+.jqModal .m-head {
     font-family: Microsoft yahei;
     font-size: 14px;
     line-height: 1;
-    /* height: 34px; */
 
+    position: relative;
+    /* height: 34px; */
     z-index: 10;
 
     padding: 10px 15px;
 
     color: #666;
     background-color: #f6f6f6;
-    background-image:    -moz-linear-gradient(top, #fcfcfc, #eaeaeb);
-    background-image:     -ms-linear-gradient(top, #fcfcfc, #eaeaeb);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fcfcfc), to(#eaeaeb));
-    background-image: -webkit-linear-gradient(top, #fcfcfc, #eaeaeb);
-    background-image:      -o-linear-gradient(top, #fcfcfc, #eaeaeb);
-    background-image:         linear-gradient(top, #fcfcfc, #eaeaeb);
-    background-repeat: repeat-x;
+    background-image: linear-gradient(top, #fcfcfc, #eaeaeb);
 
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FCFCFC', endColorstr='#EAEAEB', GradientType=0);
 }
+.jqModal .m-body {
+    padding: 15px;
 
-.jqModal .m-modal .m-foot {
+    background: #fefefe;
+}
+.jqModal .m-foot {
     font-size: 12px;
     line-height: 1;
 
-    padding: 5px 10px;
+    padding: 5px 15px;
 
     text-align: right;
 
     background: #eee;
 }
-
 .jqModal .m-foot button {
     font-size: 12px;
     font-weight: normal;
 
-    margin: 0 5px;
+    margin-left: 10px;
     padding: 5px 12px;
 
     cursor: pointer;
@@ -934,42 +929,35 @@ img {
     border: 1px solid #eee;
     border-radius: 2px;
     background-color: #fff;
-
-    _width: auto;
-    _overflow: visible;
 }
-
-.jqModal .m-modal .m-foot button:hover {
+.jqModal .m-foot button:hover {
     opacity: .8;
 
     filter: alpha(opacity=80);
 }
+.jqModal iframe {
+    position: relative;
+    z-index: 10;
 
-/*lay*/
+    width: 100%;
+}
+.jqModal img {
+    vertical-align: top;
+}
 .jqModal .m-lay .m-close {
     top: -20px;
     right: -20px;
 
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
+}
+.jqModal .jqalert,
+.jqModal .jqtip {
+    line-height: 32px; 
 
-    background-position: -178px 1px;
+    padding-left: 37px;
 }
 
-/*tip*/
-.jqModal .m-tip {
-    border-radius: 3px;
-}
-
-.jqModal .m-tip .m-body {
-    padding: 5px 20px;
-}
-
-.jqModal .m-tip .font-modal-close {
-    display: none;
-}
-
-/*alert*/
 /*!
 Animate.css - http://daneden.me/animate
 */
