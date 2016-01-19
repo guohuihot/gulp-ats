@@ -1,7 +1,6 @@
 /*!
- * @name modal v1.1
+ * @name modal v1.2
  * @author ahuing
- * @link 08cms.com
  * @date 2015-12-31 09:03:41
  */
 
@@ -156,7 +155,7 @@ define(function(require,exports,moudles){
     }
 
     Modal.prototype = {
-        init : function () {            
+        init: function() {
             var _this   = this,
                 o       = _this.o,
                 _target = o.target,
@@ -256,7 +255,7 @@ define(function(require,exports,moudles){
             o.fixed && $(window).on('resize', $.proxy(_this.setPos, _this));
 
         },
-        show : function (delay) {
+        show: function(delay) {
             var _this = this;
 
             if (_this.isShown) return
@@ -271,12 +270,13 @@ define(function(require,exports,moudles){
                 this.t = setTimeout($.proxy(this.hide, this), delay || this.o.timeout);
             }
         },
-        hideModal : function () {
+        hideModal: function() {
             this.$box.removeClass(this.o.animate + 'H').hide()
             this.$overlay && this.$overlay.hide();
             this.$self.trigger('hidenFun');
         },
-        hide : function (speed) {
+        hide: function(delay) {
+            console.log(delay);
             setTimeout($.proxy(function() {
                 this.$box.removeClass(this.o.animate).addClass(this.o.animate + 'H');
                 $.support.transition && 
@@ -284,7 +284,7 @@ define(function(require,exports,moudles){
                         .one('bsTransitionEnd', $.proxy(this.hideModal, this))
                         .emulateTransitionEnd(500) ||
                     this.hideModal()
-            }, this), speed || 0)
+            }, this), delay || 0)
 
             this.isShown = false;
             return false;
@@ -383,21 +383,44 @@ define(function(require,exports,moudles){
     moudles.exports = {
         tip: function() {
             var $target = $('.jqtip'),
-                delay = arguments[1].indexOf('load') != -1 ?
-                arguments[2] :
-                (arguments[2] || 1500),
                 option = $target[0] && 'show' || {
                     mclass: 'tip',
                     animate: 'shake',
                     css: {
-                        top: 100
+                        top: 150
                     },
                     drag: 0,
                     lock: 1
-                };
-            if (!$target[0]) $target = $('<div class="jqtip"></div>') //.appendTo('body');
+                },
+                delay = (arguments[2] || 1500);
 
-            Plugin.call($target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0]), option, delay);
+            if (!$target[0]) {
+                $target = $('<div class="jqtip"></div>') //.appendTo('body');
+            }
+
+            $target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0]);
+            Plugin.call($target, option, delay);
+        },
+        loading: function() {
+            var $target = $('.jqload'),
+                option = $target[0] && 'show' || {
+                    mclass: 'tip',
+                    animate: '',
+                    drag: 0,
+                    lock: 1
+                };
+
+            if (!$target[0]) $target = $('<div class="jqload"></div>');
+            if (arguments[0]) {
+                if (arguments[0].search(/(hide|show|toggle)/) == 0) {
+                    option = arguments[0];
+                } else {
+                    $target.html('<i class="font-modal-' + (arguments[1] || 'load') + '"></i>' + arguments[0]);
+                }
+            } else {
+                $target.html('<i class="font-modal-load"></i>loading...');
+            };
+            Plugin.call($target, option)
         },
         alert: function() {
             var $target = $('.jqalert'),

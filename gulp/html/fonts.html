@@ -87,7 +87,7 @@
 	<% _.each(cssData, function(data) { %>
 	<li>
 		<i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
-		<div class="class">.<%= sign %>-<%= fName %>-<%= data.name %></div>
+		<div class="class"><%= sign %>-<%= fName %>-<%= data.name %></div>
 		<div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
 	</li>
 	<% }); %>	

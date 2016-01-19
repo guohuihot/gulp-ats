@@ -15,44 +15,58 @@
 
 <i class="font-demo-home"></i> <i class="img-demo-face1"></i> <a href="./">Go index!</a>
 <h1>Hello, ats! 编辑文件测试下</h1>
-<textarea style="border:none;width:90%;outline:none;height:600px">
-gulp    显示帮助信息(参数一个字母一个中线，>一个字母两个中线)
-
+<pre style="border:none;width:90%;outline:none;">
 gulp            查看任务列表
 
 gulp init       查看(设置)当前配置
 
 gulp build      初始化或同步一个项目
-        -p      path    项目地址
-        -d      dev     启用开发模式
-        -a      author  作者
-        --all           同步并生成项目里所有数据
-        -m      mode    模式
-                        1.src/libs libs为核心
-                        2.src/ 直接src为核心
-                        3.手动指定
-        --src           源目录,相对项目地址,mode == 3 时有效
-        --dist          目标目录,相对项目地址,mode == 3 时有效
-        -l      libs    核心目录,相对项目地址,mode == 3 时有效
+        -p(--path)      项目地址
+                        类型：string, 默认值：保留上次的值
+
+        -d(--dev)       启用开发模式
+                        类型：bool, 默认值：true
+
+        -a(--author)    作者
+                        类型：string, 默认值：保留上次的值
+
+        --al(--all)     同步并生成项目里所有数据
+                        类型：bool, 默认值：false
+
+        -m(--mode)      模式
+                        类型：int, 默认值：保留上次的值
+                        1.src/ 直接src为核心(常用)
+                        2.src/libs libs为核心(新核心)
+                        3.在2的基础上加入后台和会员中心核心(新核心)
+
 
 gulp wacth      监控一个项目目录
-        -p      path    项目地址
-        -d      dev     启用开发模式,默认是启用
-        -a      author  作者
-        -s      server  创建一个web服务器(写静态页面时需要)
-        -o      open    -s为真时，直接打开
-        -f      ftp     处理的文件后直接上传到远程ftp
-        -r      reverse 反向复制，用于将测试好的核心代码复制到atsui库中
+        -p -d -a -m     同build
+
+        -s(--server)    创建一个web服务器(写静态页面时需要)
+                        类型：bool, 默认值：false
+
+        -o(--open)      直接在浏览器打开，-s为真时有效
+                        类型：bool, 默认值：false
+
+        -f(--ftp)       处理的文件后直接上传到远程ftp
+                        类型：bool, 默认值：false
+
+
+gulp add        新加一个分类到项目里
+        -n(--name)      分类名称
+                        类型：string, 默认值：null
+
+
 
 gulp clean      清理文件
-        -p      项目地址，会清理目录下css,js,images,fonts,maps，谨慎使用！
-
-</textarea>
+        -p      同build 清理后项目目录下src目录,谨慎使用！
+</pre>
 </div>
 <script type="text/javascript" src="<%= host %><%= libs %>/js/seajs.js"></script>
 <script type="text/javascript">
-    seajs.use(['$', 'modal'], function($) {
-        $.jqModal.tip('Hello!');
+    seajs.use(['modal'], function(modal) {
+        modal.tip('Hello!', 'laugh');
     });
 </script>
 </body>

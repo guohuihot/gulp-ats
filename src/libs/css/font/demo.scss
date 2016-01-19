@@ -9,7 +9,7 @@
 		url('../fonts/demo.svg#demo') format('svg');*/
 }
 
-[class^="font-demo-"], [class*=" font-demo-"]:before {
+[class^="font-demo-"], [class*=" font-demo-"] {
 	font-family: "demo";
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;

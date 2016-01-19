@@ -26,7 +26,9 @@ module.exports = function(gulp, $) {
     // functions
     var message = function (info) {
             return $.notify(function(file) {
-                return path.relative(config.path, file.path) + ' ' + info + ' ok !';
+                if (path.extname(file.path) != '.map') {
+                    return path.relative(config.path, file.path) + ' ' + info + ' ok !';
+                };
             })
         };
 
@@ -273,10 +275,17 @@ module.exports = function(gulp, $) {
             $.connect.server({
                 root: path.join(config.path, dist),
                 port: 8080,
-                livereload: true
+                livereload: true,
+                /*middleware: function(connect, opt) {
+                    return [function(req, res, next) {
+                        console.log(req);
+                        console.log('Hello from middleware');
+                        next();
+                      }]
+                }*/
             });
             if (argv.o) {
-                require('child_process').exec('start ' + host + config.libs + '/demo.html');
+                // require('child_process').exec('start ' + host + config.libs + '/demo.html');
             }
         });
     // watch
@@ -387,10 +396,12 @@ module.exports = function(gulp, $) {
         }
         // return false;
         config.from = config.src + config.from;
-        // 开发模式不用复制
+        
         if (config.mode == 'd') {
+            // 如果是核心开发，不复制直接处理代码
             cb();
         } else {
+            // 复制核心代码
             gulp.src([
                     config.from + '/**/*',
                     '!' + config.src + '/**/units/**/*'
@@ -405,11 +416,18 @@ module.exports = function(gulp, $) {
                 )
                 .pipe(gulp.dest(toSrc));
 
-                gulp.src(config.src + '/**/variables.scss', {
-                        base: config.src
-                    })
-                    .pipe(gulp.dest(toSrc));
+            gulp.src(config.src + '/**/variables.scss', {
+                    base: config.src
+                })
+                .pipe(gulp.dest(toSrc));
+
+            /*if (!argv.all) {
+                // 只重建核心 == 直接复制核心生成代码 --all,不生成
+            } else {
                 cb();
+                // 全部重建 == 不复制核心生成代码 --all 1，往下走重新生成项目的内容
+            }*/
+            cb();
         }
     });
     // 打包项目文件

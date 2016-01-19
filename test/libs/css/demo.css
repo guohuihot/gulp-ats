@@ -551,7 +551,7 @@ img {
 }
 
 [class^='font-demo-'],
-[class*=' font-demo-']:before {
+[class*=' font-demo-'] {
     font-family: 'demo';
     font-weight: normal;
     font-style: normal;
@@ -863,6 +863,7 @@ img {
     /*lay*/
     /*alert*/
     /*tip*/
+    /* jqload */
 }
 .jqModal .dn {
     display: none;
@@ -952,7 +953,8 @@ img {
     height: 32px;
 }
 .jqModal .jqalert,
-.jqModal .jqtip {
+.jqModal .jqtip,
+.jqModal .jqload {
     line-height: 32px; 
 
     padding-left: 37px;

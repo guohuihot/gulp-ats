@@ -1,10 +1,10 @@
 {
     "web": {
-        "path": "D:\\nodejs",
+        "path": "E:\\wwwroot\\house\\template\\blue",
         "author": "ahuing",
-        "libs": "./src/libs",
-        "tpl": "./src/",
-        "mode": "d"
+        "libs": "./src/",
+        "tpl": "./src/libs/",
+        "mode": 1
     },
     "webdown": {
         "ignore": [
