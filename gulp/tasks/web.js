@@ -331,7 +331,7 @@ module.exports = function(gulp, $) {
                         read: false
                     })
                     .pipe(gulp.dest(config.path))
-                    .pipe($.if(argv.s, $connect.reload(), $.livereload()))
+                    .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                     .pipe(message('livereload'));
             });
         }
