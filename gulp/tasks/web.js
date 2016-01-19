@@ -20,12 +20,13 @@ module.exports = function(gulp, $) {
         config    = {},
         host      = 'http://localhost:8080/',
         sign      = {
-            img  : 'img',
-            font : 'font'
+            img: 'img',
+            font: 'font'
         };
     // functions
     var message = function (info) {
             return $.notify(function(file) {
+                // console.log(path.extname(file.path));
                 if (path.extname(file.path) != '.map') {
                     return path.relative(config.path, file.path) + ' ' + info + ' ok !';
                 };
@@ -45,9 +46,11 @@ module.exports = function(gulp, $) {
                 padding: 10
             }));
 
+            // console.log(spriteData.css);
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
-                    // console.log(JSON.parse(jsonArr[0].contents));
+                    // console.log(jsonArr);
+                    // console.log(jsonArr[0].contents);
                     cb1(undefined, {
                         cssData : JSON.parse(jsonArr[0].contents),
                         fUrl    : '../images/' + fName + '.png',
@@ -149,7 +152,7 @@ module.exports = function(gulp, $) {
                 includeContent: false
             })))
             .pipe(gulp.dest(config.dist))
-            .pipe($.livereload())
+            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('scss 生成'));
         cb && cb();
     }
@@ -227,7 +230,6 @@ module.exports = function(gulp, $) {
                 path   : argv.p,
                 author : argv.a,
                 libs   : './src/',
-                tpl    : './src/libs/',
                 mode   : argv.m
             });
         } else if (argv.m == 2 || argv.m == 3) {
@@ -235,7 +237,6 @@ module.exports = function(gulp, $) {
                 path   : argv.p,
                 author : argv.a,
                 libs   : './src/libs',
-                tpl    : './src/',
                 mode   : argv.m
             });
         } else if (argv.m == 'd') {
@@ -243,7 +244,6 @@ module.exports = function(gulp, $) {
                 path   : process.cwd(),
                 author : argv.a,
                 libs   : './src/libs',
-                tpl    : './src/',
                 mode   : argv.m
             });
         } else {
@@ -260,6 +260,7 @@ module.exports = function(gulp, $) {
         console.log(config);
         console.log('\n');
 
+        config.tpl       = './src/';
         config.src       = './src/';
         config.libs      = path.relative(config.src, config.libs);
         
@@ -275,7 +276,8 @@ module.exports = function(gulp, $) {
             $.connect.server({
                 root: path.join(config.path, dist),
                 port: 8080,
-                livereload: true,
+                // 静态服务器使用
+                livereload: argv.s ? true : false,
                 /*middleware: function(connect, opt) {
                     return [function(req, res, next) {
                         console.log(req);
@@ -285,7 +287,7 @@ module.exports = function(gulp, $) {
                 }*/
             });
             if (argv.o) {
-                // require('child_process').exec('start ' + host + config.libs + '/demo.html');
+                require('child_process').exec('start ' + host + config.libs + '/demo.html');
             }
         });
     // watch
@@ -309,7 +311,17 @@ module.exports = function(gulp, $) {
                     .pipe(message('上传'));
             });
         } else {
-            $.livereload.listen();
+            // 动态使用
+            if (!argv.s) {
+                $.livereload.listen({
+                    port: 35729, // Server port
+                    // host: host, // Server host
+                    basePath: config.path, // Path to prepend all given paths
+                    start: true, // Automatically start
+                    quiet: false//, // Disable console logging
+                    //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
+                });
+            };
 
             $.watch([
                 config.path + '/**/*.html',
@@ -319,7 +331,7 @@ module.exports = function(gulp, $) {
                         read: false
                     })
                     .pipe(gulp.dest(config.path))
-                    .pipe($.livereload())
+                    .pipe($.if(argv.s, $connect.reload(), $.livereload()))
                     .pipe(message('livereload'));
             });
         }

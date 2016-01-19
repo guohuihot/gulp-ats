@@ -1,9 +1,8 @@
 {
     "web": {
-        "path": "E:\\wwwroot\\house\\template\\blue",
+        "path": "C:\\Users\\guohui\\Desktop\\test",
         "author": "ahuing",
         "libs": "./src/",
-        "tpl": "./src/libs/",
         "mode": 1
     },
     "webdown": {

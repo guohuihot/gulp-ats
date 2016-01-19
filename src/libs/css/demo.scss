@@ -24,7 +24,6 @@
 @import 'img/demo';
 // 生成全部img css
 @include img-demo($img-demo);
-
 .demo {
 	// 单独引入某一个img css
 	@include img-demo-single($img-demo-face1);

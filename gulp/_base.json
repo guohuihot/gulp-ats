@@ -3,7 +3,6 @@
         "path": "E:\\wwwroot\\tripod-dev\\web\\sources",
         "author": "ahuing",
         "libs": "./src/",
-        "tpl": "./src/libs/",
         "mode": 1
     },
     "webdown": {
