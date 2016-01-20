@@ -7,19 +7,46 @@
 define(function(require,exports,moudles){
     var $ = require('$');
     // transition.js
-    function transitionEnd(){var el=document.createElement('div')
-    var transEndEventNames={WebkitTransition:'webkitTransitionEnd',MozTransition:'transitionend',OTransition:'oTransitionEnd otransitionend',transition:'transitionend'}
-    for(var name in transEndEventNames){if(el.style[name]!==undefined){return{end:transEndEventNames[name]}}}
-    return false}
-    $.fn.emulateTransitionEnd=function(duration){var called=false
-    var $el=this
-    $(this).one('bsTransitionEnd',function(){called=true})
-    var callback=function(){if(!called)$($el).trigger($.support.transition.end)}
-    setTimeout(callback,duration)
-    return this}
-    $(function(){$.support.transition=transitionEnd()
-    if(!$.support.transition)return
-    $.event.special.bsTransitionEnd={bindType:$.support.transition.end,delegateType:$.support.transition.end,handle:function(e){if($(e.target).is(this))return e.handleObj.handler.apply(this,arguments)}}})
+    function transitionEnd() {
+        var el = document.createElement('div')
+        var transEndEventNames = {
+            WebkitTransition: 'webkitTransitionEnd',
+            MozTransition: 'transitionend',
+            OTransition: 'oTransitionEnd otransitionend',
+            transition: 'transitionend'
+        }
+        for (var name in transEndEventNames) {
+            if (el.style[name] !== undefined) {
+                return {
+                    end: transEndEventNames[name]
+                }
+            }
+        }
+        return false
+    }
+    $.fn.emulateTransitionEnd = function(duration) {
+        var called = false
+        var $el = this
+        $(this).one('bsTransitionEnd', function() {
+            called = true
+        })
+        var callback = function() {
+            if (!called) $($el).trigger($.support.transition.end)
+        }
+        setTimeout(callback, duration)
+        return this
+    }
+    $(function() {
+        $.support.transition = transitionEnd()
+        if (!$.support.transition) return
+        $.event.special.bsTransitionEnd = {
+            bindType: $.support.transition.end,
+            delegateType: $.support.transition.end,
+            handle: function(e) {
+                if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+            }
+        }
+    })
     /**
      * 得到拖拽范围
      * @param  {sting} o 对象本身
@@ -138,20 +165,20 @@ define(function(require,exports,moudles){
     }
 
     Modal.defaults = {
-        mclass          : '' //[ modal | tip | lay ]
-        , head         : ''//标题
-        , foot         : '' // 内容
-        , remote       : ''
-        , fixed        : 1 //fixed效果
-        , overlay      : .3 //显示遮罩层, 0为不显示
-        , drag         : 1 //拖拽 1 2
-        , lock         : 0 //锁定遮罩层
-        , timeout      : 0
-        , css          : {}
-        , headcss      : {}
-        , bodycss      : {}
-        , footcss      : {}
-        , animate     : 'bounceInDown' // shake | flipInY | bounceInDown | zoomIn
+        mclass  : '', //[ modal | tip | lay ]
+        head    : '', //标题
+        foot    : '', // 内容
+        remote  : '',
+        fixed   : 1, //fixed效果
+        overlay : .3, //显示遮罩层, 0为不显示
+        drag    : 1, //拖拽 1 2
+        lock    : 0, //锁定遮罩层
+        timeout : 0,
+        css     : {},
+        headcss : {},
+        bodycss : {},
+        footcss : {},
+        animate : 'bounceInDown' // shake | flipInY | bounceInDown | zoomIn, 
     }
 
     Modal.prototype = {
@@ -259,6 +286,7 @@ define(function(require,exports,moudles){
             var _this = this;
 
             if (_this.isShown) return
+            _this.$self.trigger('showFun', [this.o]);
             _this.$overlay && _this.$overlay.fadeIn();
             _this.$box.css('display', 'block');
             $.support.transition && _this.$box.addClass(_this.o.animate);
@@ -276,7 +304,7 @@ define(function(require,exports,moudles){
             this.$self.trigger('hidenFun');
         },
         hide: function(delay) {
-            console.log(delay);
+            this.$self.trigger('hideFun');
             setTimeout($.proxy(function() {
                 this.$box.removeClass(this.o.animate).addClass(this.o.animate + 'H');
                 $.support.transition && 

@@ -1,113 +1,117 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-	<meta charset="utf-8">
-	<title><%= fName %></title>
-	<script type="text/javascript">
-	    var BASE_URL = '<%= host %>';
-	</script>
-	<script type="text/javascript" src="<%= host %><%= libs %>/js/seajs.js"></script>
-	<style type="text/css">
-		@font-face {
-		font-family: "<%= fName %>";
-	    font-weight: normal;
-	    font-style: normal;
-		src: url('<%= fName %>.eot');
-		src: url('<%= fName %>.eot?#iefix') format('embedded-opentype'),
-			url('<%= fName %>.woff') format('woff');/*,
-			url('<%= fName %>.ttf') format('truetype'),
-			url('<%= fName %>.svg#<%= fName %>') format('svg');*/
-	}
+    <meta charset="utf-8">
+    <title><%= fName %></title>    
+    <style type="text/css">
+        @font-face {
+        font-family: "<%= fName %>";
+        font-weight: normal;
+        font-style: normal;
+        src: url('<%= fName %>.eot');
+        src: url('<%= fName %>.eot?#iefix') format('embedded-opentype'),
+            url('<%= fName %>.woff') format('woff');/*,
+            url('<%= fName %>.ttf') format('truetype'),
+            url('<%= fName %>.svg#<%= fName %>') format('svg');*/
+    }
 
-	[class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
-		font-family: "<%= fName %>";
-			-webkit-font-smoothing: antialiased;
-			-moz-osx-font-smoothing: grayscale;
-		font-style: normal;
-		font-variant: normal;
-		font-weight: normal;
-		font-size: 32px;
-		/* speak: none; only necessary if not using the private unicode range (firstdata option) */
-		text-decoration: none;
-		text-transform: none;
-	}
+    [class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
+        font-family: "<%= fName %>";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: normal;
+        font-size: 32px;
+        /* speak: none; only necessary if not using the private unicode range (firstdata option) */
+        text-decoration: none;
+        text-transform: none;
+    }
 
-	<% _.each(cssData, function(data) { %>
-	.<%= sign %>-<%= fName %>-<%= data.name %>:before {
-		content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
-	}
-	<% }); %>	
+    <% _.each(cssData, function(data) { %>
+    .<%= sign %>-<%= fName %>-<%= data.name %>:before {
+        content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+    }
+    <% }); %>   
 
-	* {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.container {
-		width: 1200px;
-		margin: 20px auto;
-	}
-	li {
-		float: left;
-		padding: 5px;
-		margin: 5px;
-		border: 1px solid #eee;
-		text-align: center;
-		font-family: arial;
-		line-height: 1.5;
-	}
-	textarea {
-		height: 100px;
-		border: none;
-		resize: none;
-		outline: none;
-		width: 100%;
-	}
-	</style>
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .container {
+        width: 1200px;
+        margin: 20px auto;
+    }
+    li {
+        float: left;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid #eee;
+        text-align: center;
+        font-family: arial;
+        color: #555;
+        line-height: 1.5;
+    }
+    pre {
+        margin: 15px 0;
+        color: #FD8520;
+        font-family: Consolas;
+        font-size: 14px;
+        padding: 15px;
+        background-color: #272822;
+    }
+    </style>
 </head>
 <body>
 <div class="container">
 <div class="row">
-	<h2>
-		<a href="/"><i class="font-demo-home"></i>返回首页</a>
-	</h2>
+    <h3>
+        <a href="<%= base %>"><i class="font-demo-home"></i>返回首页</a>
+    </h3>
+    <h2>
+        调用方式
+    </h2>
+    <h3>css</h3>
+<pre>
+ @import 'font/<%= fName %>'; //导入css 标识/文件名
+</pre> 
+    <h3>html</h3>
+<pre>
+ &lt;i class="font-<%= fName %>-xxx"&gt;&lt;/i&gt; // class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
+ &lt;i class="font-<%= fName %>"><span>&</span>#xEA01;&lt;/i&gt; // class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
+</pre> 
+    <h3>详细代码</h3>点击下面文字直接复制到剪切板
 </div>
-<div class="row">
-调用方式
-<textarea>
-	css
-		@import 'font/<%= fName %>'; //导入css 标识/文件名
-	html
-		<i class="font-<%= fName %>-xxx"></i> //class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
-		<i class="font-<%= fName %>">& #xEA01;</i>//class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
-</textarea> 
-点击下面文字直接复制到剪切板
-</div>
-	<ul>
-	<% _.each(cssData, function(data) { %>
-	<li>
-		<i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
-		<div class="class"><%= sign %>-<%= fName %>-<%= data.name %></div>
-		<div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
-	</li>
-	<% }); %>	
-	</ul>
+    <ul>
+    <% _.each(cssData, function(data) { %>
+    <li>
+        <i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
+        <div class="class"><%= sign %>-<%= fName %>-<%= data.name %></div>
+        <div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
+    </li>
+    <% }); %>   
+    </ul>
 </div>
 <script type="text/javascript">
+    var BASE_URL = window.location.href.replace('<%= libs %>fonts/<%= fName %>.html', '');
+</script>
+<script type="text/javascript" src="<%= base %><%= libs %>js/seajs.js"></script>
+<script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
-	$(function() {
-	    var $icons = $('.class,.text');
-	    $icons.on('click', function(e) {
-	        e.preventDefault();
-	    })
-	    .clipboard({
-	        path: '<%= host %><%= libs %>/js/static/jquery.clipboard.swf',
-	        copy: function() {
-	            $icons.removeAttr('style');
-	            return $(this).css({color:'#f00'}).text();
-	        }
-	    });
-	});
+    $(function() {
+        var $icons = $('.class,.text');
+        $icons.on('click', function(e) {
+            e.preventDefault();
+        })
+        .clipboard({
+            path: BASE_URL + '<%= libs %>js/static/jquery.clipboard.swf',
+            copy: function() {
+                $icons.removeAttr('style');
+                return $(this).css({color:'#f00'}).text();
+            }
+        });
+    });
 })
 </script>
 </body>

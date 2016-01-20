@@ -17,12 +17,11 @@ module.exports = function(gulp, $) {
                             tpl     : 't'
                         }).argv,
         sourceUrl = path.join(process.cwd(), './gulp/'),
-        config    = {},
-        host      = 'http://localhost:8080/',
         sign      = {
             img: 'img',
             font: 'font'
-        };
+        },
+        config    = {};
     // functions
     var message = function (info) {
             return $.notify(function(file) {
@@ -37,7 +36,8 @@ module.exports = function(gulp, $) {
         var pathRelative = path.relative(config.src, dir),
             fName        = path.basename(dir),
             cssPath      = path.join(dir, '../../css/' + sign.img);
-
+// console.log(path.relative(config.dist + pathRelative, config.dist) + '/');
+// return false;
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
             .pipe($.spritesmith({
                 imgName: pathRelative + '.png',
@@ -54,7 +54,7 @@ module.exports = function(gulp, $) {
                     cb1(undefined, {
                         cssData : JSON.parse(jsonArr[0].contents),
                         fUrl    : '../images/' + fName + '.png',
-                        host    : host,
+                        base    : path.relative(config.dist + pathRelative, config.dist) + '/',
                         libs    : config.libs,
                         fName   : fName,
                         sign    : sign.img
@@ -100,7 +100,7 @@ module.exports = function(gulp, $) {
                 var templateData = {
                         cssData : glyphs,
                         fUrl    : '../fonts/',
-                        host    : host,
+                        base    : path.relative(config.dist + pathRelative, config.dist) + '/',
                         libs    : config.libs,
                         sign    : sign.font,
                         fName   : fName
@@ -170,7 +170,7 @@ module.exports = function(gulp, $) {
                     name   : path.basename(file.path),
                     author : config.author,
                     date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
-                    host   : host,
+                    // base   : host,
                     libs   : config.libs
                 }
             }))
@@ -236,14 +236,14 @@ module.exports = function(gulp, $) {
             config = $.extend(baseConfig, {
                 path   : argv.p,
                 author : argv.a,
-                libs   : './src/libs',
+                libs   : './src/libs/',
                 mode   : argv.m
             });
         } else if (argv.m == 'd') {
             config = $.extend(baseConfig, {
                 path   : process.cwd(),
                 author : argv.a,
-                libs   : './src/libs',
+                libs   : './src/libs/',
                 mode   : argv.m
             });
         } else {
@@ -259,22 +259,26 @@ module.exports = function(gulp, $) {
         console.log('当前配置:\n');
         console.log(config);
         console.log('\n');
-
-        config.tpl       = './src/';
-        config.src       = './src/';
-        config.libs      = path.relative(config.src, config.libs);
+        // 原始
+        config.tpl       = './src/'; // 核心src目录
+        config.src       = './src/'; // 项目src目录
+        config.dist      = config.mode == 'd' ? './test/' : '/'; // 项目dist目录
+        config.libs      = path.relative(config.src, config.libs) + '/'; // 项目libs目录
+        config.host      = 'http://localhost:8080/' + config.dist;
         
+        // 转化后
         config.src       = path.join(config.path, config.src);
-        config.dist      = path.join(config.path, config.mode == 'd' ? './test/' : './');
-        config.from      = config.mode == 2 ? '/libs' : '';
-        config.sourcemap = './maps';
+        config.dist      = path.join(config.path, config.dist);
+        config.from      = config.mode == 1 ? '/libs/' : '/';
+        config.sourcemap = './maps/';
+        console.log(config);
+        return false;
         cb();
     });
     // connect
     gulp.task('connect', function() {
-            var dist = config.mode == 'd' ? './test/' : './';
             $.connect.server({
-                root: path.join(config.path, dist),
+                root: config.dist,
                 port: 8080,
                 // 静态服务器使用
                 livereload: argv.s ? true : false,
@@ -287,7 +291,7 @@ module.exports = function(gulp, $) {
                 }*/
             });
             if (argv.o) {
-                require('child_process').exec('start ' + host + config.libs + '/demo.html');
+                require('child_process').exec('start ' + config.host + config.libs + '/demo.html');
             }
         });
     // watch
@@ -322,10 +326,11 @@ module.exports = function(gulp, $) {
                     //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
                 });
             };
-
+            var htmlPath = config.mode == 'd' ? config.dist : config.path; 
+            
             $.watch([
-                config.path + '/**/*.html',
-                '!' + config.path + '/**/{fonts,images}/*.html'
+                htmlPath + '/**/*.html',
+                '!' + htmlPath + '/**/{fonts,images}/*.html'
             ], function(file) {
                 gulp.src(file.path, {
                         read: false
@@ -422,7 +427,7 @@ module.exports = function(gulp, $) {
                             return path.basename(file.path) === 'seajs.config.js' || 
                                     path.extname(file.path) === '.html';
                         }, $.template({
-                            host: host,
+                            base: path.relative(config.dist + config.libs, config.dist) + '/',
                             libs: config.libs
                         }))
                 )
@@ -457,7 +462,7 @@ module.exports = function(gulp, $) {
             .pipe(gulp.dest(config.dist));
         gulp.src(config.from + '/**/*.html', {base: config.src })
             .pipe($.template({
-                            host: host,
+                            base: path.relative(config.dist + config.libs, config.dist) + '/',
                             libs: config.libs
                         }))
             .pipe(gulp.dest(config.dist));

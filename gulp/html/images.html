@@ -1,104 +1,112 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-	<meta charset="utf-8">
-	<title><%= fName %></title>
-	<script type="text/javascript">
-        var BASE_URL = '<%= host %>';
-    </script>
-	<script type="text/javascript" src="<%= host %><%= libs %>/js/seajs.js"></script>
-	<style type="text/css">
+    <meta charset="utf-8">
+    <title><%= fName %></title>    
+    <style type="text/css">
 
 <% _.forEach(cssData, function(data, name) { %> 
-	.<%= sign %>-<%= fName %>-<%= name %>,
+    .<%= sign %>-<%= fName %>-<%= name %>,
 <% }); %>
-	.a {
-		display: inline-block;
-		*zoom: 1;
-		*display: inline;
-		background-image: url(<%= fName %>.png);
-	}
+    .a {
+        display: inline-block;
+        *zoom: 1;
+        *display: inline;
+        background-image: url(<%= fName %>.png);
+    }
 <% _.forEach(cssData, function(data, name) { %>
-	.<%= sign %>-<%= fName %>-<%= name %> {
-		width: <%= data.width ? data.width + 'px' : 0 %>;
-		height: <%= data.height ? data.height + 'px' : 0 %>;
-		background-position: <%= data.offset_x ? data.offset_x + 'px' : 0 %> <%= data.offset_y ? data.offset_y + 'px' : 0 %>;
-	}
+    .<%= sign %>-<%= fName %>-<%= name %> {
+        width: <%= data.width ? data.width + 'px' : 0 %>;
+        height: <%= data.height ? data.height + 'px' : 0 %>;
+        background-position: <%= data.offset_x ? data.offset_x + 'px' : 0 %> <%= data.offset_y ? data.offset_y + 'px' : 0 %>;
+    }
 <% }); %>
 
-	* {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.container {
-		width: 1200px;
-		margin: 20px auto;
-	}
-	li {
-		float: left;
-		padding: 5px;
-		margin: 5px;
-		border: 1px solid #eee;
-		text-align: center;
-		font-family: arial;
-		line-height: 1.5;
-	}
-	textarea {
-		height: 150px;
-		border: none;
-		resize: none;
-		outline: none;
-		width: 100%;
-	}
-	</style>
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .container {
+        width: 1200px;
+        margin: 20px auto;
+    }
+    li {
+        float: left;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid #eee;
+        text-align: center;
+        font-family: arial;
+        color: #555;
+        line-height: 1.5;
+    }
+    pre {
+        margin: 15px 0;
+        color: #FD8520;
+        font-family: Consolas;
+        font-size: 14px;
+        padding: 15px;
+        background-color: #272822;
+    }
+    
+    </style>
 </head>
 <body>
 <div class="container">
-	<div class="row">
-		<h2>
-			<a href="/"><i class="img-demo-face1"></i>返回首页</a>
-		</h2>
-	</div>
-	<div class="row">
-	调用方式
-	<textarea>
-	css
-		@import 'img/<%= fName %>'; //导入css 标识/文件名
-		@include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
-		.demo {
-			// 单独引入某一个img css
-			@include img-demo-single($img-<%= fName %>-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
-		}
-	html
-		<i class="img-demo-home"></i> //class 标识+合成后文件名+单个文件名
-	</textarea> 
-	点击下面文字直接复制到剪切板
-	</div>
-	<ul>
-	<% _.forEach(cssData, function(data, name) { %>
-	<li>
-		<i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
-		<div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
-	</li>
-	<% }); %>
-	</ul>
+    <div class="row">
+        <h3>
+            <a href="<%= base %>"> <i class="img-demo-face1"></i>
+                返回首页
+            </a>
+        </h3>
+        <h2>调用方式</h2>
+
+        <h3>css</h3>
+<pre>
+@import 'img/<%= fName %>'; //导入css 标识/文件名
+@include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
+.demo {
+    // 单独引入某一个img css
+    @include img-demo-single($img-<%= fName %>-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
+}
+</pre>
+        <h3>html</h3>
+<pre>
+&lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
+</pre>
+
+        <h3>详细代码</h3>
+        点击下面文字直接复制到剪切板
+    </div>
+    <ul>
+    <% _.forEach(cssData, function(data, name) { %>
+    <li>
+        <i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
+        <div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
+    </li>
+    <% }); %>
+    </ul>
 </div>
 <script type="text/javascript">
+    var BASE_URL = window.location.href.replace('<%= libs %>images/<%= fName %>.html', '');
+</script>
+<script type="text/javascript" src="<%= base %><%= libs %>js/seajs.js"></script>
+<script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
-	$(function() {
-	    var $icons = $('.class,.text');
-	    $icons.on('click', function(e) {
-	        e.preventDefault();
-	    })
-	    .clipboard({
-	        path: '<%= host %><%= libs %>/js/static/jquery.clipboard.swf',
-	        copy: function() {
-	            $icons.removeAttr('style');
-	            return $(this).css({color:'#f00'}).text();
-	        }
-	    });
-	});
+    $(function() {
+        var $icons = $('.class,.text');
+        $icons.on('click', function(e) {
+            e.preventDefault();
+        })
+        .clipboard({
+            path: BASE_URL + '<%= libs %>js/static/jquery.clipboard.swf',
+            copy: function() {
+                $icons.removeAttr('style');
+                return $(this).css({color:'#f00'}).text();
+            }
+        });
+    });
 })
 </script>
 </body>
