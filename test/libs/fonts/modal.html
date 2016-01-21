@@ -234,9 +234,9 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('test\libs\fonts/modal.html', '');
+    var BASE_URL = window.location.href.replace('test/libs/fonts/modal.html', '');
 </script>
-<script type="text/javascript">document.write('<script src="' + BASE_URL + 'test\libs\js/seajs.js"><\/script>');</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + 'test/libs/js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
     $(function() {
@@ -248,7 +248,7 @@ seajs.use(['$','clipboard'], function($) {
             e.preventDefault();
         })
         .clipboard({
-            path: BASE_URL + 'test\libs\js/static/jquery.clipboard.swf',
+            path: BASE_URL + 'test/libs/js/static/jquery.clipboard.swf',
             copy: function() {
                 $icons.removeAttr('style');
                 return $(this).css({color:'#f00'}).text();

@@ -4,49 +4,49 @@
  * @date 2015-12-31 09:03:41
  */
 
-define(function(require,exports,moudles){
+define(function(require, exports, moudles) {
     var $ = require('$');
     // transition.js
     function transitionEnd() {
-        var el = document.createElement('div')
+        var el = document.createElement('div');
         var transEndEventNames = {
             WebkitTransition: 'webkitTransitionEnd',
             MozTransition: 'transitionend',
             OTransition: 'oTransitionEnd otransitionend',
             transition: 'transitionend'
-        }
+        };
         for (var name in transEndEventNames) {
             if (el.style[name] !== undefined) {
                 return {
                     end: transEndEventNames[name]
-                }
+                };
             }
         }
-        return false
+        return false;
     }
     $.fn.emulateTransitionEnd = function(duration) {
-        var called = false
-        var $el = this
+        var called = false;
+        var $el = this;
         $(this).one('bsTransitionEnd', function() {
-            called = true
-        })
+            called = true;
+        });
         var callback = function() {
-            if (!called) $($el).trigger($.support.transition.end)
-        }
-        setTimeout(callback, duration)
-        return this
-    }
+            if (!called) $($el).trigger($.support.transition.end);
+        };
+        setTimeout(callback, duration);
+        return this;
+    };
     $(function() {
-        $.support.transition = transitionEnd()
-        if (!$.support.transition) return
+        $.support.transition = transitionEnd();
+        if (!$.support.transition) return;
         $.event.special.bsTransitionEnd = {
             bindType: $.support.transition.end,
             delegateType: $.support.transition.end,
             handle: function(e) {
-                if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+                if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments);
             }
-        }
-    })
+        };
+    });
     /**
      * 得到拖拽范围
      * @param  {sting} o 对象本身
@@ -60,7 +60,7 @@ define(function(require,exports,moudles){
             w  = o.outerWidth(),
             h  = o.outerHeight(),
             pw = $p.width(),
-            ph = $p.height()
+            ph = $p.height();
 
         return {
             minL: pw < w ? pw - w : 0,
@@ -70,25 +70,24 @@ define(function(require,exports,moudles){
             st: st,
             h: h
         };
-    }
+    };
 
     // drag
-    var Drag = function (self, opt) {
-        this.o = $.extend({}, Drag.defaults, opt);
-        this.$self = $(self);
-        this.$handle = this.o.handle && this.$self.find(this.o.handle) || this.$self
-    }
+    var Drag = function(self, opt) {
+        this.o       = $.extend({}, Drag.defaults, opt);
+        this.$self   = $(self);
+        this.$handle = this.o.handle && this.$self.find(this.o.handle) || this.$self;
+    };
 
     Drag.defaults = {
-        handle       : ''
-        , fixed      : 1
-        // , opacity    : 1
-        , attachment : ''
-    }
+        handle: '',
+        fixed: 1, // , opacity    : 1
+        attachment: ''
+    };
 
     Drag.prototype.init = function () {
         var o = this.o;
-        var $self = this.$self//.css('animation-fill-mode','backwards');
+        var $self = this.$self;//.css('animation-fill-mode','backwards');
         var $handle = this.$handle;
 
         $handle
@@ -105,7 +104,7 @@ define(function(require,exports,moudles){
                 opacity  : o.opacity
                 , zIndex : parseInt(new Date().getTime()/1000)
             })
-            .trigger('_mousemove', [e.pageX, e.pageY])
+            .trigger('_mousemove', [e.pageX, e.pageY]);
             return false;
         })
         .on('_mousemove', function (e, x, y) {
@@ -117,33 +116,33 @@ define(function(require,exports,moudles){
                 l,
                 t;
 
-            $self.trigger('dragStart', [R])
+            $self.trigger('dragStart', [R]);
             $(document).on('mousemove', function(de) {
                 // 阻止对象的默认行为,防止在img,a上拖拽时出错
                 de.preventDefault();
                 var nL = pl + de.pageX
-                , nT   = pt + de.pageY
+                , nT   = pt + de.pageY;
 
-                l = nL < R.minL ? R.minL : (nL > R.maxL ? R.maxL : nL)
+                l = nL < R.minL ? R.minL : (nL > R.maxL ? R.maxL : nL);
                 t = nT < R.minT ? R.minT : (nT > R.maxT ? R.maxT : nT);
 
                 $self.css({
                     left : l
                     , top :  t
-                }).trigger('drag', [l, t])
+                }).trigger('drag', [l, t]);
 
             }).on('mouseup',function() {
-                $(this).off('mousemove')
-                $self.trigger('dragEnd', [l, t])
+                $(this).off('mousemove');
+                $self.trigger('dragEnd', [l, t]);
             });
-        })
-    }
+        });
+    };
 
     function PluginDrag(option) {
         return this.each(function () {
-            var $this   = $(this)
-            var data    = $this.data('jqDrag')
-            var options = $.extend({}, Drag.defaults, $this.data(), typeof option == 'object' && option)
+            var $this   = $(this);
+            var data    = $this.data('jqDrag');
+            var options = $.extend({}, Drag.defaults, $this.data(), typeof option == 'object' && option);
 
             if (!data) { 
                 $this.data('jqDrag', (data = new Drag(this, options)))
@@ -240,8 +239,7 @@ define(function(require,exports,moudles){
                     .load(function() {
                         _this.setPos(1);
                     })
-            }
-            else {
+            } else {
                 _this.$bd.append(_this.$self.css('display', 'block'));
             }
 
@@ -408,9 +406,10 @@ define(function(require,exports,moudles){
     });
 
 
-    moudles.exports = {
+    var modalExt = {
         tip: function() {
             var $target = $('.jqtip'),
+                isLoad = !arguments[1].search(/load/),
                 option = $target[0] && 'show' || {
                     mclass: 'tip',
                     animate: 'shake',
@@ -425,30 +424,14 @@ define(function(require,exports,moudles){
             if (!$target[0]) {
                 $target = $('<div class="jqtip"></div>') //.appendTo('body');
             }
-
-            $target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0]);
+            $target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0])
+            if (isLoad) {
+                console.log($target);
+                $target.on('showFun', function(aa, opt) {
+                    opt.animate = '';
+                });
+            }
             Plugin.call($target, option, delay);
-        },
-        loading: function() {
-            var $target = $('.jqload'),
-                option = $target[0] && 'show' || {
-                    mclass: 'tip',
-                    animate: '',
-                    drag: 0,
-                    lock: 1
-                };
-
-            if (!$target[0]) $target = $('<div class="jqload"></div>');
-            if (arguments[0]) {
-                if (arguments[0].search(/(hide|show|toggle)/) == 0) {
-                    option = arguments[0];
-                } else {
-                    $target.html('<i class="font-modal-' + (arguments[1] || 'load') + '"></i>' + arguments[0]);
-                }
-            } else {
-                $target.html('<i class="font-modal-load"></i>loading...');
-            };
-            Plugin.call($target, option)
         },
         alert: function() {
             var $target = $('.jqalert'),
@@ -492,4 +475,5 @@ define(function(require,exports,moudles){
             }
         }
     }
+    moudles.exports = modalExt;
 })

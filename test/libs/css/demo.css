@@ -589,54 +589,6 @@ img {
     content: '\EA06';
 }
 
-.img-demo-face1,
-.img-demo-face2,
-.img-demo-face3,
-.img-demo-face4,
-.img-demo-face5 {
-    display: inline-block;
-
-    background-image: url(../images/demo.png); 
-
-    *zoom: 1;
-    *display: inline;
-}
-
-.img-demo-face1 {
-    width: 24px;
-    height: 24px;
-
-    background-position: 0 0;
-}
-
-.img-demo-face2 {
-    width: 24px;
-    height: 24px;
-
-    background-position: -34px 0;
-}
-
-.img-demo-face3 {
-    width: 24px;
-    height: 24px;
-
-    background-position: 0 -34px;
-}
-
-.img-demo-face4 {
-    width: 24px;
-    height: 24px;
-
-    background-position: -34px -34px;
-}
-
-.img-demo-face5 {
-    width: 24px;
-    height: 24px;
-
-    background-position: -68px 0;
-}
-
 /*!
 * @name modal.css
 * @author ahuing
@@ -1266,6 +1218,54 @@ Animate.css - http://daneden.me/animate
 .flipInYH {
     -webkit-animation-name: flipOutY;
             animation-name: flipOutY;
+}
+
+.img-demo-face1,
+.img-demo-face2,
+.img-demo-face3,
+.img-demo-face4,
+.img-demo-face5 {
+    display: inline-block;
+
+    background-image: url(../images/demo.png); 
+
+    *zoom: 1;
+    *display: inline;
+}
+
+.img-demo-face1 {
+    width: 24px;
+    height: 24px;
+
+    background-position: 0 0;
+}
+
+.img-demo-face2 {
+    width: 24px;
+    height: 24px;
+
+    background-position: -34px 0;
+}
+
+.img-demo-face3 {
+    width: 24px;
+    height: 24px;
+
+    background-position: 0 -34px;
+}
+
+.img-demo-face4 {
+    width: 24px;
+    height: 24px;
+
+    background-position: -34px -34px;
+}
+
+.img-demo-face5 {
+    width: 24px;
+    height: 24px;
+
+    background-position: -68px 0;
 }
 
 .demo {

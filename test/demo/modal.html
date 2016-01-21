@@ -7,16 +7,16 @@
     <script type="text/javascript">
         var BASE_URL = 'http://localhost:8080/';
     </script>
-    <link rel="stylesheet" href="/libs/css/demo.css" />
+    <link rel="stylesheet" href="/test/libs/css/demo.css" />
 </head>
 <body>
     <div class="container">
-        <a class="font-demo-home" href="http://localhost:8080/">返回首页</a> | <a class="font-demo-home" href="../">上一级</a>
+        <a class="font-demo-home" href="/">返回首页</a> | <a class="font-demo-home" href="../">上一级</a>
         <h2>Modal</h2>
-        <input type="button" data-target="#login" class="btn-jqModal" value="登录input"/>
-        <a href="#login" class="btn-jqModal">登录a链接</a>
+        <input type="button" data-target="#login" class="btn-jqModal" value="登录-input"/>
+        <a href="#login" class="btn-jqModal">登录-a链接</a>
         <h2>Drag</h2>
-        <input type="button" data-target="#login2" data-drag="2" class="btn-jqModal" value="登录input"/>
+        <input type="button" data-target="#login2" data-drag="2" class="btn-jqModal" value="登录-input"/>
         <h2>Tip</h2>
         <input type="submit" data-tip="load"  value="加载中..."/>
         <input type="submit" data-tip="success" value="操作成功"/>
@@ -66,7 +66,7 @@
             </form>
         </div>
     </div>
-<script type="text/javascript" src="/libs/js/seajs.js"></script>
+<script type="text/javascript" src="/test/libs/js/seajs.js"></script>
 <script type="text/javascript">
     seajs.use(['$', 'modal'], function($, modal) {
         $('[data-tip]').click(function() {

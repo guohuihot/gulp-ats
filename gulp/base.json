@@ -1,12 +1,12 @@
 {
     "web": {
-        "path": "E:\\ats08/",
+        "path": "D:\\nodejs/",
         "author": "ahuing",
-        "libs": "./libs/",
+        "libs": "libs",
         "mode": "d",
         "tpl": "./src/",
-        "dist": "./test/",
-        "src": "./src/",
+        "dist": "test/",
+        "src": "src",
         "sourcemap": "./maps/"
     },
     "webdown": {
