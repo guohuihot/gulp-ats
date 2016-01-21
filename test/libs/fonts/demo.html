@@ -87,7 +87,7 @@
 <div class="container">
 <div class="row">
     <h3>
-        <a href="..\..\../"><i class="font-demo-home"></i>返回首页</a>
+        <a class="index"><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a>
     </h3>
     <h2>
         调用方式
@@ -144,18 +144,21 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('libs/fonts/demo.html', '');
+    var BASE_URL = window.location.href.replace('test\libs\fonts/demo.html', '');
 </script>
-<script type="text/javascript" src="..\..\../libs/js/seajs.js"></script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + 'test\libs\js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
     $(function() {
+        $('.index').click(function(event) {
+            location.href = BASE_URL;
+        });
         var $icons = $('.class,.text');
         $icons.on('click', function(e) {
             e.preventDefault();
         })
         .clipboard({
-            path: BASE_URL + 'libs/js/static/jquery.clipboard.swf',
+            path: BASE_URL + 'test\libs\js/static/jquery.clipboard.swf',
             copy: function() {
                 $icons.removeAttr('style');
                 return $(this).css({color:'#f00'}).text();

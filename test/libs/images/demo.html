@@ -88,9 +88,7 @@
 <div class="container">
     <div class="row">
         <h3>
-            <a href="..\..\../"> <i class="img-demo-face1"></i>
-                返回首页
-            </a>
+            <a class="index"> <i class="img-demo-face1"></i> 返回首页 </a> | <a class="font-demo-home" href="../">上一级</a>
         </h3>
         <h2>调用方式</h2>
 
@@ -102,16 +100,9 @@
     // 单独引入某一个img css
     @include img-demo-single($img-demo-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
 }
-&lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
 </pre>
         <h3>html</h3>
 <pre>
-@import 'img/demo'; //导入css 标识/文件名
-@include img-demo($img-demo); //调用全部样式， 标识-文件名($标识-文件名);
-.demo {
-    // 单独引入某一个img css
-    @include img-demo-single($img-demo-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
-}
 &lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
 </pre>
 
@@ -148,18 +139,22 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('libs/images/demo.html', '');
+    var BASE_URL = window.location.href.replace('test\libs\images/demo.html', '');
 </script>
-<script type="text/javascript" src="..\..\../libs/js/seajs.js"></script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + 'test\libs\js/seajs.js"><\/script>');</script>
+
 <script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
     $(function() {
+        $('.index').click(function(event) {
+            location.href = BASE_URL;
+        });
         var $icons = $('.class,.text');
         $icons.on('click', function(e) {
             e.preventDefault();
         })
         .clipboard({
-            path: BASE_URL + 'libs/js/static/jquery.clipboard.swf',
+            path: BASE_URL + 'test\libs\js/static/jquery.clipboard.swf',
             copy: function() {
                 $icons.removeAttr('style');
                 return $(this).css({color:'#f00'}).text();

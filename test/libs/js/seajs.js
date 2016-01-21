@@ -6,5 +6,5 @@
  * @author ahuing
  * @name seajs.config.js
  */
-var cfg={base:BASE_URL,alias:{$:"libs/js/static/jquery",template:"libs/js/static/template.js",highcharts:"libs/js/static/highcharts.js",clipboard:"libs/js/static/jquery.clipboard.js",lazyload:"libs/js/static/lazyload.js",login:"libs/js/common.js",uri2MVC:"libs/js/common.js",placeholder:"libs/js/common.js",duang:"libs/js/plugin/duang.js",fixed:"libs/js/plugin/fixed.js",modal:"libs/js/plugin/modal.js",scrollspy:"libs/js/plugin/scrollspy.js"}};seajs.config(cfg);
+var cfg={base:BASE_URL,alias:{$:"testlibsjs/static/jquery",template:"testlibsjs/static/template.js",highcharts:"testlibsjs/static/highcharts.js",clipboard:"testlibsjs/static/jquery.clipboard.js",lazyload:"testlibsjs/static/lazyload.js",login:"testlibsjs/common.js",uri2MVC:"testlibsjs/common.js",placeholder:"testlibsjs/common.js",duang:"testlibsjs/plugin/duang.js",fixed:"testlibsjs/plugin/fixed.js",modal:"testlibsjs/plugin/modal.js",scrollspy:"testlibsjs/plugin/scrollspy.js"}};seajs.config(cfg);
 //# sourceMappingURL=../../maps/libs/js/seajs.js.map

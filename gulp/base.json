@@ -1,9 +1,13 @@
 {
     "web": {
-        "path": "C:\\Users\\Administrator\\Desktop\\test",
+        "path": "E:\\ats08/",
         "author": "ahuing",
-        "libs": "./src/",
-        "mode": 1
+        "libs": "./libs/",
+        "mode": "d",
+        "tpl": "./src/",
+        "dist": "./test/",
+        "src": "./src/",
+        "sourcemap": "./maps/"
     },
     "webdown": {
         "ignore": [

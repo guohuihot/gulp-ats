@@ -1,3 +1,5 @@
+$<%= sign %>-<%= fName %>-fz: inherit !default;
+
 @font-face {
 	font-family: "<%= fName %>";
     font-weight: normal;
@@ -9,10 +11,12 @@
 		url('<%= fUrl %><%= fName %>.svg#<%= fName %>') format('svg');*/
 }
 
-[class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"] {
+[class^="<%= sign %>-<%= fName %>-"],
+[class*=" <%= sign %>-<%= fName %>-"] {
 	font-family: "<%= fName %>";
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	font-size: $<%= sign %>-<%= fName %>-fz;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;

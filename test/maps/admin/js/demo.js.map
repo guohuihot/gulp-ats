@@ -1,1 +1,1 @@
-{"version":3,"sources":["admin/js/demo.js"],"names":["define","require","exports","moudles","$","jqModal","tip"],"mappings":"AAMAA,OAAO,SAASC,QAASC,QAASC,GACjC,GAAIC,GAAIH,QAAQ,SAChBA,SAAQ,SAASG,GAEjBA,EAAEC,QAAQC,IAAI","file":"admin/js/demo.js"}
+{"version":3,"sources":["admin/js/demo.js"],"names":["define","require","exports","moudles","$","jqModal","tip"],"mappings":"AAMAA,OAAO,SAASC,QAASC,QAASC,GACjC,GAAIC,GAAIH,QAAQ,SAChBA,SAAQ,SAASG,GAEjBA,EAAEC,QAAQC,IAAI","file":"admin/js/demo.js","sourceRoot":"..\\..\\../src/"}
