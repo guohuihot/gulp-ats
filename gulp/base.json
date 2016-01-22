@@ -1,24 +1,10 @@
 {
-    "web": {
-        "path": "D:\\nodejs/",
-        "author": "ahuing",
-        "libs": "libs",
-        "mode": "d",
-        "tpl": "./src/",
-        "dist": "test/",
-        "src": "src",
-        "sourcemap": "./maps/"
-    },
-    "webdown": {
-        "ignore": [
-            "cnzz",
-            "tongji",
-            "jiathis"
-        ],
-        "pic": "img1",
-        "image": "",
-        "dest": "C:/Users/Administrator/Desktop",
-        "src": "D:\\nodejs\\src\\html\\",
-        "debug": 1
-    }
+  "web": {
+    "author": "author",
+    "libs": "libs",
+    "tpl": "./src/",
+    "dist": "",
+    "mode": 2,
+    "path": "E:\\wwwroot\\tripod-dev\\web\\sources\\"
+  }
 }

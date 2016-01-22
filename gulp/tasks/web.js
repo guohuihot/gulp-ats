@@ -22,7 +22,7 @@ module.exports = function(gulp, $) {
             img: 'img',
             font: 'font'
         },
-        config    = {};
+        config;
     // functions
     var message = function (info) {
             return $.notify(function(file) {
@@ -70,7 +70,7 @@ module.exports = function(gulp, $) {
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(cssPath))
-            .pipe(gulp.dest(config.dist))
+            .pipe(gulp.dest(config.src))
             .pipe(message('sprites scss 生成'));
         // images 预览文件
         gulp.src(sourceUrl + 'html/images.html')
@@ -113,7 +113,7 @@ module.exports = function(gulp, $) {
                 gulp.src(sourceUrl + 'css/fonts.scss')
                     .pipe($.template(templateData))
                     .pipe($.rename(cssPath))
-                    .pipe(gulp.dest(config.dist))
+                    .pipe(gulp.dest(config.src))
                     .pipe(message('font scss 生成'));
 
                 gulp.src(sourceUrl + 'html/fonts.html')
@@ -238,56 +238,70 @@ module.exports = function(gulp, $) {
     // tasks start
 
     gulp.task('init', function(cb) {
-        var base       = $.jsonFilePlus.sync(sourceUrl + 'base.json'),
-            baseConfig = base.data.web;
+        var base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
+        if (base.data == undefined) {
+            base.data = {
+                web: {}
+            };
+        };
+        config = base.data.web;
         // 默认为开发模式
         argv.d = argv.d === 0 ? false : true;
 
-        // 原始
-        baseConfig.src = 'src'; // 项目src目录
-        baseConfig.sourcemap = './maps/';
-
         if (argv.m == 1) {
-            config = $.extend(baseConfig, {
+            customConfig = {
                 path   : argv.p,
                 author : argv.a,
                 libs   : '',
                 tpl    : './src/libs/',
                 dist   : '',
                 mode   : argv.m
-            });
+            };
         } else if (argv.m == 2 || argv.m == 3) {
-            config = $.extend(baseConfig, {
+            customConfig = {
                 path   : argv.p,
                 author : argv.a,
                 libs   : 'libs',
                 tpl    : './src/',
                 dist   : '',
                 mode   : argv.m
-            });
-        } else if (argv.m == 'd') {
-            config = $.extend(baseConfig, {
+            };
+        } else if (argv.m == 4) {
+            customConfig = {
                 path   : cwd,
                 author : argv.a,
                 libs   : 'libs',
                 tpl    : './src/',
                 dist   : 'test/',
                 mode   : argv.m
-            });
+            };
         } else {
-            config = $.extend(baseConfig, {
+            customConfig = {
                 path   : argv.p,
                 author : argv.a
-            });
+            };
         };
+        base.data.web = config = $.extend({
+                author    : 'author',
+                libs      : '',
+                tpl       : './src/libs/',
+                dist      : '',
+                mode      : 1
+            }, $.extend(config, customConfig));
 
-        base.saveSync();
+        base.save();
+        // 固定配置不用保存
+        config.src = 'src'; // 项目src目录
+        config.sourcemap = './maps/';
 
-        console.log('\n');
-        console.log('当前配置:\n');
-        console.log(config);
-        console.log('\n');
-
+        if (config.path) {
+            console.log('\n');
+            console.log('当前配置:\n');
+            console.log(config);
+            console.log('\n');
+        } else {
+            console.log('error: 请设置项目目录path!');
+        };
         // 转化后
         config.rPath = config.dist != config.libs ?
                             config.dist + config.libs + '/' : 

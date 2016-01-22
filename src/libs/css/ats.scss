@@ -4,9 +4,10 @@
  * @date 2016-1-15
  */
 
-// 这个可以自己定义变量，请参考variables.scss,没有定义的话使用默认的
+// 这个可以自己定义变量_variables.scss，请参考variables.scss,没有定义的话使用默认的
 // @import 'xxx/xxxvariables';
 // 全局变量
+@import 'units/_variables';
 @import 'units/variables';
 // 重置css
 @import 'units/reset';
