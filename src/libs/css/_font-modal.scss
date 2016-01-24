@@ -1,3 +1,5 @@
+$font-modal-fz: inherit !default;
+
 @font-face {
 	font-family: "modal";
     font-weight: normal;
@@ -8,11 +10,19 @@
 		url('../fonts/modal.ttf') format('truetype'),
 		url('../fonts/modal.svg#modal') format('svg');*/
 }
-
-[class^="font-modal-"], [class*=" font-modal-"] {
+$font-modal-fz: inherit !default;
+$font-modal-fl: none !default;
+$font-modal-m: 0 !default;
+$font-modal-va: -.25em !default;
+[class^="font-modal-"],
+[class*=" font-modal-"] {
 	font-family: "modal";
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	font-size: $font-modal-fz;
+	float: $font-modal-fl;
+	margin: $font-modal-m;
+	vertical-align: $font-modal-va;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;

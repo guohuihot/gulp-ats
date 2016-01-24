@@ -1,3 +1,5 @@
+$font-demo-fz: inherit !default;
+
 @font-face {
 	font-family: "demo";
     font-weight: normal;
@@ -8,11 +10,19 @@
 		url('../fonts/demo.ttf') format('truetype'),
 		url('../fonts/demo.svg#demo') format('svg');*/
 }
-
-[class^="font-demo-"], [class*=" font-demo-"] {
+$font-demo-fz: inherit !default;
+$font-demo-fl: none !default;
+$font-demo-m: 0 !default;
+$font-demo-va: -.25em !default;
+[class^="font-demo-"],
+[class*=" font-demo-"] {
 	font-family: "demo";
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	font-size: $font-demo-fz;
+	float: $font-demo-fl;
+	margin: $font-demo-m;
+	vertical-align: $font-demo-va;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;

@@ -3,8 +3,8 @@
     "author": "author",
     "libs": "libs",
     "tpl": "./src/",
-    "dist": "",
-    "mode": 2,
-    "path": "E:\\wwwroot\\tripod-dev\\web\\sources\\"
+    "dist": "test/",
+    "mode": 4,
+    "path": "D:\\nodejs"
   }
 }

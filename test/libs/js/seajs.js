@@ -7,4 +7,4 @@
  * @name seajs.config.js
  */
 var cfg={base:BASE_URL,alias:{$:"test/libs/js/static/jquery",template:"test/libs/js/static/template.js",highcharts:"test/libs/js/static/highcharts.js",clipboard:"test/libs/js/static/jquery.clipboard.js",lazyload:"test/libs/js/static/lazyload.js",login:"test/libs/js/common.js",uri2MVC:"test/libs/js/common.js",placeholder:"test/libs/js/common.js",duang:"test/libs/js/plugin/duang.js",fixed:"test/libs/js/plugin/fixed.js",modal:"test/libs/js/plugin/modal.js",scrollspy:"test/libs/js/plugin/scrollspy.js"}};seajs.config(cfg);
-//# sourceMappingURL=../../maps/libs/js/seajs.js.map
+//# sourceMappingURL=seajs.js.map

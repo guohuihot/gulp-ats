@@ -40,7 +40,7 @@ module.exports = function(gulp, $) {
     var sprites = function(dir, cb) {
         var pathRelative = path.relative(config.src, dir),
             fName        = path.basename(dir),
-            cssPath      = path.join(pathRelative, '../../css/' + sign.img + '/' + fName + '.scss');
+            cssPath      = path.join(pathRelative, '../../css/_' + sign.img + '-' + fName + '.scss');
 
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
             .pipe($.spritesmith({
@@ -88,7 +88,7 @@ module.exports = function(gulp, $) {
     var fonts = function(dir, cb) {
         var pathRelative = path.relative(config.src, dir),
             fName        = path.basename(dir),
-            cssPath      = path.join(pathRelative, '../../css/' + sign.font + '/' + fName + '.scss');
+            cssPath      = path.join(pathRelative, '../../css/_' + sign.font + '-' + fName + '.scss');
 
         gulp.src(dir + '/*.svg', {base: config.src })
             .pipe($.iconfont({
@@ -129,11 +129,13 @@ module.exports = function(gulp, $) {
     }
     // scss
     var scss = function(filePath, cb) {
+        // console.log(config.tpl + config.libs + '/css/');
+        // return false;
         gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
-                includePaths: config.tpl + config.libs + '/css/',
+                includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
                 outputStyle: 'nested', 
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
                 sourceMap: true
@@ -155,10 +157,15 @@ module.exports = function(gulp, $) {
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
             // .pipe($.convertEncoding({to: 'gbk'}))
+            .pipe($.if(argv.d, $.sourcemaps.write('.', {
+                sourceRoot: '/src',
+                includeContent: false
+            })))
+            /*
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 sourceRoot: getSourceRoot(filePath),
                 includeContent: false
-            })))
+            })))*/
             .pipe(gulp.dest(config.dist))
             .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('scss 生成'));
@@ -187,13 +194,17 @@ module.exports = function(gulp, $) {
             .pipe($.uglify(configs.uglify))
             .pipe($.concat(pathRelative + '.js'))
             // .pipe($.convertEncoding({to: 'gbk'}))
+            .pipe($.if(argv.d, $.sourcemaps.write('.', {
+                sourceRoot: '/src',
+                includeContent: false
+            })))/*
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 // C:\Users\Administrator\Desktop\test\map\js\seajs
                 // C:\Users\Administrator\Desktop\test\src\
                 sourceRoot: getSourceRoot(dir),
                 destPath: './',
                 includeContent: false
-            })))
+            })))*/
             .pipe(gulp.dest(config.dist))
             .pipe(message('合并 压缩'));
         cb && cb();
@@ -212,10 +223,14 @@ module.exports = function(gulp, $) {
                 date   : $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
             // .pipe($.convertEncoding({to: 'gbk'}))
+            .pipe($.if(argv.d, $.sourcemaps.write('.', {
+                sourceRoot: '/src',
+                includeContent: false
+            })))/*
             .pipe($.if(argv.d, $.sourcemaps.write(config.sourcemap, {
                 sourceRoot: getSourceRoot(filePath),
                 includeContent: false
-            })))
+            })))*/
             .pipe(gulp.dest(config.dist))
             .pipe(message('处理'));
         cb && cb();
@@ -292,7 +307,7 @@ module.exports = function(gulp, $) {
         base.save();
         // 固定配置不用保存
         config.src = 'src'; // 项目src目录
-        config.sourcemap = './maps/';
+        // config.sourcemap = './maps/';
 
         if (config.path) {
             console.log('\n');
@@ -306,8 +321,9 @@ module.exports = function(gulp, $) {
         config.rPath = config.dist != config.libs ?
                             config.dist + config.libs + '/' : 
                             '';
-        config.src   = path.join(config.path, config.src);
-        config.dist  = path.join(config.path, config.dist);
+        config.src  = path.join(config.path, config.src);
+        config.dist = path.join(config.path, config.dist);
+        // config.tpl  = path.join(config.path, config.tpl);
 
         // console.log(config);
         cb();
@@ -449,8 +465,7 @@ module.exports = function(gulp, $) {
             // config.src = path.join(config.path, config.tpl);
             config.src = config.tpl;
         }
-        // return false;
-        if (config.mode == 'd') {
+        if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
             cb();
         } else {
@@ -461,13 +476,15 @@ module.exports = function(gulp, $) {
             // 复制核心代码
             gulp.src([
                     config.src + '/**/*',
-                    '!' + config.src + '/**/units/**/*'
+                    '!' + config.src + '/**/_*'
                 ], {base: config.src})
                 .pipe(
                     $.if(isNeedTpl, 
                         $.data(function(file) {
+                            // console.log(path.relative(path.dirname(file.path), config.src) + '/');
+                            var nPath = path.relative(path.dirname(file.path), config.src);
                             return {
-                                base : path.relative(path.dirname(file.path), config.src) + '/',
+                                base : nPath ? nPath + '/' : '',
                                 path : config.rPath
                             }
                         })
@@ -476,7 +493,7 @@ module.exports = function(gulp, $) {
                 .pipe($.if(isNeedTpl, $.template()))
                 .pipe(gulp.dest(toSrc));
 
-            gulp.src(config.src + '/**/variables.scss', {
+            gulp.src(config.src + '/**/_variables.scss', {
                     base: config.src
                 })
                 .pipe(gulp.dest(toSrc));
@@ -505,9 +522,10 @@ module.exports = function(gulp, $) {
             .pipe(gulp.dest(config.dist));
         gulp.src(config.src + '/**/demo*.html', {base: config.src })
             .pipe($.data(function(file) {
-                var nPath = argv.all ? config.path : cwd;
+                // var nPath = argv.all ? config.path : cwd;
+                var nPath = path.relative(path.dirname(file.path), config.src);
                 return {
-                    base : path.relative(path.dirname(file.path), nPath) + '/',
+                    base : nPath ? nPath + '/' : '',
                     path : config.rPath
                 }
             }))

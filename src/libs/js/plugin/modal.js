@@ -280,7 +280,7 @@ define(function(require, exports, moudles) {
             o.fixed && $(window).on('resize', $.proxy(_this.setPos, _this));
 
         },
-        show: function(delay) {
+        show: function() {
             var _this = this;
 
             if (_this.isShown) return
@@ -291,9 +291,9 @@ define(function(require, exports, moudles) {
             _this.$self.trigger('shownFun');
             _this.isShown = true
 
-            if(delay || this.o.timeout) {
+            if(this.o.timeout) {
                 clearTimeout(this.t);
-                this.t = setTimeout($.proxy(this.hide, this), delay || this.o.timeout);
+                this.t = setTimeout($.proxy(this.hide, this), this.o.timeout);
             }
         },
         hideModal: function() {
@@ -357,7 +357,7 @@ define(function(require, exports, moudles) {
         }
     }
 
-    function Plugin(option, delay) {
+    function Plugin(option) {
         return this.each(function () {
             var $this   = $(this)
             var data    = $this.data('jqModal')
@@ -365,10 +365,10 @@ define(function(require, exports, moudles) {
             if (!data) { 
                 $this.data('jqModal', (data = new Modal(this, options)))
                 data.init()
-                data.show(delay)
+                data.show()
             }
             else {
-                if (typeof option == 'string') data[option](delay)
+                if (typeof option == 'string') data[option]()
                 else data['toggle']()
             }
         })
@@ -410,28 +410,25 @@ define(function(require, exports, moudles) {
         tip: function() {
             var $target = $('.jqtip'),
                 isLoad = !arguments[1].search(/load/),
-                option = $target[0] && 'show' || {
+                option = $target[0] && 'toggle' || {
                     mclass: 'tip',
-                    animate: 'shake',
                     css: {
                         top: 150
                     },
                     drag: 0,
                     lock: 1
-                },
-                delay = (arguments[2] || 1500);
+                };
 
             if (!$target[0]) {
-                $target = $('<div class="jqtip"></div>') //.appendTo('body');
+                $target = $('<div class="jqtip"></div>'); //.appendTo('body');
             }
             $target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0])
-            if (isLoad) {
-                console.log($target);
-                $target.on('showFun', function(aa, opt) {
-                    opt.animate = '';
-                });
-            }
-            Plugin.call($target, option, delay);
+                // console.log($target);
+            .on('showFun', function(el, opt) {
+                opt.animate = isLoad ? '' : 'shake';
+                opt.timeout = isLoad ? 0 : (arguments[2] || 1500);
+            });
+            Plugin.call($target, option);
         },
         alert: function() {
             var $target = $('.jqalert'),

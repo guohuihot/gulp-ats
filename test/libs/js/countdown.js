@@ -1,2 +1,2 @@
 
-//# sourceMappingURL=../../maps/libs/js/countdown.js.map
+//# sourceMappingURL=countdown.js.map
