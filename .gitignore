@@ -1,6 +1,14 @@
 /node_modules
 /down
-/src/src/css/font/demo.scss
-/src/src/css/img/demo.scss
+/src/src/css/_font-*.scss
+/src/src/css/_img-*.scss
 /gulp/base.json
 /gulp/base.js
+/test/*.map
+/test/admin/css/*.map
+/test/admin/js/*.map
+/test/libs/css/*.map
+/test/libs/js/*.map
+/test/libs/js/plugin/*.map
+/test/member/js/*.map
+/node_modules.zip

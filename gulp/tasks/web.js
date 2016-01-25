@@ -33,18 +33,32 @@ module.exports = function(gulp, $) {
             })
         };
     var getSourceRoot = function (filePath) {
-        // return path.relative(path.dirname(filePath), config.path), '/src/';
-        return path.relative(filePath, config.path), '/src/';
-    };
+            // return path.relative(path.dirname(filePath), config.path), '/src/';
+            return path.relative(filePath, config.path), '/src/';
+        };
+    // 复制时替换的数据
+    var tplData = function(file) {
+            // src文件到src = dist文件到dist
+            var pathRelative = path.relative(path.dirname(file.path), config.src);
+            var pathRelative1 = path.relative(config.src, file.path);
+            return {
+                base  : path.join(pathRelative, config.libs)
+                            .split(path.sep).join('/') + '/',
+                path  : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
+                            .split(path.sep).join('/'),
+                rPath : config.rPath
+            }
+        }
 
     var sprites = function(dir, cb) {
-        var pathRelative = path.relative(config.src, dir),
-            fName        = path.basename(dir),
-            cssPath      = path.join(pathRelative, '../../css/_' + sign.img + '-' + fName + '.scss');
+        var pathBase = path.relative(config.src, dir + '../../')
+                            .split(path.sep).join('/') + '/',
+            fName    = path.basename(dir),
+            cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
 
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
             .pipe($.spritesmith({
-                imgName: pathRelative + '.png',
+                imgName: pathBase + 'images/' + fName + '.png',
                 cssName: 'sprite.json',
                 // cssName: path.join(dir, '../../css/img/' + fName + '.scss'),
                 padding: 10
@@ -58,8 +72,8 @@ module.exports = function(gulp, $) {
                     cb1(undefined, {
                         cssData : JSON.parse(jsonArr[0].contents),
                         fUrl    : '../images/' + fName + '.png',
-                        // base    : path.relative(config.dist + pathRelative, config.dist) + '/',
-                        path    : config.rPath,
+                        path    : pathBase + 'images/' + fName + '.html',
+                        rPath   : config.rPath,
                         fName   : fName,
                         sign    : sign.img
                     });
@@ -76,7 +90,7 @@ module.exports = function(gulp, $) {
         gulp.src(sourceUrl + 'html/images.html')
             .pipe($.data(dataFun))
             .pipe($.template())
-            .pipe($.rename(pathRelative + '.html'))
+            .pipe($.rename(pathBase + 'images/' + fName + '.html'))
             .pipe(gulp.dest(config.dist));
 
         spriteData.img
@@ -86,13 +100,14 @@ module.exports = function(gulp, $) {
     }
 
     var fonts = function(dir, cb) {
-        var pathRelative = path.relative(config.src, dir),
-            fName        = path.basename(dir),
-            cssPath      = path.join(pathRelative, '../../css/_' + sign.font + '-' + fName + '.scss');
+        var pathBase = path.relative(config.src, dir + '../../')
+                            .split(path.sep).join('/') + '/',
+            fName    = path.basename(dir),
+            cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
         gulp.src(dir + '/*.svg', {base: config.src })
             .pipe($.iconfont({
-                fontName: pathRelative, // required
+                fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
                 formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
                 // timestamp: runTimestamp // recommended to get consistent builds when watching files
@@ -104,8 +119,8 @@ module.exports = function(gulp, $) {
                 var templateData = {
                         cssData : glyphs,
                         fUrl    : '../fonts/',
-                        // base    : path.relative(config.dist + pathRelative, config.dist) + '/',
-                        path    : config.rPath,
+                        path    : pathBase + 'fonts/' + fName + '.html',
+                        rPath   : config.rPath,
                         sign    : sign.font,
                         fName   : fName
                     };
@@ -115,10 +130,9 @@ module.exports = function(gulp, $) {
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(config.src))
                     .pipe(message('font scss 生成'));
-
                 gulp.src(sourceUrl + 'html/fonts.html')
                     .pipe($.template(templateData))
-                    .pipe($.rename(pathRelative + '.html'))
+                    .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     // .pipe($.convertEncoding({to: 'gbk'}))
                     .pipe(gulp.dest(config.dist))
                 cb && cb();
@@ -187,7 +201,7 @@ module.exports = function(gulp, $) {
                     author : config.author,
                     date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                     // base   : host,
-                    path   : config.rPath
+                    rPath  : config.rPath
                 }
             }))
             .pipe($.template())
@@ -344,7 +358,7 @@ module.exports = function(gulp, $) {
                 }*/
             });
             if (argv.o) {
-                var demoUrl = config.rPath + 'demo.html'
+                var demoUrl = config.rPath + 'demo.html';
                 require('child_process').exec('start http://localhost:8080/' + demoUrl);
             }
         });
@@ -478,21 +492,10 @@ module.exports = function(gulp, $) {
                     config.src + '/**/*',
                     '!' + config.src + '/**/_*'
                 ], {base: config.src})
-                .pipe(
-                    $.if(isNeedTpl, 
-                        $.data(function(file) {
-                            // console.log(path.relative(path.dirname(file.path), config.src) + '/');
-                            var nPath = path.relative(path.dirname(file.path), config.src);
-                            return {
-                                base : nPath ? nPath + '/' : '',
-                                path : config.rPath
-                            }
-                        })
-                    )
-                )
+                .pipe($.if(isNeedTpl, $.data(tplData)))
                 .pipe($.if(isNeedTpl, $.template()))
                 .pipe(gulp.dest(toSrc));
-
+// return false;
             gulp.src(config.src + '/**/_variables.scss', {
                     base: config.src
                 })
@@ -521,14 +524,7 @@ module.exports = function(gulp, $) {
         gulp.src([config.src + '/**/static/*'], {base: config.src})
             .pipe(gulp.dest(config.dist));
         gulp.src(config.src + '/**/demo*.html', {base: config.src })
-            .pipe($.data(function(file) {
-                // var nPath = argv.all ? config.path : cwd;
-                var nPath = path.relative(path.dirname(file.path), config.src);
-                return {
-                    base : nPath ? nPath + '/' : '',
-                    path : config.rPath
-                }
-            }))
+            .pipe($.data(tplData))
             .pipe($.template())
             .pipe(gulp.dest(config.dist));
             // return false;

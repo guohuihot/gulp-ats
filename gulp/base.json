@@ -1,10 +1,10 @@
 {
   "web": {
-    "author": "author",
+    "author": true,
     "libs": "libs",
     "tpl": "./src/",
     "dist": "test/",
     "mode": 4,
-    "path": "D:\\nodejs"
+    "path": "E:\\ats08/"
   }
 }

@@ -87,9 +87,9 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('<%= path %>images/<%= fName %>.html', '');
+    var BASE_URL = window.location.href.replace('<%= path %>', '');
 </script>
-<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= path %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
 
 <script type="text/javascript">
 seajs.use(['$','clipboard'], function($) {
@@ -102,7 +102,7 @@ seajs.use(['$','clipboard'], function($) {
             e.preventDefault();
         })
         .clipboard({
-            path: BASE_URL + '<%= path %>js/static/jquery.clipboard.swf',
+            path: BASE_URL + '<%= rPath %>js/static/jquery.clipboard.swf',
             copy: function() {
                 $icons.removeAttr('style');
                 return $(this).css({color:'#f00'}).text();
