@@ -51,7 +51,7 @@ module.exports = function(gulp, $) {
         }
 
     var sprites = function(dir, cb) {
-        var pathBase = path.relative(config.src, dir + '../../')
+        var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + '/',
             fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
@@ -100,7 +100,7 @@ module.exports = function(gulp, $) {
     }
 
     var fonts = function(dir, cb) {
-        var pathBase = path.relative(config.src, dir + '../../')
+        var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + '/',
             fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
@@ -135,6 +135,7 @@ module.exports = function(gulp, $) {
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     // .pipe($.convertEncoding({to: 'gbk'}))
                     .pipe(gulp.dest(config.dist))
+                    .pipe(message('font html 生成'));
                 cb && cb();
             })
             // .pipe($.plumber())
