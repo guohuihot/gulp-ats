@@ -3,11 +3,6 @@ $<%= sign %>-<%= fName %>-<%= name %>:(<%= data.width ? data.width + 'px' : 0 %>
 <% }); %>
 $<%= sign %>-<%= fName %>: (<% _.forEach(cssData, function(data, name) { %>$<%= sign %>-<%= fName %>-<%= name %>,<% }); %>);
 
-@mixin <%= sign %>-<%= fName %>-single($sprite) {
-  background: url(<%= fUrl %>) no-repeat nth($sprite, 3) nth($sprite, 4);
-}
-
-
 @mixin <%= sign %>-<%= fName %>($sprites) {
   %ico {
       display: inline-block;

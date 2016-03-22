@@ -47,17 +47,55 @@
 }
 
 .tal {
-    text-align: left;
+    text-align: left !important;
 }
 
 .tac {
-    text-align: center;
+    text-align: center !important;
 }
 
 .tar {
-    text-align: right;
+    text-align: right !important;
 }
 
 .ma {
-    margin: 0 auto;
+    margin: 0 auto !important;
+}
+// blank
+%blank {
+    font-size: 1px;
+
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+@for $i from 1 through 20 {
+  .blank#{$i} { 
+        @extend %blank;
+        height: #{$i}px; 
+    }
+}
+
+// margin padding
+$param: (t: top, r: right, b: bottom, l: left);
+
+@each $k, $v in $param {
+    @for $i from 1 through 30 {
+        @if $i % 5 == 0 {
+            .m#{$k}#{$i} {
+                margin-#{$v}: #{$i}px !important;
+            }
+            .p#{$k}#{$i} {
+                padding-#{$v}: #{$i}px !important;
+            }
+        }
+    }
+}
+// font
+
+@for $i from 12 through 34 {
+  .fz#{$i} { 
+        font-size: #{$i}px !important; 
+    }
 }

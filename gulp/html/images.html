@@ -64,10 +64,7 @@
 <pre>
 @import 'img-<%= fName %>'; //导入css 标识-文件名
 @include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
-.demo {
-    // 单独引入某一个img css
-    @include img-demo-single($img-<%= fName %>-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
-}
+
 </pre>
         <h3>html</h3>
 <pre>
@@ -92,7 +89,7 @@
 <script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
 
 <script type="text/javascript">
-seajs.use(['$','clipboard'], function($) {
+seajs.use(['clipboard'], function() {
     $(function() {
         $('.index').click(function(event) {
             location.href = BASE_URL;
