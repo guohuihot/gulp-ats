@@ -4,10 +4,11 @@ $<%= sign %>-<%= fName %>-<%= name %>:(<%= data.width ? data.width + 'px' : 0 %>
 $<%= sign %>-<%= fName %>: (<% _.forEach(cssData, function(data, name) { %>$<%= sign %>-<%= fName %>-<%= name %>,<% }); %>);
 
 @mixin <%= sign %>-<%= fName %>($sprites) {
-  %ico {
+  %ico<%= fName %> {
       display: inline-block;
       *zoom: 1;
       *display: inline;
+      vertical-align: middle;
       background-image: url(<%= fUrl %>);
   }
   @each $sprite in $sprites {
@@ -15,7 +16,7 @@ $<%= sign %>-<%= fName %>: (<% _.forEach(cssData, function(data, name) { %>$<%= 
         width: nth($sprite, 1);
         height: nth($sprite, 2);
         background-position: nth($sprite, 3) nth($sprite, 4);
-      @extend %ico;
+      @extend %ico<%= fName %>;
     }
   }
 }
