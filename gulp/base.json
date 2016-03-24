@@ -3,10 +3,10 @@
     "author": "ahuing",
     "libs": "",
     "tpl": "./src/libs/",
-    "dist": "",
+    "dist": "public",
     "src": "src",
-    "mode": 1,
-    "path": "E:\\wwwroot\\html",
+    "mode": "c",
+    "path": "E:\\wwwroot\\newcore\\site\\AutoBundle\\Resources",
     "distEx": "E:\\wwwroot\\newcore\\web\\bundles\\auto"
   }
 }

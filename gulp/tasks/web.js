@@ -210,7 +210,7 @@ module.exports = function(gulp, $) {
                 }
             }))
             .pipe($.template())
-            .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
             .pipe($.if(argv.d, sourcemaps(dir)))
@@ -225,7 +225,7 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
-            .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.template({
                 name   : path.basename(filePath),
                 author : config.author,
@@ -542,7 +542,7 @@ module.exports = function(gulp, $) {
 
         // 直接复制核心
         gulp.src([config.src + '/**/plugin/*.js'], {base: config.src})
-            .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe(gulp.dest(config.dist));
         gulp.src([config.src + '/**/static/*'], {base: config.src})
             .pipe(gulp.dest(config.dist));
