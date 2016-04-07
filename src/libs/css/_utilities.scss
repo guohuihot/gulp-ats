@@ -81,7 +81,7 @@
 $param: (t: top, r: right, b: bottom, l: left);
 
 @each $k, $v in $param {
-    @for $i from 1 through 30 {
+    @for $i from 1 through 40 {
         @if $i % 5 == 0 {
             .m#{$k}#{$i} {
                 margin-#{$v}: #{$i}px !important;

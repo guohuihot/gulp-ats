@@ -215,6 +215,7 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
             .pipe($.if(argv.d, sourcemaps(dir)))
             .pipe(gulp.dest(config.dist))
+            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('合并 压缩'));
         cb && cb();
     }
@@ -234,6 +235,7 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
             .pipe($.if(argv.d, sourcemaps(filePath)))
             .pipe(gulp.dest(config.dist))
+            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('处理'));
         cb && cb();
     }
