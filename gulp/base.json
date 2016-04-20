@@ -3,10 +3,10 @@
     "author": "ahuing",
     "libs": "",
     "tpl": "./src/libs/",
-    "dist": "public",
+    "dist": "",
     "src": "src",
-    "mode": "c",
-    "path": "E:\\wwwroot\\newcore\\site\\AutoBundle\\Resources",
-    "distEx": "E:\\wwwroot\\newcore\\web\\bundles\\auto"
+    "mode": 1,
+    "path": "E:\\baidu\\web\\javascript\\jquery_plugIn\\jqduang",
+    "distEx": ""
   }
 }

@@ -70,7 +70,7 @@
     overflow: hidden;
 }
 
-@for $i from 1 through 20 {
+@for $i from 1 through 30 {
   .blank#{$i} { 
         @extend %blank;
         height: #{$i}px; 

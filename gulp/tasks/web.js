@@ -405,8 +405,8 @@ module.exports = function(gulp, $) {
             };
 
             $.watch([
-                config.dist + '/**/*.html',
-                '!' + config.dist + '/**/{fonts,images}/*.html'
+                config.dist + '/**/*.{html,htm}',
+                '!' + config.dist + '/**/{fonts,images,src}/*.{html,htm}'
             ], function(file) {
                 gulp.src(file.path, {
                         read: false
@@ -428,6 +428,23 @@ module.exports = function(gulp, $) {
                 }
             })
         }
+        // html
+        $.watch([
+                config.src + '/**/*.{html,htm}',
+                '!' + config.dist + '/**/_*.{html,htm}'
+            ], function(file) {
+                if (file.event == 'unlink') {
+                    var pathRelative = path.relative(config.src, file.path);
+                    $.del([config.dist + '/' + pathRelative], {force: true});
+                } else {
+                    gulp.src(file.path, {base: config.src})
+                        .pipe($.plumber())
+                        .pipe($.fileInclude())
+                        .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
+                        .pipe(gulp.dest(config.dist))
+                        .pipe(message('html处理ok'));
+                }
+            });
         // images
         $.watch([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], function(file) {
             if (file.event == 'unlink') {

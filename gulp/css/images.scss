@@ -9,6 +9,8 @@ $<%= sign %>-<%= fName %>: (<% _.forEach(cssData, function(data, name) { %>$<%= 
       *zoom: 1;
       *display: inline;
       vertical-align: middle;
+      line-height: 300px;
+      overflow: hidden;
       background-image: url(<%= fUrl %>);
   }
   @each $sprite in $sprites {

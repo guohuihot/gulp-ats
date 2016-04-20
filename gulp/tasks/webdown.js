@@ -1,4 +1,4 @@
-module.exports = function(gulp, $$, utils) {
+    module.exports = function(gulp, $$, utils) {
     var request = require('request'),
         url        = require('url'),
         fs         = require('fs'),
@@ -12,15 +12,12 @@ module.exports = function(gulp, $$, utils) {
         var processCon = function(cb) {
             var jsonFile = require('json-file-plus'),
                 extend   = require('node.extend'),
-                baseFile = jsonFile.sync('./gulp/base.json'),
-                base     = baseFile.data,
-                argv     = require('yargs').alias('c', 'config').argv.c;
+                // baseFile = jsonFile.sync('./gulp/base.json'),
+                // base     = baseFile.data,
+                argv     = require('yargs').alias('c', 'config').argv;
             // 参数不存在返回错误信息
-            if (!argv) {
-                cb('命令：gulp webdown -c "' + base['webdown']['argv'] + '"\n');
-            };
-            var args = argv.split(','),
-                urlParse = url.parse(args[0]),
+
+            var urlParse = url.parse(argv.h),
                 reqConfig = {
                     url: urlParse.href, //要下载的网址
                     gzip: true, //是否开启gzip
@@ -31,13 +28,12 @@ module.exports = function(gulp, $$, utils) {
                 },
                 webConfig = extend(true, {
                     hostUrl: urlParse.protocol + '//' + urlParse.host + '/',
-                    downDir: (base['webdown']['dest'] = args[2] || base['webdown'].dest) + '\\' + urlParse.hostname + '\\',
-                    fileName: (args[1] || 'index') + '.html'
-                }, base['webdown']);
+                    downDir: argv.d + '\\' + urlParse.hostname + '\\',
+                    fileName: (argv.n || 'index') + '.html'
+                }, {});
             // 创建下载目录
             utils.mkdir(webConfig.downDir, webConfig.src);
             // 设置目录 保存配置
-            baseFile.saveSync();
 
             cb(null, reqConfig, webConfig);
         }
@@ -131,7 +127,7 @@ module.exports = function(gulp, $$, utils) {
         }
 
         var downCss = function(webConfig, cb) {
-            async.forEachOfLimit(rUrls, 20, function(v, k, callback) {
+            async.forEachOfLimit(rUrls, 10, function(v, k, callback) {
                 if (v.split('.').pop() == 'css') {
                     request(k, function(err, response, fileData) {
                         if (err) {
@@ -145,7 +141,8 @@ module.exports = function(gulp, $$, utils) {
                                 })
                             };
 
-                            fs.writeFile(webConfig.downDir + v, fileData, function(err) {
+                            fs.writeFile(webConfig.downDir ? webConfig.downDir + v : v, fileData, function(err) {
+                                console.log(webConfig.downDir ? webConfig.downDir + v : v,1111);
                                 if (err) {
                                     callback(err);
                                 };
