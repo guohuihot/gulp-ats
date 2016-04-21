@@ -1,5 +1,7 @@
 /node_modules
 /down
-/src/src/css/font/demo.scss
-/src/src/css/img/demo.scss
+/src/src/css/_font-*.scss
+/src/src/css/_img-*.scss
 /gulp/base.json
+/gulp/base.js
+/test

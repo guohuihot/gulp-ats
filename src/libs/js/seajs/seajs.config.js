@@ -1,24 +1,29 @@
 /*!
- * @author ahuing
- * @name seajs.config.js
+ * @name <%= name %>
+ * @author <%= author %>
  */
-
 var cfg = {
     base : BASE_URL,
     alias: {
-		'$'           : '<%= path %>js/static/jquery',
-		'template'    : '<%= path %>js/static/template.js',
-		'highcharts'  : '<%= path %>js/static/highcharts.js',
-		'clipboard'   : '<%= path %>js/static/jquery.clipboard.js',
-		'lazyload'    : '<%= path %>js/static/lazyload.js',
-		'login'       : '<%= path %>js/common.js',
-		'uri2MVC'     : '<%= path %>js/common.js',
-		'placeholder' : '<%= path %>js/common.js',
-		'duang'       : '<%= path %>js/plugin/duang.js',
-		'fixed'       : '<%= path %>js/plugin/fixed.js',
-		'modal'       : '<%= path %>js/plugin/modal.js',
-		'scrollspy'   : '<%= path %>js/plugin/scrollspy.js'
-    }   
+		'$'           : 'libs/js/static/jquery',
+		'template'    : 'libs/js/static/template',
+		'highcharts'  : 'libs/js/static/highcharts',
+		'clipboard'   : 'libs/js/static/jquery.clipboard',
+		'lazyload'    : 'libs/js/static/lazyload',
+		'jscroll'     : 'libs/js/static/perfect-scrollbar',
+		'dataFormat'  : 'libs/js/static/data-format',
+		'login'       : 'libs/js/common',
+		'uri2MVC'     : 'libs/js/common',
+		'placeholder' : 'libs/js/common',
+		// 'jscroll'     : 'libs/js/plugin/jscroll',
+		'duang'       : 'libs/js/plugin/duang',
+		'validate'    : 'libs/js/plugin/validate',
+		'fixed'       : 'libs/js/plugin/fixed',
+		'modal'       : 'libs/js/plugin/modal',
+		'scrollspy'   : 'libs/js/plugin/scrollspy'
+    },   
+    preload: ['$'],
+	charset: 'utf-8'
 };
 
 seajs.config(cfg);

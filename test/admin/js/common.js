@@ -1,7 +1,27 @@
 /*!
  * @name demo.js
  * @author ahuing
- * @date 2016-01-22 01:59:13
+ * @date 2016-04-21 11:25:49
  */
-define("placeholder",["$"],function(require){var $=require("$");"placeholder"in document.createElement("input")||$("[placeholder]").each(function(){var e=this,l=$(this),t=l.attr("placeholder");""===$.trim(e.value)&&(e.value=t),l.focus(function(){$.trim(e.value)===t&&(e.value="")}).blur(function(){""===$.trim(e.value)&&(e.value=t)}).closest("form").on("submit",function(){$.trim(e.value)===t&&(e.value="")})})});
-//# sourceMappingURL=../../maps/admin/js/common.js.map
+
+define('placeholder', ['$'], function(require){
+    var $  = require('$');
+    if (!('placeholder' in document.createElement('input'))) {
+        $('[placeholder]').each(function() {
+            var _this       = this,
+                $this       = $(this),
+                placeholder = $this.attr('placeholder');
+
+            if ($.trim(_this.value) === '') _this.value = placeholder;
+
+            $this.focus(function() {
+                if ($.trim(_this.value) === placeholder) _this.value = '';
+            }).blur(function() {
+                if ($.trim(_this.value) === '') _this.value = placeholder;
+            }).closest('form').on('submit', function() {
+                if ($.trim(_this.value) === placeholder) _this.value = '';
+            });
+        });
+    }
+});
+//# sourceMappingURL=..\..\src\admin\js\common.js.map

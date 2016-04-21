@@ -1,0 +1,56 @@
+@mixin triangle ($size, $color, $direction) {
+  height: 0;
+  width: 0;
+
+  //三角向上、向下、向右和向左时，设置边框样式 
+  @if ($direction == up) or ($direction == down) or ($direction == right) or ($direction == left) {
+    border-color: transparent;
+    border-style: solid;
+    border-width: $size / 2;
+
+    //三角向上时，底部边框颜色为$color
+    @if $direction == up {
+      border-bottom-color: $color;
+
+    //三角向右时，左边边框颜色为$color
+    } @else if $direction == right {
+      border-left-color:   $color;
+
+    //三你向下时，顶部边框颜色为$color
+    } @else if $direction == down {
+      border-top-color:    $color;
+
+    //三角向左时，右边框颜色为$color
+    } @else if $direction == left {
+      border-right-color:  $color;
+    }
+  }
+
+  //当三角为左上、右上直角三角形时       
+  @else if ($direction == up-right) or ($direction == up-left) {
+    border-top: $size solid $color;//顶边边框样式
+
+    //当三角为右上直角三角形时，设置左边边框为透明
+    @if $direction == up-right {
+      border-left:  $size solid transparent;
+
+    //当三角为左上直角三角形时，设置右边边框为透明
+    } @else if $direction == up-left {
+      border-right: $size solid transparent;
+    }
+  }
+
+  //当三角为右下、左下直角三角形时
+  @else if ($direction == down-right) or ($direction == down-left) {
+    border-bottom: $size solid $color;//底边边框样式
+
+    //当三角为右下直角三角形时，设置左边边框为透明
+    @if $direction == down-right {
+      border-left:  $size solid transparent;
+
+    //当三你为左下直角三角形时，设置右边边框为透明
+    } @else if $direction == down-left {
+      border-right: $size solid transparent;
+    }
+  }
+}

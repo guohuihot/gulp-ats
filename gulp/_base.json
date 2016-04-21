@@ -1,10 +1,4 @@
 {
-    "web": {
-        "path": "E:\\wwwroot\\tripod-dev\\web\\sources",
-        "author": "ahuing",
-        "libs": "./src/",
-        "mode": 1
-    },
     "webdown": {
         "ignore": [
             "cnzz",

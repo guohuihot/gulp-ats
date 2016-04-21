@@ -62,12 +62,9 @@
 
         <h3>css</h3>
 <pre>
-@import 'img/<%= fName %>'; //导入css 标识/文件名
+@import 'img-<%= fName %>'; //导入css 标识-文件名
 @include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
-.demo {
-    // 单独引入某一个img css
-    @include img-demo-single($img-<%= fName %>-xxx); //标识-合成后文件名-single($标识-文件名-单个文件名)
-}
+
 </pre>
         <h3>html</h3>
 <pre>
@@ -87,12 +84,12 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('<%= path %>images/<%= fName %>.html', '');
+    var BASE_URL = window.location.href.replace('<%= path %>', '');
 </script>
-<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= path %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
 
 <script type="text/javascript">
-seajs.use(['$','clipboard'], function($) {
+seajs.use(['clipboard'], function() {
     $(function() {
         $('.index').click(function(event) {
             location.href = BASE_URL;
@@ -102,7 +99,7 @@ seajs.use(['$','clipboard'], function($) {
             e.preventDefault();
         })
         .clipboard({
-            path: BASE_URL + '<%= path %>js/static/jquery.clipboard.swf',
+            path: BASE_URL + '<%= rPath %>js/static/jquery.clipboard.swf',
             copy: function() {
                 $icons.removeAttr('style');
                 return $(this).css({color:'#f00'}).text();

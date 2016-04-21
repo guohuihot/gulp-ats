@@ -4,4 +4,364 @@
  * @link 08cms.com
  * @date 2015-12-31 09:03:41
  */
-define(function(require,exports,e){function t(e){return"index"==e?this.data("jqDuang").index:this.each(function(){var t=$(this),s=t.data("jqDuang"),n="object"==typeof e&&e;s||(t.data("jqDuang",s=new i(this,n)),s.init()),"string"==typeof e?s[e]():"number"==typeof e&&s.play(s.loopNext=e)})}var s,$=require("$"),i=function(e,t){this.o=$.extend({},i.defaults,t),this.$self=$(e);var s=this.o.obj.split("|");this.$obj=this.$self.find(s[0]),this.$objExt=$(s[1]),this.$obj.length||(this.$obj=this.$objExt,this.$objExt=[]),this.dire=$.inArray(this.o.effect,["left","leftLoop","leftMarqueue"])<0&&"top"||"left",this.objAttr="top"==this.dire&&"height"||"width",this.index=this.o.index,this.effect=this.o.effect.replace(this.dire,""),this.L=this.$obj.length,this.pages=!this.effect&&Math.ceil((this.L-this.o.visible)/this.o.steps)+1||Math.ceil(this.L/this.o.steps),this.WH={width:this.$obj.outerWidth(!0),height:this.$obj.outerHeight(!0)}};i.defaults={obj:"li",cell:"",trigger:"mouseover",effect:"fade",speed:500,index:0,autoplay:1,interval:3e3,prevbtn:"",nextbtn:"",delay:100,easing:"swing",visible:1,steps:1,overstop:1,showtit:0,pagewrap:"",btnLoop:1,wheel:0,actclass:"act"},i.prototype={init:function(){function e(e){var t=f.$self.find(d[e+"btn"]);return!(1*d.btnLoop)&&"prev"==e&&t.addClass("disabled"),t["Marqueue"==f.effect?d.trigger:"click"](function(){$(this).hasClass("disabled")||(f.s="next"==e?-1:1,"Marqueue"==f.effect?f.next():f[e]())}).attr({unselectable:"on",onselectstart:"return false;"}),!0}var t,s,i,n,a,o,l,r,f=this,d=f.o,c=f.$obj,p=c.parent(),h=p.parent();if(!(f.pages<=1||f.L<=d.visible)){switch(!d.speed&&(f.effect="fade"),f.effect){case"fade":c.css({display:"none"}).eq(d.index).show();break;case"fold":c.css({position:"absolute",display:"none",left:0,top:0}).eq(d.index).show(),t=f.WH,t["position"]="relative",h.css(t);break;case"weibo":p.css("position","relative"),t={position:"relative",overflow:"hidden"},t[f.objAttr]=f.WH[this.objAttr]*d.visible,h.css(t);break;case"Marqueue":default:c.css({"float":"top"==f.dire?"none":"left"}),s={position:"relative",overflow:"hidden"},s[f.dire]=-f.WH[f.objAttr]*d.index,s[f.objAttr]=9999,f.effect&&(f.$obj=p.append(c.slice(0,d.visible).clone()).prepend(c.slice(c.length-d.visible).clone()).children(),s[f.dire]=-(d.visible+d.index*d.steps)*f.WH[f.objAttr],"Marqueue"==f.effect&&(f.s=-1,f.scrollSize=f.WH[f.objAttr]*f.L)),p.css(s),t={overflow:"hidden",position:"relative"},i=c.eq(0),n=parseInt(i.css("margin-"+this.dire))-parseInt(i.css("margin-"+("left"==this.dire?"right":"bottom"))),t[f.objAttr]=f.WH[f.objAttr]*d.visible+n,h.css(t)}if(d.cell&&"Marqueue"!=f.effect){if(o=d.cell.split("|"),f.$cells=o.length>1?f.$self.find(o[1]):f.$self.find(o[0]).children(),f.$cells.length)f.$cells=f.$cells.slice(0,f.pages);else{for(l="",r=0;r<f.pages;r++)l+="<i>"+(r+1)+"</i>";f.$cells=$(l).appendTo(f.$self.find(o[0]))}f.$cells[d.trigger](function(){return clearTimeout(a),f.loopNext=f.$cells.index(this),a=setTimeout(function(){f.play(f.loopNext)},d.delay),"click"==d.trigger?!1:void 0}).eq(f.index).addClass(d.actclass)}1*d.autoplay&&(f.start(),1*d.overstop&&f.$obj.add(f.$cells).add(d.prevbtn&&"Marqueue"!=f.effect&&d.prevbtn+","+d.nextbtn||null).on("mouseover",$.proxy(f.stop,f)).on("mouseout",$.proxy(f.start,f))),1*d.showtit&&1==d.visible&&h.after('<a class="tit-duang" target="_blank" href="'+c.eq(d.index).data("url")+'">'+c.eq(d.index).data("title")+"</a>"),d.pagewrap&&f.$self.find(d.pagewrap).html(1*f.index+1+"/"+f.pages),d.prevbtn&&e("prev")&&e("next"),1*d.wheel&&$.fn.mousewheel&&h.mousewheel(function(e,t){clearTimeout(a),a=setTimeout(function(){f[t>0?"prev":"next"]()},100)}),f.$objExt.length>d.index&&f.$objExt.css("display","none").eq(d.index).show()}},start:function(){clearInterval(this.t1),this.t1=setInterval($.proxy(this.next,this),this.o.interval)},stop:function(){clearInterval(this.t1)},next:function(){this.play("Marqueue"!=this.effect&&(this.loopNext=this.index+1)%this.pages)},prev:function(){this.loopNext=this.index-1,this.play((this.loopNext+this.pages)%this.pages)},play:function(e){var t,s,i,n,a,o,l=this,r=l.o,f=l.$obj,d=f.parent(),c=l.loopNext;if(l.index!=e||"Marqueue"==l.effect){switch(l.$self.trigger("beforeFun"),l.effect){case"fade":f.eq(l.index).hide(),f.eq(e).animate({opacity:"show"},r.speed,r.easing);break;case"fold":f.stop(!0,!0).eq(l.index).animate({opacity:"hide"},r.speed,r.easing),f.eq(e).animate({opacity:"show"},r.speed,r.easing);break;case"Marqueue":d.css(l.dire,function(e,t){var s=parseInt(t)+l.s;return s<=-l.scrollSize?s=0:s>=0&&(s=-l.scrollSize),s});break;case"weibo":t={},t[l.dire]=9*l.WH[l.objAttr]/8,d.stop(!0,!0).animate(t,r.speed,r.easing,function(){var e=d.children()[f.length-1];e.style.display="none",d[0].insertBefore(e,d[0].children[0]),d[0].style.top=0,$(e).fadeIn()});break;default:if(s=0,"Loop"==this.effect){if(d.is(":animated"))return!1;n=l.L%r.steps,n&&c==l.pages?s=n-r.steps:n&&-1==c&&(s=r.steps-n),i=c*r.steps+r.visible+s,a=function(){d.css(l.dire,-l.WH[l.objAttr]*(e*r.steps+r.visible))}}else(c==l.pages-1||-1==c)&&(s=l.L-e*r.steps-r.visible);t={},t[l.dire]=-l.WH[l.objAttr]*("Loop"==this.effect?i:e*r.steps+s),d.stop(!0).animate(t,r.speed,r.easing,a)}1*r.showtit&&1==r.visible&&(o=f.eq(e+("Loop"==this.effect?1:0)).data(),l.$self.find(".tit-duang").html(o.title)[0].href=o.url),r.pagewrap&&l.$self.find(r.pagewrap).html(e+1+"/"+l.pages),r.cell&&l.$cells.removeClass(r.actclass).eq(e).addClass(r.actclass),l.$objExt.length>e&&l.$objExt.css("display","none").eq(e).show(),l.index=e,1*r.btnLoop||!r.prevbtn||(l.$self.find(r.prevbtn+","+r.nextbtn).removeClass("disabled"),0==e&&l.$self.find(r.prevbtn).addClass("disabled"),e==l.pages-1&&l.$self.find(r.nextbtn).addClass("disabled")),l.$self.trigger("afterFun",[e])}}},s=$.fn.jqDuang,$.fn.jqDuang=t,$.fn.jqDuang.Constructor=i,$.fn.jqDuang.noConflict=function(){return $.fn.jqDuang=s,this},$(window).on("load",function(){$(".jqDuang").each(function(){var e=$(this);t.call(e,e.data())})})});
+
+define(function(require,exports,moudles){
+    var $ = require('$');
+    var Duang = function (self, opt) {
+        this.o         = $.extend({}, Duang.defaults, opt)
+        this.$self     = $(self)
+        var aObj       = this.o.obj.split('|');
+        this.$obj      = this.$self.find(aObj[0])
+        this.$objExt   = $(aObj[1])
+        // 如果正常的切换对象不存在,将扩展对象作为正常的对象,扩展对象清空
+        if (!this.$obj.length) {
+            this.$obj = this.$objExt
+            this.$objExt = []
+        };
+        /*aObj.shift();
+        if (aObj.length) this.$objExt   = $.map(aObj, function (n) {
+            return $(n);
+        })*/
+// 方向
+        this.dire    = $.inArray(this.o.effect, ['left','leftLoop','leftMarqueue']) < 0 && 'top' || 'left'
+        this.objAttr = this.dire == 'top' && 'height' || 'width'
+        this.index   = this.o.index
+        this.effect  = this.o.effect.replace(this.dire, '')
+        this.L       = this.$obj.length
+        // 分页
+        this.pages   = !this.effect 
+        // 不循环滚动
+        && Math.ceil((this.L - this.o.visible) / this.o.steps) + 1 
+        // 循环滚动
+        || Math.ceil(this.L / this.o.steps); 
+        
+        this.WH      = {
+            width    : this.$obj.outerWidth(true)
+            , height : this.$obj.outerHeight(true)
+        }
+    }
+
+    Duang.defaults = {
+        obj           : 'li'
+        , cell        : ''
+        , trigger     : 'mouseover' //click mouseover
+        , effect      : 'fade' //效果 fold left leftLoop
+        , speed       : 500 //播放速度
+        , index       : 0 //默认索引
+        , autoplay    : 1 //自动播放
+        , interval    : 3000 //播放间隔时间
+        , prevbtn     : '' //上一个
+        , nextbtn     : '' //下一个
+        , delay       : 100 //延迟时间,优化click or mouseover时延迟切换
+        , easing      : 'swing'
+        // , wrapsize : 0 //外层大小
+        , visible     : 1 //可见数量
+        , steps       : 1 //每次切换的数量
+        , overstop    : 1 //鼠标悬停
+        , showtit     : 0
+        , pagewrap    : ''
+        , btnLoop     : 1
+        , wheel       : 0
+        , actclass    : 'act'
+    }
+
+    Duang.prototype = {
+        init : function () {
+            var _this = this
+            , o       = _this.o
+            , $obj    = _this.$obj
+            , $objP   = $obj.parent()
+            , $objPP  = $objP.parent();
+            
+            if (_this.pages <= 1 || _this.L <= o.visible) return;
+            // o.wrapsize && (_this.WH[_this.objAttr] = o.wrapsize);
+            !o.speed && (_this.effect = 'fade');
+
+
+            switch(_this.effect){
+                case 'fade' :
+                    $obj.css({
+                        display : 'none'
+                    }).eq(o.index).show();
+
+                    // $objPP.css(_this.WH);
+                    break;
+                case 'fold' :
+                    $obj.css({
+                        position  : 'absolute'
+                        , display : 'none'
+                        , left    : 0
+                        , top     : 0
+                    }).eq(o.index).show();
+
+                    var ppCss = _this.WH;
+                    ppCss['position'] = 'relative';
+                    $objPP.css(ppCss);
+                    break;
+                case 'weibo' :
+                    $objP.css('position', 'relative');
+                    var ppCss = {position:'relative',overflow: 'hidden'};
+                    // ppCss[_this.objAttr] = o.wrapsize || _this.WH[this.objAttr] * o.visible
+                    ppCss[_this.objAttr] = _this.WH[this.objAttr] * o.visible
+                    $objPP.css(ppCss);
+                    break;
+                case 'Marqueue' :
+                default :
+                    $obj.css({
+                        float : _this.dire == 'top' ? 'none' : 'left'
+                    });
+
+                    var pCss = {position : 'relative', overflow : 'hidden'};
+                    pCss[_this.dire] = -_this.WH[_this.objAttr] * o.index;
+                    pCss[_this.objAttr] = 9999;
+
+                    if (_this.effect) {
+                        _this.$obj = $objP
+                                    .append($obj.slice(0, o.visible).clone())
+                                    .prepend($obj.slice($obj.length - o.visible).clone())
+                                    .children();
+
+                        pCss[_this.dire] = -(o.visible + o.index * o.steps) * _this.WH[_this.objAttr];
+                        // marqueue
+                        if (_this.effect == 'Marqueue') {
+                            _this.s = -1;
+                            _this.scrollSize = _this.WH[_this.objAttr] * _this.L;
+                        }
+                    };
+                    $objP.css(pCss);
+
+                    var ppCss = {overflow: 'hidden', position: 'relative'};
+                    // ppCss[_this.objAttr] = o.wrapsize || _this.WH[_this.objAttr] * o.visible;
+                    // 处理最后的边距,让整个滚动图片两边对齐
+                    var $obj1 = $obj.eq(0);
+                    var marginMore = parseInt($obj1.css('margin-' + this.dire)) - parseInt($obj1.css('margin-' + (this.dire == 'left' ? 'right' : 'bottom')));
+                    // 设置外层的尺寸
+                    // ppCss[_this.objAttr] = o.wrapsize || _this.WH[_this.objAttr] * o.visible + marginMore;
+                    ppCss[_this.objAttr] = _this.WH[_this.objAttr] * o.visible + marginMore;
+                    
+                    $objPP.css(ppCss);
+            }
+
+            // 分页
+            var t;
+            if (o.cell && _this.effect != 'Marqueue') {
+                var aCell = o.cell.split('|');
+
+                _this.$cells = aCell.length > 1 ? _this.$self.find(aCell[1]) : _this.$self.find(aCell[0]).children();
+                if (_this.$cells.length) _this.$cells = _this.$cells.slice(0, _this.pages);
+                else {
+                    var __html = '';
+                    for (var i = 0; i < _this.pages; i++) __html += '<i>' + (i + 1) + '</i>';
+                    _this.$cells = $(__html).appendTo(_this.$self.find(aCell[0]));
+                }
+                _this.$cells[o.trigger](function() {
+                    clearTimeout(t);
+                    _this.loopNext = _this.$cells.index(this);
+                    t = setTimeout(function () {
+                        _this.play(_this.loopNext);
+                    }, o.delay)
+                    //点击时阻止跳转
+                    if(o.trigger == 'click') return false;
+                })
+                .eq(_this.index).addClass(o.actclass);
+            }; 
+
+            // 自动播放
+            if (o.autoplay * 1) {
+                _this.start();
+                (o.overstop * 1) && 
+                    _this.$obj
+                    // $objPP
+                    .add(_this.$cells)
+                    .add(o.prevbtn && _this.effect != 'Marqueue' && o.prevbtn + ',' + o.nextbtn || null)
+                    .on('mouseover', $.proxy(_this.stop, _this))
+                    .on('mouseout', $.proxy(_this.start, _this))
+                    /*
+                    .on('mouseover mouseout', function(e) {
+                        console.log(this);
+                        _this[e.type == 'mouseover' ? 'stop' : 'start']();
+                    })*/
+            };
+
+            // 显示标题
+            o.showtit * 1 && o.visible == 1 && $objPP.after('<a class="tit-duang" target="_blank" href="' + $obj.eq(o.index).data('url') + '">' + $obj.eq(o.index).data('title') + '</a>')
+ 
+            // 页码
+            o.pagewrap && _this.$self.find(o.pagewrap).html(_this.index * 1 + 1 + '/' + _this.pages);
+
+            // 上一个下一个
+            o.prevbtn && goBtn('prev') && goBtn('next')
+
+            function goBtn(p) {
+                var $pnBtn = _this.$self.find(o[p + 'btn']);
+                !(o.btnLoop * 1) && p == 'prev' && $pnBtn.addClass('disabled');
+                $pnBtn[_this.effect == 'Marqueue' ? o.trigger : 'click'](function() {
+                    if ($(this).hasClass('disabled')) return;
+                    _this.s = p == 'next' ? -1 : 1;
+                    if (_this.effect == 'Marqueue') _this.next();
+                    else _this[p]()
+                }).attr({
+                    unselectable : 'on'
+                    , onselectstart : 'return false;'
+                });
+                return true;
+            }
+            // 鼠标滚动切换
+            o.wheel * 1 && $.fn.mousewheel && $objPP.mousewheel(function(e, d) {
+                clearTimeout(t);
+                t = setTimeout(function () {
+                    _this[d > 0 ? 'prev' : 'next']()
+                }, 100)
+            });
+            // 处理扩展的切换对象
+            /*_this.$objExt && $.each(_this.$objExt, function (j, e) {
+                e.css('display','none').eq(o.index).show()
+            });*/
+            _this.$objExt.length > o.index && _this.$objExt.css('display','none').eq(o.index).show();
+
+        }
+        , start : function () {
+            clearInterval(this.t1);
+            this.t1 = setInterval($.proxy(this.next, this), this.o.interval);
+        }
+        , stop : function () {
+            clearInterval(this.t1);
+        }
+        , next : function () {
+            this.play(this.effect != 'Marqueue' && (this.loopNext = this.index + 1) % this.pages);
+        }
+        , prev : function () {
+            this.loopNext = this.index - 1;
+            this.play((this.loopNext + this.pages) % this.pages);
+        }
+        , play : function (next) {
+            var _this  = this
+            , o        = _this.o
+            , $obj     = _this.$obj
+            , $objP    = $obj.parent()
+            , loopNext = _this.loopNext;
+
+            if (_this.index == next && _this.effect != 'Marqueue') return;
+
+            _this.$self.trigger('beforeFun');
+            switch(_this.effect){
+                case 'fade' :
+                    $obj.eq(_this.index).hide()
+                    $obj.eq(next).animate({opacity: 'show'}, o.speed, o.easing);
+                    break;
+                case 'fold' :
+                    $obj.stop(true, true).eq(_this.index)
+                    .animate({opacity: 'hide'}, o.speed, o.easing);
+
+                    $obj.eq(next)
+                    .animate({opacity: 'show'}, o.speed, o.easing);
+                    break;
+                case 'Marqueue' :
+                    $objP.css(_this.dire, function (i, v) {
+                        var offset = parseInt(v) + _this.s;
+                        if (offset <= -_this.scrollSize) offset = 0;
+                        else if (offset >= 0) offset = - _this.scrollSize;
+                        return offset;
+                    });
+                    break;
+                case 'weibo' :
+                        var  pCss = {};
+                        pCss[_this.dire] = _this.WH[_this.objAttr] * 9 / 8;
+
+                        $objP.stop(true, true)
+                        .animate(pCss, o.speed, o.easing, function() {
+                            var oLi = $objP.children()[$obj.length - 1];
+                            oLi.style.display = 'none';
+                            $objP[0].insertBefore(oLi, $objP[0].children[0]);
+                            $objP[0].style.top = 0;
+                            $(oLi).fadeIn()
+                        });
+                    break;
+                default :
+                    var mm = 0;
+                    if (this.effect == 'Loop') {
+                        if ($objP.is(':animated')) return false;;
+                        var offset, _mod = _this.L % o.steps; 
+                        // 第一页
+                        if (_mod && loopNext == _this.pages) {
+                            mm = _mod - o.steps;
+                        }
+                        // 最后一页
+                        else if (_mod && loopNext == -1) {
+                            mm = o.steps - _mod;
+                        }
+                        offset = loopNext * o.steps + o.visible + mm;
+                        var comFun = function () {
+                            $objP.css(_this.dire, -_this.WH[_this.objAttr] * (next * o.steps + o.visible));
+                        }
+                    }
+                    else if (loopNext == _this.pages - 1 || loopNext == - 1) {
+                        mm = _this.L - next * o.steps - o.visible
+                    };
+
+                    // offset = offset || next * o.steps + mm;
+                    // offset = this.effect == 'Loop' && offset || next * o.steps + mm;
+
+                    var pCss = {};
+                    // pCss[_this.dire] = -_this.WH[_this.objAttr] * offset;
+                    pCss[_this.dire] = -_this.WH[_this.objAttr] * (this.effect == 'Loop' ? offset : next * o.steps + mm);
+
+                    $objP.stop(true)
+                    .animate(pCss, o.speed, o.easing, comFun);
+            } // switch end
+            // 标题
+            if(o.showtit * 1 && o.visible == 1) {
+                var nextEleData = $obj.eq(next + (this.effect == 'Loop' ? 1 : 0)).data();
+                _this.$self.find('.tit-duang').html(nextEleData.title)[0].href = nextEleData.url;
+            }
+            // 分页
+            o.pagewrap && _this.$self.find(o.pagewrap).html(next + 1 + '/' + _this.pages);
+            // 控制按钮
+            o.cell && _this.$cells.removeClass(o.actclass).eq(next).addClass(o.actclass)
+            // 扩展对象, next过大时没有扩展对象,不执行
+            _this.$objExt.length > next && _this.$objExt.css('display','none').eq(next).show();
+            // 
+            _this.index = next;
+            // 按钮循环
+            if (!(o.btnLoop * 1) && o.prevbtn) {
+                _this.$self.find(o.prevbtn + ',' + o.nextbtn).removeClass('disabled');
+                next == 0 && _this.$self.find(o.prevbtn).addClass('disabled');
+                next == _this.pages - 1 && _this.$self.find(o.nextbtn).addClass('disabled');
+            }
+            _this.$self.trigger('afterFun',[next]);
+        }
+
+    }
+
+    function Plugin(option) {
+        return option == 'index' ? this.data('jqDuang').index : this.each(function () {
+            var $this   = $(this)
+            var data    = $this.data('jqDuang')
+            var options = typeof option == 'object' && option
+
+            if (!data) {
+                $this.data('jqDuang', (data = new Duang(this, options)));
+                data.init();
+            }
+
+            if (typeof option == 'string') data[option]()
+            else if(typeof option == 'number') data.play(data.loopNext = option)
+        })
+    }
+    var old = $.fn.jqDuang;
+
+    $.fn.jqDuang             = Plugin
+    $.fn.jqDuang.Constructor = Duang;
+
+    $.fn.jqDuang.noConflict = function () {
+        $.fn.jqDuang = old
+        return this
+    }
+
+    $(window).on('load', function () {
+        $('.jqDuang').each(function() {
+            var $this = $(this);
+            Plugin.call($this, $this.data())
+        });
+    })
+})

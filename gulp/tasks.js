@@ -7,12 +7,7 @@ module.exports = {
     
     init: {
         
-        title: '查看(设置)当前配置'
-    },
-    
-    build: {
-        
-        title: '初始化或同步一个项目',
+        title: '查看(设置)当前配置',
         
         argv: {
             
@@ -31,19 +26,46 @@ module.exports = {
                 '类型：string, 默认值：保留上次的值'
             ].join('\n\t\t\t'),
             
-            '--al(--all)': [
-                '同步并生成项目里所有数据',
-                '类型：bool, 默认值：false'
-            ].join('\n\t\t\t'),
-            
             '-m(--mode)': [
                 '模式',
                 '类型：int, 默认值：保留上次的值',
-                '1.src/ 直接src为核心(常用)',
-                '2.src/libs libs为核心(新核心)',
-                '3.在2的基础上加入后台和会员中心核心(新核心)',
-                '4.核心开发模式'
+                '1 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts',
+                '2 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层',
+                '3 - 在2的基础上加入后台和会员中心核心(新核心)',
+                '4 - ats自身核心开发模式',
+                'c - 自定义，有时源代码目录不是"src"目录，',
+                '可以手动指定，生成目标目录"dist"也一样',
             ].join('\n\t\t\t'),
+
+            '--src\t': [
+                '源代码目录，当 mode 为"c"时有效',
+                '类型：string,  默认值：保留上次的值',
+                'PS：与p的相对路径',
+            ].join('\n\t\t\t'),
+
+            '--dist\t': [
+                '源代码目录，当 mode 为"c"时有效',
+                '类型：string,  默认值：保留上次的值',
+                'PS：与p的相对路径',
+            ].join('\n\t\t\t'),
+
+            '--distEx': [
+                '扩展生成目录，有时我们生成的目录不仅仅只dist目标，',
+                '可能还要将生成的文件复制到另一个目录，',
+                '这样就可以给ats再多指定一个生成目录',
+                '类型：string,  默认值：保留上次的值',
+                'PS：需要绝对路径',
+            ].join('\n\t\t\t')
+        }
+    },
+    
+    build: {
+        
+        title: '初始化或同步一个项目',
+        
+        argv: {
+            
+            '-p -d -a -m --src --dist --distEx': '同init',
         }
     },
     
@@ -53,7 +75,7 @@ module.exports = {
         
         argv: {
             
-            '-p -d -a -m': '同build',
+            '-p -d -a -m --src --dist --distEx': '同init',
             
             '-s(--server)': [
                 '创建一个web服务器(写静态页面时需要)',

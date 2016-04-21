@@ -130,7 +130,7 @@
     </h2>
     <h3>css</h3>
 <pre>
- @import 'font/modal'; //导入css 标识/文件名
+ @import 'font-modal'; //导入css 标识-文件名
 </pre> 
     <h3>html</h3>
 <pre>
@@ -234,11 +234,11 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('test/libs/fonts/modal.html', '');
+    var BASE_URL = window.location.href.replace('libs/fonts/modal.html', '');
 </script>
 <script type="text/javascript">document.write('<script src="' + BASE_URL + 'test/libs/js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
-seajs.use(['$','clipboard'], function($) {
+seajs.use(['clipboard'], function() {
     $(function() {
         $('.index').click(function(event) {
             location.href = BASE_URL;

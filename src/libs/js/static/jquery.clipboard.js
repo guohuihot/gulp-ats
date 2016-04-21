@@ -16,7 +16,6 @@
 
 /* Component: jQuery Clipboard */
 define(function(require,exports,moudles){
-    var $ = require('$');
   var $clip = null;
   var $is_loaded = false;
 

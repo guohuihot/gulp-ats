@@ -81,17 +81,16 @@
         // load-success
         var timer;
         $('#load-success-tip').click(function(event) {
-            modal.loading('正在操作...');
+            modal.tip('正在操作...', 'load');
             timer = setTimeout(function() {
-                modal.loading();
-/*                $('.jqload')
+                $('.jqtip')
                     .html('<i class="font-modal-success"></i>操作成功!')
                     .jqModal('hide', 1000)
                     .on('hidenFun', function() {
                         // 模拟ajax,如果是真正的ajax,请结束ajax请求
                         clearTimeout(timer);
                     });
-*/            }, 3000);
+            }, 3000);
         });
         $('#load-success-alert').click(function(event) {
             modal.alert('正在操作...', 'load');

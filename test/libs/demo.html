@@ -4,68 +4,119 @@
     <meta charset="utf-8">
     <title>Hello, ats!</title>   
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="stylesheet" href="..\../test/libs/css/ats.css" />
-    <link rel="stylesheet" href="..\../test/libs/css/demo.css" />
+    <link rel="stylesheet" href="../libs/css/ats.css" />
+    <link rel="stylesheet" href="../libs/css/demo.css" />
 </head>
 <body>
 <div class="container">
 
-<h2><a href="..\../"><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a></h2>
+<h2><a class="index" href=""><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a></h2>
 <h3>Hello, ats! 编辑文件测试下</h3>
 <pre style="border:none;width:90%;outline:none;">
-gulp            查看任务列表
-
-gulp init       查看(设置)当前配置
-
-gulp build      初始化或同步一个项目
-        -p(--path)      项目地址
-                        类型：string, 默认值：保留上次的值
-
-        -d(--dev)       启用开发模式
-                        类型：bool, 默认值：true
-
-        -a(--author)    作者
-                        类型：string, 默认值：保留上次的值
-
-        --al(--all)     同步并生成项目里所有数据
-                        类型：bool, 默认值：false
-
-        -m(--mode)      模式
-                        类型：int, 默认值：保留上次的值
-                        1.src/ 直接src为核心(常用)
-                        2.src/libs libs为核心(新核心)
-                        3.在2的基础上加入后台和会员中心核心(新核心)
 
 
-gulp wacth      监控一个项目目录
-        -p -d -a -m     同build
+例：
+gulp build -p 'C:\Users\Administrator\Desktop\test' -a 'ahuing' -m 1
+显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)
 
-        -s(--server)    创建一个web服务器(写静态页面时需要)
-                        类型：bool, 默认值：false
+gulp 		查看任务列表
+	
+gulp init	查看(设置)当前配置
+	-p(--path)	项目地址
+			类型：string, 默认值：保留上次的值
 
-        -o(--open)      直接在浏览器打开，-s为真时有效
-                        类型：bool, 默认值：false
+	-d(--dev)	启用开发模式
+			类型：bool, 默认值：true
 
-        -f(--ftp)       处理的文件后直接上传到远程ftp
-                        类型：bool, 默认值：false
+	-a(--author)	作者
+			类型：string, 默认值：保留上次的值
 
+	-m(--mode)	模式
+			类型：int, 默认值：保留上次的值
+			1 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts
+			2 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层
+			3 - 在2的基础上加入后台和会员中心核心(新核心)
+			4 - ats自身核心开发模式
+			c - 自定义，有时源代码目录不是"src"目录，
+			可以手动指定，生成目标目录"dist"也一样
 
-gulp add        新加一个分类到项目里
-        -n(--name)      分类名称
-                        类型：string, 默认值：null
+	--src		源代码目录，当 mode 为"c"时有效
+			类型：string,  默认值：保留上次的值
+			PS：与p的相对路径
 
+	--dist		源代码目录，当 mode 为"c"时有效
+			类型：string,  默认值：保留上次的值
+			PS：与p的相对路径
 
+	--distEx	扩展生成目录，有时我们生成的目录不仅仅只dist目标，
+			可能还要将生成的文件复制到另一个目录，
+			这样就可以给ats再多指定一个生成目录
+			类型：string,  默认值：保留上次的值
+			PS：需要绝对路径
 
-gulp clean      清理文件
-        -p      同build 清理后项目目录下src目录,谨慎使用！
+	
+gulp build	初始化或同步一个项目
+	-p -d -a -m --src --dist --distEx	同init
+
+	--al(--all)	同步并生成项目里所有数据
+			类型：bool, 默认值：false
+
+	
+gulp watch	监控一个项目目录
+	-p -d -a -m --src --dist --distEx	同init
+
+	-s(--server)	创建一个web服务器(写静态页面时需要)
+			类型：bool, 默认值：false
+
+	-o(--open)	直接在浏览器打开，-s为真时有效
+			类型：bool, 默认值：false
+
+	-f(--ftp)	处理的文件后直接上传到远程ftp
+			类型：bool, 默认值：false
+
+	
+gulp add	新加一个分类到项目里
+	-n(--name)	分类名称
+			类型：string, 默认值：null
+			
+
+	
+gulp clean	清理文件	
+	-p	同build	清理后项目目录下src目录,谨慎使用！
+
+	
+gulp pack:patch	压缩文件并删除原文件
+	-p	项目地址
+
+	-n	打包名称
+
+	
+gulp markdown	markdown文件转html
+	-p	markdown文件目录
+
+	
+gulp webdown	下载网页(扒皮)	
+	-h	网页地址
+
+	-n	页面名称
+
+	-l	内容图片的标志
+
+	-d	下载目录
+
+	
+
 </pre>
 </div>
 <script type="text/javascript">
     var BASE_URL = window.location.href.replace('test/libs/demo.html', '');
 </script>
-<script type="text/javascript" src="..\../test/libs/js/seajs.js"></script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + 'test/libs/js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
     seajs.use(['modal'], function(modal) {
+        $('.index').click(function(event) {
+            location.href = BASE_URL;
+        });
         modal.tip('Hello!', 'laugh');
     });
 </script>

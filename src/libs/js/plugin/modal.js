@@ -5,7 +5,6 @@
  */
 
 define(function(require, exports, moudles) {
-    var $ = require('$');
     // transition.js
     function transitionEnd() {
         var el = document.createElement('div');
@@ -280,7 +279,7 @@ define(function(require, exports, moudles) {
             o.fixed && $(window).on('resize', $.proxy(_this.setPos, _this));
 
         },
-        show: function(delay) {
+        show: function() {
             var _this = this;
 
             if (_this.isShown) return
@@ -291,9 +290,9 @@ define(function(require, exports, moudles) {
             _this.$self.trigger('shownFun');
             _this.isShown = true
 
-            if(delay || this.o.timeout) {
+            if(this.o.timeout) {
                 clearTimeout(this.t);
-                this.t = setTimeout($.proxy(this.hide, this), delay || this.o.timeout);
+                this.t = setTimeout($.proxy(this.hide, this), this.o.timeout);
             }
         },
         hideModal: function() {
@@ -308,7 +307,7 @@ define(function(require, exports, moudles) {
                 $.support.transition && 
                     this.$box
                         .one('bsTransitionEnd', $.proxy(this.hideModal, this))
-                        .emulateTransitionEnd(500) ||
+                        .emulateTransitionEnd(delay || 500) ||
                     this.hideModal()
             }, this), delay || 0)
 
@@ -357,7 +356,7 @@ define(function(require, exports, moudles) {
         }
     }
 
-    function Plugin(option, delay) {
+    function Plugin(option, t) {
         return this.each(function () {
             var $this   = $(this)
             var data    = $this.data('jqModal')
@@ -365,10 +364,10 @@ define(function(require, exports, moudles) {
             if (!data) { 
                 $this.data('jqModal', (data = new Modal(this, options)))
                 data.init()
-                data.show(delay)
+                data.show()
             }
             else {
-                if (typeof option == 'string') data[option](delay)
+                if (typeof option == 'string') data[option](t)
                 else data['toggle']()
             }
         })
@@ -408,30 +407,30 @@ define(function(require, exports, moudles) {
 
     var modalExt = {
         tip: function() {
-            var $target = $('.jqtip'),
-                isLoad = !arguments[1].search(/load/),
-                option = $target[0] && 'show' || {
-                    mclass: 'tip',
-                    animate: 'shake',
-                    css: {
-                        top: 150
-                    },
-                    drag: 0,
-                    lock: 1
-                },
-                delay = (arguments[2] || 1500);
-
-            if (!$target[0]) {
-                $target = $('<div class="jqtip"></div>') //.appendTo('body');
-            }
-            $target.html('<i class="font-modal-' + arguments[1] + '"></i>' + arguments[0])
-            if (isLoad) {
-                console.log($target);
-                $target.on('showFun', function(aa, opt) {
-                    opt.animate = '';
+            var $target = $('.jqtip');
+            if (arguments[0].search(/hide/) == 0) {
+                $target.jqModal('hide', arguments[1]);
+            } else {
+                var isLoad = !arguments[1].search(/load/),
+                    option = $target[0] && 'toggle' || {
+                        mclass: 'tip',
+                        css: {
+                            top: 150
+                        },
+                        drag: 0,
+                        lock: 1
+                    };
+                if (!$target[0]) {
+                    $target = $('<div class="jqtip"></div>'); //.appendTo('body');
+                }
+                $target.html('<div class="bd"><i class="font-modal-' + arguments[1] + '"></i>' + arguments[0] + '</div>')
+                    // console.log($target);
+                .on('showFun', function(el, opt) {
+                    opt.animate = isLoad ? '' : 'shake';
+                    opt.timeout = isLoad ? 0 : (arguments[2] || 1500);
                 });
+                Plugin.call($target, option);
             }
-            Plugin.call($target, option, delay);
         },
         alert: function() {
             var $target = $('.jqalert'),
@@ -445,23 +444,28 @@ define(function(require, exports, moudles) {
 
             if (!$target[0]) $target = $('<div class="jqalert"></div>');
 
-            Plugin.call($target.html('<i class="font-modal-' + (arguments[1] || 'info') + '"></i>' + arguments[0]), option)
+            Plugin.call($target.html('<div class="bd"><i class="font-modal-' + (arguments[1] || 'info') + '"></i>' + arguments[0] + '</div>'), option)
         },
         confirm: function() {
-            var $target = $('.jqconfirm'),
+            var $target = $('.jqconfirm'), 
+                args = arguments,
                 option = $target[0] && 'show' || {
-                    head: arguments[1] || '提示信息',
+                    head: args[1] || '提示信息',
+                    drag: 0, //拖拽 1 2
+                    lock: 1, //锁定遮罩层
                     css: {
                         width: 300
-                    },
-                    foot: '<button data-close="1" class="ok" data-btn="ok">确定</button><button data-close="1" data-btn="no">取消</button>'
+                    }
                 };
 
             if (!$target[0]) {
-                $target = $('<div class="jqconfirm"></div>');
+                $target = $('<div class="jqconfirm"></div>')
+                            .on('click', '[data-btn="ok"]', function() {
+                                args[2].call();
+                            });
             }
 
-            Plugin.call($target.html('<i class="font-modal-' + (arguments[2] || 'ask') + '"></i>' + arguments[0]), option);
+            Plugin.call($target.html('<div class="bd"><i class="font-modal-ask"></i>' + args[0] + '</div><div class="bf"><button class="ok" data-btn="ok">确定</button><button data-close="1" data-btn="no">取消</button></div>'), option);
         },
         lay: function(txt) {
             var html = txt;

@@ -4,4 +4,129 @@
 * name   : jqfixed v1.01
 * modify : 2015-8-24 17:09:53
  */
-define(function(require,exports,s){return function(s){!function($){function s(s){return this.each(function(){var i=$(this),o=i.data("jqFixed"),t="object"==typeof s&&s;o||(i.data("jqFixed",o=new e(this,t)),o.init())})}var i,e=function(s,i){this.o=$.extend(!0,{},e.defaults,i),this.$self=$(s)};e.defaults={css:{},fixed:0,margintop:0,fade:0,close:".btn-close"},e.prototype={init:function(){var s,i,e,o,t,n,f,c,d;this.$self.length&&(s=this,i=$(window),e=!-[1]&&!window.XMLHttpRequest,o=s.o,t=s.$self.outerHeight(!0),n=0,f={position:e?"absolute":"fixed",marginTop:0,display:"block",zIndex:parseInt((new Date).getTime()/1e3)},o.css.zIndex=o.css.zIndex||s.$self.css("z-index"),o.css.position=o.css.position||s.$self.css("position"),s.$self.css(o.css),c=o.css.marginTop=s.$self.offset().top,"fixed"==o.css.position?(o.css.marginTop=f.marginTop=o.css.bottom>=0?i.height()-t-o.css.bottom:c-i.scrollTop(),o.css.bottom="auto",e&&(o.css.position="absolute")):("absolute"!=o.css.position&&(s.$self.before('<div style="height:'+t+'px"></div>'),o.css.marginTop=-t),o.fixed?f.marginTop=o.fixed>c?o.margintop:c-o.fixed:o.fixed=c),o.css.top=0,o.css.width=o.css.width||s.$self.width(),s.$self.css(o.css),s.$self.find(o.close).click(function(){s.$self.css("display","none"),i.off("scroll.fixed")}),o.fade&&s.$self.on("unfixed",function(){s.$self.one("fixed",function(){s.$self.css("display","none").animate({opacity:"show"})})}),d=function(){var c=i.scrollTop();f.top=e?c:0,s.$self.css(c>=o.fixed&&f||o.css),c>=o.fixed&&s.$self.trigger("fixed",[c,t]).trigger(c>n?"scrollUp":"scrollDown")||s.$self.trigger("unfixed"),setTimeout(function(){n=c},0)},d(),i.on("scroll.fixed",d))}},i=$.fn.jqFixed,$.fn.jqFixed=s,$.fn.jqFixed.Constructor=e,$.fn.jqFixed.noConflict=function(){return $.fn.jqFixed=i,this},$(window).on("load",function(){$(".jqFixed").each(function(){var i=$(this);s.call(i,i.data())})})}(jQuery)}});
+define(function(require,exports,moudles){
+     return function(jquery){
+        (function ($) {
+            var Fixed = function (self, opt) {
+                this.o     = $.extend(true, {}, Fixed.defaults, opt)
+                this.$self = $(self)
+            }
+
+            Fixed.defaults = {
+                css : {}
+                , fixed : 0 //页面滚动到些位置，才fixed，默认为对象本身的top,如果css.position = 'fixed'，这个是没有用的
+                , margintop : 0//对应偏离顶部的大小，fixed大于对象的top时才有有效，否则如果要设置偏离，请调整fixed的大小
+                , fade : 0//对象显示时是否有fade效果
+                , close : '.btn-close'//对象内部的关闭按钮的class
+            }
+
+            Fixed.prototype = {
+                init : function () {
+                    if (!this.$self.length) return;
+
+                    var _this = this
+                    , $win    = $(window)
+                    , isIE6   = !-[1, ] && !window.XMLHttpRequest
+                    // , wH      = $win.height()
+                    // , bH      = $('body').height()
+                    , o       = _this.o
+                    , oH      = _this.$self.outerHeight(true)
+                    , t       = 0
+                    , fixedcss = {
+                        position : isIE6 ? 'absolute' : 'fixed'
+                        , marginTop : 0
+                        , display : 'block'
+                        , zIndex : parseInt(new Date().getTime() / 1e3)
+                    };
+                    o.css.zIndex = o.css.zIndex || _this.$self.css('z-index');
+                    o.css.position = o.css.position || _this.$self.css('position');
+                    // 先定位 再取top
+                    _this.$self.css(o.css);
+
+                    var oft = o.css.marginTop = _this.$self.offset().top;
+
+                    if (o.css.position == 'fixed') {
+                        o.css.marginTop = fixedcss.marginTop = o.css.bottom >= 0 ? $win.height() - oH - o.css.bottom : oft - $win.scrollTop();
+                        o.css.bottom = 'auto';
+                        isIE6 && (o.css.position = 'absolute');
+                    }
+                    else {
+                        if (o.css.position != 'absolute') {
+                            // $('<div style="height:' + oH + 'px"></div>').insertBefore(_this.$self);
+                            _this.$self.before('<div style="height:' + oH + 'px"></div>');
+                            o.css.marginTop = -oH;
+                        };
+
+                        if (o.fixed) {
+                            fixedcss.marginTop = o.fixed > oft ? o.margintop : oft - o.fixed;
+                        }
+                        else o.fixed = oft;
+                    }
+
+                    o.css.top = 0;
+                    // 设置对象的宽
+                    o.css.width = o.css.width || _this.$self.width();
+                    // 设置初始状态
+                    _this.$self.css(o.css);
+                    // 点击关闭
+                    _this.$self.find(o.close).click(function () {
+                        _this.$self.css('display', 'none');
+                        $win.off('scroll.fixed');
+                    });
+
+                    o.fade && _this.$self.on('unfixed', function () {
+                        _this.$self.one('fixed', function () {
+                            _this.$self.css('display', 'none').animate({opacity:'show'});
+                        })
+                    })
+
+                    var setFixed = function() {
+                        var st = $win.scrollTop();
+                        fixedcss.top = isIE6 ? st : 0;
+                        _this.$self.css(st >= o.fixed && fixedcss || o.css);
+
+                        st >= o.fixed && 
+                        _this.$self.trigger('fixed', [st, oH]).trigger(st > t ? 'scrollUp' : 'scrollDown') ||
+                        _this.$self.trigger('unfixed');
+
+                        setTimeout(function () {t = st}, 0)
+                    }
+                    // 页面加载后先执行一次
+                    setFixed();
+                    $win.on('scroll.fixed', setFixed)
+                }
+            }
+
+            function Plugin(option) {
+                return this.each(function () {
+                    var $this   = $(this)
+                    var data    = $this.data('jqFixed')
+                    var options = typeof option == 'object' && option
+
+                    if (!data) {
+                        $this.data('jqFixed', (data = new Fixed(this, options)));
+                        data.init();
+                    }
+
+                })
+            }
+
+            var old = $.fn.jqFixed;
+
+            $.fn.jqFixed             = Plugin
+            $.fn.jqFixed.Constructor = Fixed;
+
+            $.fn.jqFixed.noConflict = function () {
+                $.fn.jqFixed = old
+                return this
+            }
+
+            $(window).on('load', function () {
+                $('.jqFixed').each(function() {
+                    var $this = $(this);
+                    Plugin.call($this, $this.data())
+                });
+            })
+        })(jQuery);
+    }
+})
