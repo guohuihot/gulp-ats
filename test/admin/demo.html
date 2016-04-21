@@ -65,7 +65,7 @@ gulp clean      清理文件
 </script>
 <script type="text/javascript">document.write('<script src="' + BASE_URL + 'test/libs/js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
-    seajs.use(['$', 'modal'], function($, modal) {
+    seajs.use([ 'modal'], function(modal) {
         $('.index').click(function(event) {
             location.href = BASE_URL;
         });

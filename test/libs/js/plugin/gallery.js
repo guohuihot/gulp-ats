@@ -4,4 +4,242 @@
 * @date:2014-01-15
 * @modify:2014-01-15
 */
-!function($){$.extend(jQuery.easing,{easeOutQuint:function(t,e,n,a,i){return a*((e=e/i-1)*e*e*e*e+1)+n}}),$.extend({gallery:function(t){function e(){return p=h+1,t.circular?p%=f:w.css("display",p==f?"block":"none"),f>p&&a(),!1}function n(){return w.css("display","none"),p=t.circular?(h+f-1)%f:h-1,p>=0&&a(),!1}function a(){var e,n,a=c.css("display","none").find("img").css("display","none").filter(".i"+p),r=l.removeClass(t.curClass).eq(p).addClass(t.curClass);a.length?i(a.css("display","block").data("data-size")):(d.css("display","block"),e=$("<img>",{"class":"i"+p,style:"width:100%;height:100%;"}),n=new Image,n.onerror=function(){i([0,0],e)},n.onload=function(){i(s(n,t.maxW,t.maxH),e)},n.src=r.attr("data-url"),c.prepend(e.attr("src",n.src))),v.attr("href",r.attr("data-url")),g.html(r.attr("data-title")),f>t.visible&&o(),location.hash="#g="+(p+1),t.numerator&&$(t.numerator).text(p+1),h=p,t.endFun&&t.endFun.call(r,p)}function i(e,n){n&&(d.css("display","none"),n.data("data-size",e));var a={left:(t.maxW-e[0])/2,top:(t.maxH-e[1])/2,height:e[1]-b,width:e[0]-b};"css"==t.effect?c.stop(0,1).css(a).animate({opacity:"show"}):c.stop(0,1).animate($.extend(a,{opacity:"show"}))}function s(t,e,n){var a,i,i=_w=t.width,a=_H=t.height;return _w>0&&_H>0&&(_w/_H>=e/n&&_w>e?(i=e,a=parseInt(_H*e/_w)):_H>n&&(a=n,i=parseInt(_w*n/_H))),[i,a]}function o(){var e;m>=p?e=0:p>m&&f-(m+1)>p&&(e=-(p-m)),p>=f-(m+1)&&(e=-(f-t.visible)),r.stop(0,1).animate({left:y*e},400,"easeOutQuint")}var r,l,c,d,u,p,h,f,m,g,v,w,y,b,x,k;t=$.extend({big:"",small:"",botPrev:"",botNext:"",visible:6,curClass:"hover",endLayer:"#endLayer",maxW:500,maxH:400,circular:0,showIndex:0,showBigBot:0,now:1,keyboard:0,oImg:"",title:"",numerator:"",denominator:"",effect:"css",endFun:null},t||{}),$(t.small).length&&(r=$(t.small),l=r.children(),c=$(t.big),d=$('<div class="loading"></div>').insertAfter(c),u=parseInt(location.hash.replace("#g=","")),p=isNaN(u)?t.now-1:u-1,h=0,f=l.length,m=parseInt(t.visible/2)-(t.visible%2==0&&1),g=$(t.title),v=$(t.oImg),w=$(t.endLayer),y=l.outerWidth(!0),b=c.outerWidth()-c.width(),x=c.parent(),l.on("click",function(){return $(this).hasClass(t.curClass)?void 0:(w.css("display","none"),p=l.index(this),a(),!1)}),w.css("display","none").click(function(t){t.stopPropagation()}),t.showIndex&&l.each(function(t){this.innerHTML+="<tt>"+(t+1)+"/"+f+"</tt>"}),t.denominator&&$(t.denominator).text(f),x.css({width:t.maxW,height:t.maxH,position:"relative",margin:"0 auto",cursor:"pointer"}).attr({unselectable:"on",onselectstart:"return false;"}),c.css({position:"absolute",left:"50%",top:"50%",width:0,height:0,overflow:"hidden"}),r.css({left:0,width:99999,position:"relative"}).parent().css({width:y*t.visible,overflow:"hidden",margin:"0 auto",position:"relative"}),a(),t.showBigBot&&($pnBtns=$('<a class="big-prev">&#xe68c;</a><a class="big-next">&#xe68f;</a>').appendTo(x),k=x.offset().left+t.maxW/2,x.mouseenter(function(t){$pnBtns.eq(t.pageX>k).animate({opacity:"show"})}).mousemove(function(t){$pnBtns[1*(t.pageX>k)].style.display="block",$pnBtns[1*(t.pageX<k)].style.display="none"}).mouseleave(function(){$pnBtns.css("display","none")}).click(function(t){t.pageX>k?e():n()})),t.botPrev&&$(t.botPrev).on("click",function(){return n(),!1}),t.botNext&&$(t.botNext).on("click",function(){return e(),!1}),t.keyboard&&$(document).on("keydown",function(t){var a=t.which;return 33==a||37==a?(n(),!1):34==a||39==a?(e(),!1):void 0}))}})}(jQuery);
+;(function($) {
+	$.extend(jQuery.easing,{
+		easeOutQuint: function (x, t, b, c, d) {
+			return c*((t=t/d-1)*t*t*t*t + 1) + b;
+		}
+	});
+
+	$.extend({
+		gallery: function(o) {
+			o = $.extend({
+				big          : ''//大图的外框
+				,small       : ''//子节点的格式value='' data-url='' data-title=''
+				,botPrev     : ''//下一个
+				,botNext     : ''//上一个
+				,visible     : 6//小图显示的个数
+				,curClass    : 'hover'//当然图片的class
+				,endLayer    : '#endLayer'//最后一个弹出的广告层
+				,maxW        : 500//大图的最大宽度
+				,maxH        : 400//大图的最大高度
+				,circular    : 0//循环
+				,showIndex   : 0//显示数字索引
+				,showBigBot  : 0//大图上面的上一个下一个
+				,now         : 1//激活第now个元素,从1开始
+				,keyboard    : 0//允许键盘操作
+				,oImg        : ''//原图链接的对象
+				,title       : ''//图片的标题的对象
+				,numerator   : ''//当前索引的节点
+				,denominator : ''//总数的节点
+				,effect      : 'css'//css,animate
+				,endFun      : null
+			},
+			o || {});
+			if(!$(o.small).length) return;
+			var  $thumbs = $(o.small)
+			,$li         = $thumbs.children()
+			,$big        = $(o.big)
+			,$loading    = $('<div class="loading"></div>').insertAfter($big)
+			,begin       = parseInt(location.hash.replace("#g=",""))
+			,index       = !isNaN(begin)?begin-1:o.now-1
+			,nowIndex    = 0
+			,size        = $li.length
+			,now         = parseInt(o.visible/2)-(o.visible%2==0&&1)
+			,$title      = $(o.title)
+			,$oImg       = $(o.oImg)
+			,$endLayer   = $(o.endLayer)
+			,g           = $li.outerWidth(true)
+			,pb          = $big.outerWidth()-$big.width()
+			, $wrap      = $big.parent();
+		//初始化
+		$li.on('click',function () {
+			if ($(this).hasClass(o.curClass)) return;
+			$endLayer.css('display','none');
+			index = $li.index(this);
+			fadeAB();
+			return false;
+		})
+
+		$endLayer.css('display','none').click(function(e) {
+			e.stopPropagation();
+		})
+
+		o.showIndex&&$li.each(function (i) {
+			this.innerHTML+='<tt>'+(i+1)+'/'+size+'</tt>';
+		})
+
+		o.denominator&&$(o.denominator).text(size);
+
+		$wrap.css({
+			width:o.maxW
+			,height:o.maxH
+			,position:'relative'
+			,margin:'0 auto'
+			,cursor:'pointer'
+		}).attr({
+			unselectable : "on"
+			,onselectstart : "return false;"
+		});
+
+		$big.css({
+			position:'absolute'
+			,left:'50%'
+			,top:'50%'
+			,width:0
+			,height:0
+			,overflow:'hidden'
+		})
+
+		$thumbs.css({
+			left:0
+			,width:99999
+			,position:'relative'
+		}).parent().css({
+			width:g*o.visible
+			,overflow:'hidden'
+			,margin:'0 auto'
+			,position:'relative'
+		})
+
+		fadeAB();
+		// setInterval(runNext, 3000)
+		if (o.showBigBot) {
+			$pnBtns = $('<a class="big-prev">&#xe68c;</a><a class="big-next">&#xe68f;</a>').appendTo($wrap);
+
+			var $wrapL = $wrap.offset().left + o.maxW / 2;
+			$wrap.mouseenter(function(e) {
+				$pnBtns.eq(e.pageX > $wrapL).animate({
+					opacity: 'show'
+				});
+			}).mousemove(function(e) {
+				$pnBtns[(e.pageX > $wrapL)*1].style.display = 'block';
+				$pnBtns[(e.pageX < $wrapL)*1].style.display = 'none';
+			}).mouseleave(function() {
+				$pnBtns.css('display','none');
+			}).click(function(e) {
+				e.pageX  > $wrapL ? runNext() : runPrev();
+			})
+		};
+
+		//上一个
+		o.botPrev && $(o.botPrev).on('click',function () {
+			runPrev();
+			return false;
+		});
+
+		// 下一个
+		o.botNext && $(o.botNext).on('click',function () {
+			runNext();
+			return false;
+		});
+
+		function runNext() {
+			index = nowIndex + 1;
+			if (o.circular)	index %= size;
+			else $endLayer.css('display',index==size?'block':'none');
+
+			if(index<size) fadeAB()
+			return false;
+		}
+
+		function runPrev() {
+			$endLayer.css('display','none');
+			if (o.circular)	index = (nowIndex + size - 1)%size;
+			else index = nowIndex - 1;
+			if(index>=0) fadeAB()
+			return false;
+		}
+
+		// 切换
+		function fadeAB() {
+			var $nowImg=$big.css('display','none').find('img').css('display','none').filter('.i'+index)
+				,$nowLi=$li.removeClass(o.curClass).eq(index).addClass(o.curClass);
+
+			if (!$nowImg.length){
+				$loading.css('display','block');
+				var $img = $('<img>',{'class':'i'+index,style:'width:100%;height:100%;'})
+					,_img = new Image();
+				_img.onerror=function () {
+	            	bigAnimate([0,0],$img);
+				}
+				_img.onload=function () {
+	            	bigAnimate(getSize(_img,o.maxW,o.maxH),$img);
+				}
+				_img.src = $nowLi.attr('data-url');
+				$big.prepend($img.attr('src',_img.src));
+			}else{
+	            bigAnimate($nowImg.css('display','block').data('data-size'));
+			}
+			$oImg.attr('href',$nowLi.attr('data-url'));
+			$title.html($nowLi.attr('data-title'));
+			if (size>o.visible) move();
+			location.hash='#g='+(index+1);
+			o.numerator&&$(o.numerator).text(index+1);
+			nowIndex = index;
+			o.endFun&&o.endFun.call($nowLi,index);
+		}
+
+		function bigAnimate (imgSize,$img) {
+            if($img){
+				$loading.css('display','none');
+	            $img.data('data-size',imgSize);
+            }
+            var _params={
+	    			left:(o.maxW-imgSize[0])/2
+					,top:(o.maxH-imgSize[1])/2
+					,height: imgSize[1]-pb
+					,width: imgSize[0]-pb
+				};
+
+            o.effect=='css'?$big.stop(0,1).css(_params).animate({opacity:'show'}):$big.stop(0,1).animate($.extend(_params,{opacity:'show'}));
+		}
+
+		// 缩放图片
+		function getSize(img, iW, iH) {
+            var nH, nW
+            	,nW = _w = img.width
+            	,nH = _H = img.height;
+            if (_w > 0 && _H > 0) {
+                if (_w / _H >= iW / iH && _w > iW) {
+                    nW = iW;
+                    nH = parseInt(_H * iW / _w);
+                }else if (_H > iH) {
+                    nH = iH;
+                    nW = parseInt(_w * iH / _H);
+                }
+            }
+            return [nW,nH];
+        }
+
+		function move () {
+			var step;
+			if (index<=now) step=0;
+			else if (index>now&&index<size-(now+1)) step=-(index-now);
+			if (index>=size-(now+1)) step=-(size-o.visible);
+
+			$thumbs.stop(0,1).animate({left: g*step},400,'easeOutQuint');
+		}
+
+		//键盘事件
+		if(o.keyboard){
+			$(document).on('keydown',function (e) {
+				var k = e.which;
+				if(k == 33 || k == 37) {
+					runPrev();
+					return false;
+				};
+				if (k == 34 || k == 39) {
+					runNext();
+					return false;
+				}
+			})
+		}
+
+	}
+})
+
+})(jQuery);
+
+
+

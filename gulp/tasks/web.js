@@ -6,7 +6,6 @@ module.exports = function(gulp, $) {
                         .alias({
                             path    : 'p',
                             author  : 'a',
-                            all     : 'al',
                             custom  : 'c',
                             libs    : 'l',
                             dev     : 'd',
@@ -51,6 +50,24 @@ module.exports = function(gulp, $) {
     }
     // 复制时替换的数据
     var tplData = function(file) {
+            // 处理demo
+            var tasks = require('../tasks'), taskInfo = '', params;
+
+            taskInfo += [
+                '\n',
+                '例：',
+                'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\' -a \'ahuing\' -m 1',
+                '显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)',
+                '\n'
+            ].join('\n');
+
+            for(var i in tasks) {
+                params = '';
+                for (var j in tasks[i]['argv']) {
+                    params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
+                }
+                taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
+            }
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), config.src);
             var pathRelative1 = path.relative(config.src, file.path);
@@ -60,7 +77,8 @@ module.exports = function(gulp, $) {
                             .split(path.sep).join('/') + '/',
                 path  : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
                             .split(path.sep).join('/'),
-                rPath : config.distEx ? '/' : config.rPath
+                rPath : config.distEx ? '/' : config.rPath,
+                info  : taskInfo,
             }
         }
 
@@ -109,6 +127,7 @@ module.exports = function(gulp, $) {
             .pipe(gulp.dest(config.dist))
             .pipe(message('sprites img 生成'));
         cb && cb();
+        return spriteData;
     }
 
     var fonts = function(dir, cb) {
@@ -117,11 +136,12 @@ module.exports = function(gulp, $) {
             fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
-        gulp.src(dir + '/*.svg', {base: config.src })
+        var stream = gulp.src(dir + '/*.svg', {base: config.src })
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
                 formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
+                normalize: true, // 兼容不同大小的字体图标合成
                 // timestamp: runTimestamp // recommended to get consistent builds when watching files
             }))
             .on('glyphs', function(glyphs, options) {
@@ -153,12 +173,14 @@ module.exports = function(gulp, $) {
             // .pipe($.plumber())
             .pipe(gulp.dest(config.dist))
             .pipe(message('font 生成'));
+
+        return stream;
     }
     // scss
     var scss = function(filePath, cb) {
         // console.log(config.tpl + config.libs + '/css/');
         // return false;
-        gulp.src(filePath, {base: config.src})
+        var stream = gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
@@ -167,16 +189,16 @@ module.exports = function(gulp, $) {
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
                 sourceMap: true
             }).on('error', $.sass.logError))
-            /*.pipe($.autoprefixer({
-                browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8']//,
-                //cascade: true, 是否美化属性值 默认：true 像这样：
+            .pipe($.autoprefixer({
+                browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
+                cascade: true, // 是否美化属性值 默认：true 像这样：
                 //-webkit-transform: rotate(45deg);
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true
-            }))*/
-            .pipe($.if(!argv.d || (config.isBuild && !argv.all),
-                $.csso(),
-                $.csscomb(sourceUrl + 'css/csscomb.json')
+            }))
+            .pipe($.if(argv.d,
+                $.csscomb(sourceUrl + 'css/csscomb.json'),
+                $.csso()
             ))
             .pipe($.template({
                 name: path.basename(filePath),
@@ -189,13 +211,14 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('scss 生成'));
         cb && cb();
+        return stream;
     }
     // concatjs
     var concatJS = function(dir, cb) {
         var pathRelative = path.relative(config.src, dir),
             fName        = path.basename(dir);
 
-        gulp.src(dir + '/*.js', {base: config.src })
+        var stream = gulp.src(dir + '/*.js', {base: config.src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -218,10 +241,11 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('合并 压缩'));
         cb && cb();
+        return stream;
     }
     // js
     var JS = function(filePath, cb) {
-        gulp.src(filePath, {base: config.src})
+        var stream = gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -238,25 +262,40 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
             .pipe(message('处理'));
         cb && cb();
+
+        return stream;
     }
 
     var buildCB = function(fun, files, cb0, isLast) {
-        $.async.eachLimit(files, 10, function(file, callback) {
-                fun(file, callback);
-            }, function(err) {
-                if (!err) {
+        var stream = $.mergeStream();
+        files.forEach(function(file) {
+            stream.add(fun(file, function() {
+                if (config.isBuild && isLast) {
                     if (config.distEx) {
                         gulp.src([config.dist + '/**/*', '!' + config.dist + '/src/**/*'])
                             .pipe(gulp.dest(config.distEx));
                     }
-                    // if (fun == 'scss' && config.isBuild) {
-                    if (config.isBuild && isLast) {
-                        gulp.src('./package.json', {read: false })
-                            .pipe($.notify('build ok'));
-                    }
-                    cb0();
+                    gulp.src('./package.json', {read: false })
+                        .pipe($.notify('build ok'));
                 }
-            })
+            }));
+        });
+        // $.async.eachLimit(files, 10, function(file, callback) {
+        //         stream.add(fun(file, callback));
+        //     }, function(err) {
+        //         if (!err) {
+        //             if (config.isBuild && isLast) {
+        //                 if (config.distEx) {
+        //                     gulp.src([config.dist + '/**/*', '!' + config.dist + '/src/**/*'])
+        //                         .pipe(gulp.dest(config.distEx));
+        //                 }
+        //                 gulp.src('./package.json', {read: false })
+        //                     .pipe($.notify('build ok'));
+        //             }
+        //             cb0();
+        //         }
+        //     })
+        return stream;
     }
     // tasks start
 
@@ -298,6 +337,7 @@ module.exports = function(gulp, $) {
                 libs   : 'libs',
                 tpl    : './src/',
                 dist   : 'test/',
+                distEx : '',
                 src    : 'src',
                 mode   : argv.m
             };
@@ -349,6 +389,7 @@ module.exports = function(gulp, $) {
         // config.tpl  = path.join(config.path, config.tpl);
 
         // console.log(config);
+
         cb();
     });
     // connect
@@ -506,104 +547,94 @@ module.exports = function(gulp, $) {
         }
     });
     // build
-    gulp.task('build', ['init', 'copy', 'pack', 'concat', 'sprites', 'fonts', 'scss']);
+    gulp.task('build', [
+        'init',
+        'copy',
+        'pack',
+        'concat',
+        'sprites',
+        'fonts',
+        'scss'
+    ]);
     // 复制核心到项目
     gulp.task('copy', ['init'], function (cb) {
-        var toSrc = config.src;
+        var atsSrc = config.tpl;
+        var proSrc = config.src;
+        var isNeedTpl = function(file) {
+                return path.basename(file.path) === 'seajs.config.js' ||
+                        path.extname(file.path) === '.html';
+            };
+        var isVariables = function(file) {
+                return path.basename(file.path) === '_variables.scss';
+            };
         // 只重建核心
         config.isBuild = true;
 
-        if (!argv.all) {
-            // config.src = path.join(config.path, config.tpl);
-            config.src = config.tpl;
-        }
         if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
             cb();
         } else {
-            var isNeedTpl = function(file) {
-                    return path.basename(file.path) === 'seajs.config.js' ||
-                            path.extname(file.path) === '.html';
-                };
             // 复制核心代码
-            gulp.src([
-                    config.src + '/**/*.html',
-                    config.src + '/**/*.config.js',
-                    config.src + '/**/demo*.*',
-                    config.src + '/**/demo/**',
-                    '!' + config.src + '/libs/**/*.config.js'
-                ], {base: config.src})
-                .pipe($.if(isNeedTpl, $.data(tplData)))
-                .pipe($.if(isNeedTpl, $.template()))
-                .pipe(gulp.dest(toSrc));
-            // return false;
-            gulp.src(config.src + '/**/_variables.scss', {
-                    base: config.src
-                })
-                .pipe($.rename({basename: '__variables'}))
-                .pipe(gulp.dest(toSrc));
-
-            /*if (!argv.all) {
-                // 只重建核心 == 直接复制核心生成代码 --all,不生成
-            } else {
-                cb();
-                // 全部重建 == 不复制核心生成代码 --all 1，往下走重新生成项目的内容
-            }*/
-            cb();
+            return gulp.src([
+                    // atsSrc + '/**/*.html',
+                    // atsSrc + '/**/*.config.js',
+                    // atsSrc + '/**/demo*.*',
+                    // atsSrc + '/**/demo/**',
+                    atsSrc + '/**/*',
+                    '!' + atsSrc + '/libs/**/*.config.js'
+                ], {base: atsSrc})
+                // .pipe($.if(isNeedTpl, $.data(tplData)))
+                // .pipe($.if(isNeedTpl, $.template()))
+                .pipe($.if(isVariables, $.rename({basename: '__variables'})))
+                .pipe(gulp.dest(proSrc));
         }
     });
     // 打包项目文件
     gulp.task('pack', ['copy'], function(cb) {
+        var proSrc = config.src;
+        var proDist = config.dist;
+        var stream = $.mergeStream();
         // 处理自定义的img
-        gulp.src([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], {base: config.src})
+        stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: proSrc})
             .pipe($.imagemin(configs.imagemin))
-            .pipe(gulp.dest(config.dist));
+            .pipe(gulp.dest(proDist)));
 
         // 直接复制核心
-        gulp.src([config.src + '/**/plugin/*.js'], {base: config.src})
+        stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe(gulp.dest(config.dist));
-        gulp.src([config.src + '/**/static/*'], {base: config.src})
-            .pipe(gulp.dest(config.dist));
-        gulp.src(config.src + '/**/demo*.html', {base: config.src })
+            .pipe(gulp.dest(proDist)));
+
+        stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
+            .pipe(gulp.dest(proDist)));
+
+        stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
             .pipe($.data(tplData))
             .pipe($.template())
-            .pipe(gulp.dest(config.dist));
+            .pipe(gulp.dest(proDist)));
             // return false;
+        stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js'), cb));
         // 处理自定义的js
-        $.glob(config.src + '/**/js/*.js', function (err, files) {
-            buildCB(JS, files, cb);
-        });
+        return stream;
     });
     // concatjs 异步处理
     gulp.task('concat', ['pack'], function(cb) {
-        $.glob(config.src + '/**/js/!(plugin|static)/', function (err, files) {
-            buildCB(concatJS, files, cb);
-        });
-
+        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/!(plugin|static)/'), cb);
     });
 
     // sprites 异步处理
     gulp.task('sprites', ['concat'], function(cb) {
-        $.glob(config.src + '/**/images/!(static)/', function (err, files) {
-            buildCB(sprites, files, cb);
-        });
-
+        return buildCB(sprites, $.glob.sync(config.src + '/**/images/!(static)/'), cb);
     });
     // fonts 异步处理
     gulp.task('fonts', ['sprites'], function(cb) {
-        $.glob(config.src + '/**/fonts/!(static)/', function (err, files) {
-            buildCB(fonts, files, cb);
-        });
+        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/!(static)/'), cb);
     })
     // scss 单独出来，异步处理
     gulp.task('scss', ['fonts'], function(cb) {
-        $.glob(config.src + '/**/css/*.scss', function (err, files) {
-            buildCB(scss, files, cb, 1);
-        });
+        return buildCB(scss, $.glob.sync(config.src + '/**/css/*.scss'), cb);
     })
     // add
-    gulp.task('add', ['init'], function () {
+    gulp.task('add', ['init'], function() {
         // return false;
         return gulp.src([
                 cwd + 'src/libs/**/{static,common,plugin,units,demo}',
@@ -613,6 +644,7 @@ module.exports = function(gulp, $) {
     })
     // clean
     gulp.task('clean', ['init'], function(cb) {
+        // console.log(config.path);
         // return false;
         $.del([
             config.path, '/**',

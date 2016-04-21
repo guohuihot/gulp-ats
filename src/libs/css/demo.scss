@@ -1,7 +1,7 @@
 /*!
- * @name demo
- * @author ahuing
- * @date 2016-1-15
+ * @name <%= name %>
+ * @author <%= author %>
+ * @date <%= date %>
  */
 
 // 这个可以自己定义变量，请参考variables.scss,没有定义的话使用默认的
@@ -17,7 +17,7 @@
 @import 'modal';
 .demo {
 	// 单独引入某一个img css
-	@include img-demo-single($img-demo-face1);
+	@extend .img-demo-face1;
 }
 
 .demo1 {

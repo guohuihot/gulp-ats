@@ -1,6 +1,6 @@
 /*!
  * @name <%= name %>
- * @author ahuing
+ * @author <%= author %>
  */
 var cfg = {
     base : BASE_URL,
