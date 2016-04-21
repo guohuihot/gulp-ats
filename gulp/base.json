@@ -1,12 +1,12 @@
 {
   "web": {
     "author": "ahuing",
-    "libs": "libs",
-    "tpl": "./src/",
-    "dist": "test/",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
     "src": "src",
-    "mode": 4,
-    "path": "D:\\nodejs/",
+    "mode": 11,
+    "path": "C:\\Users\\guohui\\Desktop\\test1",
     "distEx": ""
   }
 }

@@ -84,9 +84,11 @@ module.exports = function(gulp, $) {
 
     var sprites = function(dir, cb) {
         var pathBase = path.relative(config.src, dir + '/../../')
-                            .split(path.sep).join('/') + './',
+                            .split(path.sep).join('/') + '/',
             fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
+        // console.log(pathBase);
+        // return false;
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
             .pipe($.spritesmith({
                 imgName: pathBase + 'images/' + fName + '.png',
@@ -310,23 +312,36 @@ module.exports = function(gulp, $) {
         // 默认为开发模式
         argv.d = argv.d === 0 ? false : true;
 
-        if (argv.m == 1) {
+        if (argv.m == 1 || argv.m == 11) {
             customConfig = {
                 path   : argv.p,
                 author : argv.a,
                 libs   : '',
-                tpl    : './src/libs/',
-                dist   : '',
-                src    : 'src',
+                tpl    : './src/libs/', // ats源目录
+                dist   : '', // 项目的dist
+                distEx : argv.distEx, // 项目的扩展目录
+                src    : 'src', // 项目的src
                 mode   : argv.m
             };
-        } else if (argv.m == 2 || argv.m == 3) {
+        } else if (argv.m == 2 || argv.m == 21) {
             customConfig = {
                 path   : argv.p,
                 author : argv.a,
                 libs   : 'libs',
                 tpl    : './src/',
                 dist   : '',
+                distEx : argv.distEx,
+                src    : 'src',
+                mode   : argv.m
+            };
+        } else if (argv.m == 3) {
+            customConfig = {
+                path   : argv.p,
+                author : argv.a,
+                libs   : 'mobile',
+                tpl    : './src/',
+                dist   : '',
+                distEx : argv.distEx,
                 src    : 'src',
                 mode   : argv.m
             };
@@ -560,6 +575,7 @@ module.exports = function(gulp, $) {
     gulp.task('copy', ['init'], function (cb) {
         var atsSrc = config.tpl;
         var proSrc = config.src;
+        var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
         var isNeedTpl = function(file) {
                 return path.basename(file.path) === 'seajs.config.js' ||
                         path.extname(file.path) === '.html';
@@ -567,6 +583,19 @@ module.exports = function(gulp, $) {
         var isVariables = function(file) {
                 return path.basename(file.path) === '_variables.scss';
             };
+        // 内容字串
+        var sss = (argv.m == 11 || argv.m == 21) ? [
+                    path.join(atsFromSrc, '/css/**/*'),
+                    path.join(atsFromSrc, '/images/**/*'),
+                    path.join(atsFromSrc, '/fonts/**/*'),
+                    path.join(atsFromSrc, '/pic/**/*'),
+                    path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
+                    path.join(atsFromSrc, '/**/*.html'),
+                    '!' + atsSrc + '/libs/**/*.config.js'
+                ] : [
+                    atsFromSrc + '/**/*',
+                    '!' + atsSrc + '/libs/**/*.config.js'
+                ];
         // 只重建核心
         config.isBuild = true;
 
@@ -575,14 +604,7 @@ module.exports = function(gulp, $) {
             cb();
         } else {
             // 复制核心代码
-            return gulp.src([
-                    // atsSrc + '/**/*.html',
-                    // atsSrc + '/**/*.config.js',
-                    // atsSrc + '/**/demo*.*',
-                    // atsSrc + '/**/demo/**',
-                    atsSrc + '/**/*',
-                    '!' + atsSrc + '/libs/**/*.config.js'
-                ], {base: atsSrc})
+            return gulp.src(sss, {base: atsSrc})
                 // .pipe($.if(isNeedTpl, $.data(tplData)))
                 // .pipe($.if(isNeedTpl, $.template()))
                 .pipe($.if(isVariables, $.rename({basename: '__variables'})))
@@ -594,16 +616,17 @@ module.exports = function(gulp, $) {
         var proSrc = config.src;
         var proDist = config.dist;
         var stream = $.mergeStream();
-        // 处理自定义的img
+        // 处理img
         stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: proSrc})
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
 
-        // 直接复制核心
+        // 直接复制plugin目录
         stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe(gulp.dest(proDist)));
 
+        // 直接复制static目录
         stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
             .pipe(gulp.dest(proDist)));
 
@@ -612,8 +635,8 @@ module.exports = function(gulp, $) {
             .pipe($.template())
             .pipe(gulp.dest(proDist)));
             // return false;
+        // 处理正常的js
         stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js'), cb));
-        // 处理自定义的js
         return stream;
     });
     // concatjs 异步处理

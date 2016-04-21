@@ -30,11 +30,12 @@ module.exports = {
                 '模式',
                 '类型：int, 默认值：保留上次的值',
                 '1 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts',
+                '11 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts',
                 '2 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层',
-                '3 - 在2的基础上加入后台和会员中心核心(新核心)',
+                '21 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层',
                 '4 - ats自身核心开发模式',
-                'c - 自定义，有时源代码目录不是"src"目录，',
-                '可以手动指定，生成目标目录"dist"也一样',
+                'c - 自定义，有时源代码目录和生成目标目录不是固定，',
+                '可以手动指定',
             ].join('\n\t\t\t'),
 
             '--src\t': [

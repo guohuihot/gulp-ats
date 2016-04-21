@@ -11,16 +11,14 @@ $img-demo-face5:(24px,24px,-68px,0,img-demo-face5);
 
 $img-demo: ($img-demo-face1,$img-demo-face2,$img-demo-face3,$img-demo-face4,$img-demo-face5,);
 
-@mixin img-demo-single($sprite) {
-  background: url(../images/demo.png) no-repeat nth($sprite, 3) nth($sprite, 4);
-}
-
-
 @mixin img-demo($sprites) {
-  %ico {
+  %icodemo {
       display: inline-block;
       *zoom: 1;
       *display: inline;
+      vertical-align: middle;
+      line-height: 300px;
+      overflow: hidden;
       background-image: url(../images/demo.png);
   }
   @each $sprite in $sprites {
@@ -28,7 +26,7 @@ $img-demo: ($img-demo-face1,$img-demo-face2,$img-demo-face3,$img-demo-face4,$img
         width: nth($sprite, 1);
         height: nth($sprite, 2);
         background-position: nth($sprite, 3) nth($sprite, 4);
-      @extend %ico;
+      @extend %icodemo;
     }
   }
 }
