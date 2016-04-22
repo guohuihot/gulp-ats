@@ -4,9 +4,9 @@
     "libs": "",
     "tpl": "./src/libs/",
     "dist": "",
+    "distEx": "",
     "src": "src",
-    "mode": 11,
-    "path": "C:\\Users\\guohui\\Desktop\\test1",
-    "distEx": ""
+    "mode": 1,
+    "path": "C:\\Users\\Administrator\\Desktop\\test"
   }
 }

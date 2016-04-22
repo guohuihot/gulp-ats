@@ -23,7 +23,29 @@ module.exports = function(gulp, $) {
             font: 'font'
         },
         config;
+
     // functions
+    var getInfo = function () {
+        // 处理demo
+        var tasks = require('../tasks'), taskInfo = '', params;
+
+        taskInfo += [
+            '\n',
+            '例：',
+            'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\' -a \'ahuing\' -m 1',
+            '显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)',
+            '\n'
+        ].join('\n');
+
+        for(var i in tasks) {
+            params = '';
+            for (var j in tasks[i]['argv']) {
+                params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
+            }
+            taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
+        }
+        return taskInfo;
+    }
     var message = function (info) {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
@@ -48,44 +70,33 @@ module.exports = function(gulp, $) {
                     includeContent: false
                 });
     }
+    var isNeedTpl = function(file) {
+            return path.basename(file.path) === 'seajs.config.js' ||
+                    path.extname(file.path) === '.html';
+        };
     // 复制时替换的数据
     var tplData = function(file) {
-            // 处理demo
-            var tasks = require('../tasks'), taskInfo = '', params;
-
-            taskInfo += [
-                '\n',
-                '例：',
-                'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\' -a \'ahuing\' -m 1',
-                '显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)',
-                '\n'
-            ].join('\n');
-
-            for(var i in tasks) {
-                params = '';
-                for (var j in tasks[i]['argv']) {
-                    params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
-                }
-                taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
-            }
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), config.src);
             var pathRelative1 = path.relative(config.src, file.path);
             return {
-                name : path.basename(file.path),
-                base  : path.join(pathRelative, config.libs)
+                name   : path.basename(file.path),
+                author : config.author,
+                date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
+                base   : path.join(pathRelative, config.libs)
                             .split(path.sep).join('/') + '/',
-                path  : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
+                path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
                             .split(path.sep).join('/'),
-                rPath : config.distEx ? '/' : config.rPath,
-                info  : taskInfo,
+                rPath  : config.distEx ? '/' : config.rPath,
+                info   : config.info,
             }
         }
 
     var sprites = function(dir, cb) {
         var pathBase = path.relative(config.src, dir + '/../../')
-                            .split(path.sep).join('/') + '/',
-            fName    = path.basename(dir),
+                            .split(path.sep).join('/') + './';
+
+        var fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
         // console.log(pathBase);
         // return false;
@@ -128,7 +139,7 @@ module.exports = function(gulp, $) {
         spriteData.img
             .pipe(gulp.dest(config.dist))
             .pipe(message('sprites img 生成'));
-        cb && cb();
+        // cb && cb();
         return spriteData;
     }
 
@@ -253,11 +264,13 @@ module.exports = function(gulp, $) {
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe($.template({
+            .pipe($.if(isNeedTpl, $.data(tplData)))
+            .pipe($.if(isNeedTpl, $.template()))
+            /*.pipe($.template({
                 name   : path.basename(filePath),
                 author : config.author,
                 date   : $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))
+            }))*/
             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
             .pipe($.if(argv.d, sourcemaps(filePath)))
             .pipe(gulp.dest(config.dist))
@@ -379,7 +392,8 @@ module.exports = function(gulp, $) {
                 libs      : '',
                 tpl       : './src/libs/',
                 dist      : '',
-                src    : 'src',
+                distEx    : '',
+                src       : 'src',
                 mode      : 1
             }, $.extend(config, customConfig));
         base.saveSync();
@@ -404,7 +418,8 @@ module.exports = function(gulp, $) {
         // config.tpl  = path.join(config.path, config.tpl);
 
         // console.log(config);
-
+        // getInfo
+        config.info = getInfo();
         cb();
     });
     // connect
@@ -576,10 +591,6 @@ module.exports = function(gulp, $) {
         var atsSrc = config.tpl;
         var proSrc = config.src;
         var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
-        var isNeedTpl = function(file) {
-                return path.basename(file.path) === 'seajs.config.js' ||
-                        path.extname(file.path) === '.html';
-            };
         var isVariables = function(file) {
                 return path.basename(file.path) === '_variables.scss';
             };
@@ -591,10 +602,8 @@ module.exports = function(gulp, $) {
                     path.join(atsFromSrc, '/pic/**/*'),
                     path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
                     path.join(atsFromSrc, '/**/*.html'),
-                    '!' + atsSrc + '/libs/**/*.config.js'
                 ] : [
                     atsFromSrc + '/**/*',
-                    '!' + atsSrc + '/libs/**/*.config.js'
                 ];
         // 只重建核心
         config.isBuild = true;
