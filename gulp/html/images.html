@@ -84,8 +84,7 @@
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = 'http://' + location.host + '/';
-    // var BASE_URL = window.location.href.replace('<%= path %>', '') + '/';
+    var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
 </script>
 <script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
 

@@ -5,3 +5,5 @@
 /gulp/base.json
 /gulp/base.js
 /test
+/src/libs/js/*.map
+/src/libs/css/*.map
