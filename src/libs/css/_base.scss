@@ -73,7 +73,7 @@ img {
 
 .container {
     width: $screen;
-    min-width: $screen;
+    min-width: $min-screen;
     @extend %clearfix;
     margin: auto;
 }

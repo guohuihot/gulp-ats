@@ -1,13 +1,14 @@
 // 规范：
 // 变量名用中线连接
 $screen: 1000px !default; // 页面宽度
+$min-screen: 1000px !default; // 页面宽度
 
 // 字体
 $color : #333 !default; // 字体颜色
 $fz    : 14px !default; // 字号
 $ff    : microsoft yahei !default; // 字体
 $lh    : 1.5 !default; // 行高
-$bgc   : none !default; // 背景
+$bgc   : transparent !default; // 背景
 
 // link
 $link-color       : #333 !default; // 颜色

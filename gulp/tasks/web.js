@@ -555,7 +555,7 @@ module.exports = function(gulp, $) {
             }
         });
         // 直接复制
-        $.watch([config.src + '/**/static/*'], function(file) {
+        $.watch([config.src + '/**/{static,test}/*'], function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
                 $.del([config.dist + '/' + pathRelative], {force: true});
