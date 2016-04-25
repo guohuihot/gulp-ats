@@ -264,8 +264,8 @@ module.exports = function(gulp, $) {
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe($.if(isNeedTpl, $.data(tplData)))
-            .pipe($.if(isNeedTpl, $.template()))
+            .pipe($.data(tplData))
+            .pipe($.template())
             /*.pipe($.template({
                 name   : path.basename(filePath),
                 author : config.author,
