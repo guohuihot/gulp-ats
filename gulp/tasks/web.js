@@ -22,7 +22,7 @@ module.exports = function(gulp, $) {
             img: 'img',
             font: 'font'
         },
-        config;
+        config = {};
 
     // functions
     var getInfo = function () {
@@ -315,15 +315,34 @@ module.exports = function(gulp, $) {
     // tasks start
 
     gulp.task('init', function(cb) {
-        var base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
-        if (base.data == undefined) {
-            base.data = {
-                web: {}
-            };
-        };
-        config = base.data.web;
-        // 默认为开发模式
+        var fs = require('fs'),
+            base, customConfig;
+
+        if (!fs.existsSync(sourceUrl + 'base.json')) {
+            fs.writeFileSync(sourceUrl + 'base.json', '');
+        }
+
+        base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
+
+        if (base.data) {
+            if (argv.p) {
+                // 有路径时直接保存配置及时间戳
+                config = base.data[argv.p];
+            } else {
+                // 没有时直接从base里查
+                for (p in base.data) {
+                    if (base.data[p].t > (config.t || 0)) {
+                        config = base.data[p];
+                    }
+                }
+            }
+        } else {
+            base.data = {};
+        }
+        // 默认项
         argv.d = argv.d === 0 ? false : true;
+        argv.m = argv.m || 1;
+        argv.a = argv.a || 'author';
 
         if (argv.m == 1 || argv.m == 11) {
             customConfig = {
@@ -380,35 +399,28 @@ module.exports = function(gulp, $) {
                 src    : argv.src,
                 mode   : argv.m
             };
-        } else {
-            customConfig = {
-                path   : argv.p,
-                author : argv.a
-            };
         };
         // console.log(config);
-        base.data.web = config = $.extend({
-                author    : 'author',
-                libs      : '',
-                tpl       : './src/libs/',
-                dist      : '',
-                distEx    : '',
-                src       : 'src',
-                mode      : 1
-            }, $.extend(config, customConfig));
+        config = $.extend($.extend(config, customConfig));
+        // 目录不存在时直接返回
+        if (!config.path) {
+            console.log('error: 请设置项目目录path!');
+            return false;
+        };
+
+        // 设置时间下次直接用
+        config.t = parseInt(new Date().getTime() / 1000);
+        base.data[config.path] = config;
         base.saveSync();
         // 固定配置不用保存
         // config.src = 'src'; // 项目src目录
         // config.sourcemap = './maps/';
 
-        if (config.path) {
-            console.log('\n');
-            console.log('当前配置:\n');
-            console.log(config);
-            console.log('\n');
-        } else {
-            console.log('error: 请设置项目目录path!');
-        };
+        console.log('\n');
+        console.log('当前配置:\n');
+        console.log(config);
+        console.log('\n');
+
         // 转化后
         config.rPath = config.dist != config.libs ?
                             config.dist + config.libs + '/' :

@@ -1,0 +1,12 @@
+{
+  "web": {
+    "author": "ahuing",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "distEx": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\baidu\\web\\javascript\\jquery_plugIn\\jqduang"
+  }
+}

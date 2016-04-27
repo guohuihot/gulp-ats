@@ -1,12 +1,15 @@
 {
-  "web": {
-    "author": "ahuing",
+  "aaa": {
+    "bb": "ccc"
+  },
+  "C:\\Users\\guohui\\Desktop\\test1": {
+    "path": "C:\\Users\\guohui\\Desktop\\test1",
+    "author": "author",
     "libs": "",
     "tpl": "./src/libs/",
     "dist": "",
-    "distEx": "",
     "src": "src",
     "mode": 1,
-    "path": "E:\\baidu\\web\\javascript\\jquery_plugIn\\jqduang"
+    "t": 1461784850
   }
 }
