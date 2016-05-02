@@ -1,15 +1,24 @@
 {
-  "aaa": {
-    "bb": "ccc"
-  },
   "C:\\Users\\guohui\\Desktop\\test1": {
-    "path": "C:\\Users\\guohui\\Desktop\\test1",
     "author": "author",
+    "distEx": "",
     "libs": "",
     "tpl": "./src/libs/",
     "dist": "",
     "src": "src",
     "mode": 1,
-    "t": 1461784850
+    "path": "C:\\Users\\guohui\\Desktop\\test1",
+    "t": 1462219833
+  },
+  "C:\\Users\\guohui\\Desktop\\test": {
+    "author": "author",
+    "distEx": "",
+    "libs": "libs",
+    "tpl": "./src/",
+    "dist": "",
+    "src": "src",
+    "mode": 2,
+    "path": "C:\\Users\\guohui\\Desktop\\test",
+    "t": 1462219823
   }
 }

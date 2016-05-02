@@ -329,7 +329,7 @@ module.exports = function(gulp, $) {
                 // 有路径时直接保存配置及时间戳
                 config = base.data[argv.p];
             } else {
-                // 没有时直接从base里查
+                // 没有时直接从base里找最后一次配置
                 for (p in base.data) {
                     if (base.data[p].t > (config.t || 0)) {
                         config = base.data[p];
@@ -341,67 +341,70 @@ module.exports = function(gulp, $) {
         }
         // 默认项
         argv.d = argv.d === 0 ? false : true;
-        argv.m = argv.m || 1;
-        argv.a = argv.a || 'author';
+        argv.m = argv.m || config.mode;
 
-        if (argv.m == 1 || argv.m == 11) {
-            customConfig = {
-                path   : argv.p,
-                author : argv.a,
-                libs   : '',
-                tpl    : './src/libs/', // ats源目录
-                dist   : '', // 项目的dist
-                distEx : argv.distEx, // 项目的扩展目录
-                src    : 'src', // 项目的src
-                mode   : argv.m
-            };
-        } else if (argv.m == 2 || argv.m == 21) {
-            customConfig = {
-                path   : argv.p,
-                author : argv.a,
-                libs   : 'libs',
-                tpl    : './src/',
-                dist   : '',
-                distEx : argv.distEx,
-                src    : 'src',
-                mode   : argv.m
-            };
-        } else if (argv.m == 3) {
-            customConfig = {
-                path   : argv.p,
-                author : argv.a,
-                libs   : 'mobile',
-                tpl    : './src/',
-                dist   : '',
-                distEx : argv.distEx,
-                src    : 'src',
-                mode   : argv.m
-            };
-        } else if (argv.m == 4) {
-            customConfig = {
-                path   : cwd,
-                author : argv.a,
-                libs   : 'libs',
-                tpl    : './src/',
-                dist   : 'test/',
-                distEx : '',
-                src    : 'src',
-                mode   : argv.m
-            };
-        } else if (argv.m == 'c') {
-            customConfig = {
-                path   : argv.p,
-                author : argv.a,
-                libs   : '',
-                tpl    : './src/libs/',
-                dist   : argv.dist,
-                distEx : argv.distEx,
-                src    : argv.src,
-                mode   : argv.m
-            };
-        };
+        switch (argv.m) {
+            case 11:
+                customConfig = {
+                    libs   : '',
+                    tpl    : './src/libs/', // ats源目录
+                    dist   : '', // 项目的dist
+                    src    : 'src', // 项目的src
+                };
+                break;
+            case 2:
+            case 21:
+                customConfig = {
+                    libs   : 'libs',
+                    tpl    : './src/',
+                    dist   : '',
+                    src    : 'src',
+                };
+                break;
+            case 3:
+                customConfig = {
+                    libs   : 'mobile',
+                    tpl    : './src/',
+                    dist   : '',
+                    src    : 'src',
+                };
+                break;
+            case 4:
+                customConfig = {
+                    path   : cwd,
+                    libs   : 'libs',
+                    tpl    : './src/',
+                    dist   : 'test/',
+                    distEx : '',
+                    src    : 'src',
+                };
+                break;
+            case 'c':
+                customConfig = {
+                    libs   : '',
+                    tpl    : './src/libs/',
+                };
+                break;
+        }
+
         // console.log(config);
-        config = $.extend($.extend(config, customConfig));
+        config = $.extend(config, {
+            author : 'author',
+            distEx : '',
+            libs   : '',
+            tpl    : './src/libs/', // ats源目录
+            dist   : '', // 项目的dist
+            src    : 'src', // 项目的src
+            mode   : 1
+        },
+        {
+            path   : argv.p,
+            author : argv.a,
+            dist   : argv.dist,
+            distEx : argv.distEx,
+            src    : argv.src,
+            mode   : argv.m
+        }, customConfig);
         // 目录不存在时直接返回
         if (!config.path) {
             console.log('error: 请设置项目目录path!');
