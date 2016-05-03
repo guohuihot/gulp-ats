@@ -1,0 +1,24 @@
+{
+  "E:\\wwwroot\\newcore\\site\\AutoBundle\\Resources": {
+    "author": "ahuing",
+    "distEx": "E:\\wwwroot\\newcore\\web\\bundles\\auto",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "./public",
+    "src": "./src",
+    "mode": "c",
+    "path": "E:\\wwwroot\\newcore\\site\\AutoBundle\\Resources",
+    "t": 1462263601
+  },
+  "C:\\Users\\Administrator\\Desktop\\test": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "C:\\Users\\Administrator\\Desktop\\test",
+    "t": 1462263481
+  }
+}

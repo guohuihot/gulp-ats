@@ -178,7 +178,6 @@ module.exports = function(gulp, $) {
                 gulp.src(sourceUrl + 'html/fonts.html')
                     .pipe($.template(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
-                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('font html 生成'));
                 cb && cb();
@@ -327,7 +326,7 @@ module.exports = function(gulp, $) {
         if (base.data) {
             if (argv.p) {
                 // 有路径时直接保存配置及时间戳
-                config = base.data[argv.p];
+                config = base.data[argv.p] || {};
             } else {
                 // 没有时直接从base里找最后一次配置
                 for (p in base.data) {
@@ -388,7 +387,7 @@ module.exports = function(gulp, $) {
         }
 
         // console.log(config);
-        config = $.extend(config, {
+        config = $.extend({
             author : 'author',
             distEx : '',
             libs   : '',
@@ -396,7 +395,8 @@ module.exports = function(gulp, $) {
             dist   : '', // 项目的dist
             src    : 'src', // 项目的src
             mode   : 1
-        },
+        }, 
+        config,
         {
             path   : argv.p,
             author : argv.a,
