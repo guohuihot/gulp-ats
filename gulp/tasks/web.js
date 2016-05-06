@@ -27,7 +27,9 @@ module.exports = function(gulp, $) {
     // functions
     var getInfo = function () {
         // 处理demo
-        var tasks = require('../tasks'), taskInfo = '', params;
+        var tasks = require('../tasks'),
+            taskInfo = '',
+            params;
 
         taskInfo += [
             '\n',
@@ -79,8 +81,10 @@ module.exports = function(gulp, $) {
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), config.src);
             var pathRelative1 = path.relative(config.src, file.path);
+            var sExtLen = path.extname(file.path).length;
+            
             return {
-                name   : path.basename(file.path),
+                name   : path.basename(file.path).slice(0, -sExtLen),
                 author : config.author,
                 date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                 base   : path.join(pathRelative, config.libs)
@@ -213,7 +217,7 @@ module.exports = function(gulp, $) {
                 $.csso()
             ))
             .pipe($.template({
-                name: path.basename(filePath),
+                name: path.basename(filePath).slice(0, -5),
                 author: config.author,
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
@@ -237,7 +241,7 @@ module.exports = function(gulp, $) {
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
                 return {
-                    name   : path.basename(file.path),
+                    name   : path.basename(file.path).slice(0, -3),
                     author : config.author,
                     date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                     // base   : host,
