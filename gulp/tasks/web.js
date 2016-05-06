@@ -249,7 +249,8 @@ module.exports = function(gulp, $) {
                 }
             }))
             .pipe($.template())
-            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            .pipe($.uglify(configs.uglify))
             .pipe($.concat(pathRelative + '.js'))
             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
             .pipe($.if(argv.d, sourcemaps(dir)))
@@ -266,7 +267,8 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
-            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
             .pipe($.template())
             /*.pipe($.template({
