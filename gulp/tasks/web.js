@@ -22,6 +22,7 @@ module.exports = function(gulp, $) {
             img: 'img',
             font: 'font'
         },
+        ftp = {},
         config = {};
 
     // functions
@@ -48,33 +49,33 @@ module.exports = function(gulp, $) {
         }
         return taskInfo;
     }
-    var message = function (info) {
+    var message = function () {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
                 if (path.extname(file.path) != '.map' && !config.isBuild) {
-                    return path.relative(config.path, file.path) + ' ' + info + ' ok !';
+                    return path.relative(config.path, file.path) + ' ok !';
                 };
             })
         };
 
     var sourcemaps = function (filePath) {
-        var relativePath; 
-        if (config.distEx) {
-            relativePath = path.relative(config.distEx + '/a.css', config.src);
-        } else {
-            relativePath = path.relative(argv.dist + '/a.css', config.src);
-        };
-        return $.sourcemaps.write(config.src, {
-                    sourceRoot: relativePath,
-                    sourceMappingURL: function(file) {
-                        return relativePath + '\\' + file.relative + '.map';
-                      },
-                    includeContent: false
-                });
+        var src = path.relative(config.path, config.src);
+        var absSrc = '/' + src;
+        return $.sourcemaps.write(absSrc, {
+            includeContent: false,
+            sourceMappingURL: function(file) {
+                return path.join(absSrc, file.relative + '.map').split(path.sep).join('/');
+            },
+            sourceRoot: absSrc,
+            // addComment: false,
+        });
     }
     var isNeedTpl = function(file) {
             return path.basename(file.path) === 'seajs.config.js' ||
                     path.extname(file.path) === '.html';
+        };
+    var ext = function(file) {
+            return path.extname(file.path);
         };
     // 复制时替换的数据
     var tplData = function(file) {
@@ -95,8 +96,28 @@ module.exports = function(gulp, $) {
                 info   : config.info,
             }
         }
+    // gulpMiddleWare
+    var gulpMiddleWare = function(stream, filePath) {
+        var s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                to: 'gbk'
+            })))
+            .pipe($.if(argv.d, sourcemaps(filePath)))
+            .pipe(gulp.dest(config.dist))
+
+        if (argv.f) {
+           s.pipe(ftp.dest(config.ftp.remotePath))
+                .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
+                .pipe(message())
+        } else {
+            s.pipe($.if(argv.s, $.connect.reload(), $.livereload()))
+                .pipe(message());
+        }
+        
+        return s;
+    }
 
     var sprites = function(dir, cb) {
+        var stream = $.mergeStream();
         var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + './';
 
@@ -115,7 +136,7 @@ module.exports = function(gulp, $) {
             // console.log(spriteData.css);
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
-                    // console.log(jsonArr);
+                    // console.log(jsonArr, 2222);
                     // console.log(jsonArr[0].contents);
                     cb1(undefined, {
                         cssData : JSON.parse(jsonArr[0].contents),
@@ -128,32 +149,33 @@ module.exports = function(gulp, $) {
                 }));
             };
 
-        gulp.src(sourceUrl + 'css/images.scss')
+        stream.add(gulp.src([sourceUrl + 'css/images.scss'])
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(cssPath))
             .pipe(gulp.dest(config.src))
-            .pipe(message('sprites scss 生成'));
-        // images 预览文件
-        gulp.src(sourceUrl + 'html/images.html')
+            .pipe(message()));
+        gulp.src([sourceUrl + 'html/images.html'])
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(pathBase + 'images/' + fName + '.html'))
-            .pipe(gulp.dest(config.dist));
-        spriteData.img
             .pipe(gulp.dest(config.dist))
-            .pipe(message('sprites img 生成'));
+            .pipe(message());
+        stream.add(spriteData.img
+            .pipe(gulp.dest(config.dist))
+            .pipe(message('sprites img 生成')));
         // cb && cb();
-        return spriteData;
+        return stream;
     }
 
     var fonts = function(dir, cb) {
+        var stream = $.mergeStream();
         var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + '/',
             fName    = path.basename(dir),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
-        var stream = gulp.src(dir + '/*.svg', {base: config.src })
+        var stream1 = gulp.src(dir + '/*.svg', {base: config.src })
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
@@ -162,7 +184,6 @@ module.exports = function(gulp, $) {
                 // timestamp: runTimestamp // recommended to get consistent builds when watching files
             }))
             .on('glyphs', function(glyphs, options) {
-                // CSS templating, e.g.
                 // console.log(glyphs, options);
 
                 var templateData = {
@@ -174,22 +195,21 @@ module.exports = function(gulp, $) {
                         fName   : fName
                     };
 
-                gulp.src(sourceUrl + 'css/fonts.scss')
+                stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
                     .pipe($.template(templateData))
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(config.src))
-                    .pipe(message('font scss 生成'));
-                gulp.src(sourceUrl + 'html/fonts.html')
+                    .pipe(message()));
+                gulp.src([sourceUrl + 'html/fonts.html'])
                     .pipe($.template(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     .pipe(gulp.dest(config.dist))
-                    .pipe(message('font html 生成'));
+                    .pipe(message());
                 cb && cb();
             })
-            // .pipe($.plumber())
             .pipe(gulp.dest(config.dist))
             .pipe(message('font 生成'));
-
+            stream.add(stream1)
         return stream;
     }
     // scss
@@ -205,13 +225,6 @@ module.exports = function(gulp, $) {
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
                 sourceMap: true
             }).on('error', $.sass.logError))
-            .pipe($.autoprefixer({
-                browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
-                cascade: true, // 是否美化属性值 默认：true 像这样：
-                //-webkit-transform: rotate(45deg);
-                //        transform: rotate(45deg);
-                //remove:true //是否去掉不必要的前缀 默认：true
-            }))
             .pipe($.if(argv.d,
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
@@ -221,13 +234,17 @@ module.exports = function(gulp, $) {
                 author: config.author,
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
-            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
-            .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(gulp.dest(config.dist))
-            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
-            .pipe(message('scss 生成'));
+            /*.pipe($.autoprefixer({
+                browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
+                cascade: true, // 是否美化属性值 默认：true 像这样：
+                //-webkit-transform: rotate(45deg);
+                //        transform: rotate(45deg);
+                //remove:true //是否去掉不必要的前缀 默认：true
+            }))*/
+
+        
         cb && cb();
-        return stream;
+        return gulpMiddleWare(stream, filePath);
     }
     // concatjs
     var concatJS = function(dir, cb) {
@@ -252,13 +269,9 @@ module.exports = function(gulp, $) {
             // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.uglify(configs.uglify))
             .pipe($.concat(pathRelative + '.js'))
-            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
-            .pipe($.if(argv.d, sourcemaps(dir)))
-            .pipe(gulp.dest(config.dist))
-            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
-            .pipe(message('合并 压缩'));
+        
         cb && cb();
-        return stream;
+        return gulpMiddleWare(stream, dir);
     }
     // js
     var JS = function(filePath, cb) {
@@ -267,23 +280,14 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
-            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
             .pipe($.template())
-            /*.pipe($.template({
-                name   : path.basename(filePath),
-                author : config.author,
-                date   : $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))*/
-            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
-            .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(gulp.dest(config.dist))
-            .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
-            .pipe(message('处理'));
+        
+        
         cb && cb();
 
-        return stream;
+        return gulpMiddleWare(stream, filePath);
     }
 
     var buildCB = function(fun, files, cb0, isLast) {
@@ -449,7 +453,7 @@ module.exports = function(gulp, $) {
                 root: config.path,
                 port: 8080,
                 // 静态服务器使用
-                livereload: argv.s ? true : false,
+                livereload: true,
                 /*middleware: function(connect, opt) {
                     return [function(req, res, next) {
                         console.log(req);
@@ -467,35 +471,24 @@ module.exports = function(gulp, $) {
 
     gulp.task('watch', ['init'], function() {
         if (argv.f) {
-            $.watch(config.path + '/**/*.{html,css,js}', function(cssFile) {
-                var relativeDir = path.dirname(path.relative(config.path, cssFile.path)
-                                    .replace(/\\/g,'/'));
-                console.log('本地：' + cssFile.path);
-                console.log('远程：' + '/housev7.08cms.com/template/blue/' + relativeDir + '/');
-                return gulp.src(cssFile.path)
-                    .pipe($.ftp({
-                        host: '',
-                        user: '',
-                        pass: '',
-                        port: '621',
-                        remotePath: '/housev7.08cms.com/template/blue/' + relativeDir + '/'
-                    }))
-                    .pipe($.livereload())
-                    .pipe(message('上传'));
-            });
+            if (!config.ftp) {
+                console.log('请先在gulp/base.json里设置ftp相关配置!');
+                return false;
+            }
+            ftp = $.ftp.create(config.ftp);
+            // $.watch([
+            //     config.dist + '/**/*.{html,css,js}', 
+            //     '!' + config.dist + '/src/**/*'
+            // ], function(cssFile) {
+            //     console.log('本地：' + cssFile.path);
+            //     console.log('远程：' + path.join(config.ftp.remotePath, path.relative(config.path, cssFile.path)));
+            //     return gulp.src(cssFile.path, {base: config.dist})
+            //         .pipe(ftp.newer(cssFile.path))
+            //         .pipe(ftp.dest(config.ftp.remotePath))
+            //         .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
+            // });
         } else {
-            // 动态使用
-            if (!argv.s) {
-                $.livereload.listen({
-                    port: 35729, // Server port
-                    // host: host, // Server host
-                    basePath: config.path, // Path to prepend all given paths
-                    start: true, // Automatically start
-                    quiet: false//, // Disable console logging
-                    //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
-                });
-            };
-
+            // 只刷新html
             $.watch([
                 config.dist + '/**/*.{html,htm}',
                 '!' + config.dist + '/**/{fonts,images,src}/*.{html,htm}'
@@ -508,6 +501,7 @@ module.exports = function(gulp, $) {
                     .pipe(message('livereload'));
             });
         }
+            
         // 扩展dist
         if (config.distEx) {
             $.watch([config.dist + '/**/*', '!' + config.dist + '/src/**/*'], function (file) {
@@ -595,7 +589,17 @@ module.exports = function(gulp, $) {
         });
         if (argv.s) {
             gulp.start('connect');
-        }
+        } else {
+        // 动态使用
+            $.livereload.listen({
+                port: 35729, // Server port
+                // host: host, // Server host
+                basePath: config.path, // Path to prepend all given paths
+                start: true, // Automatically start
+                quiet: false//, // Disable console logging
+                //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
+            });
+        };
     });
     // build
     gulp.task('build', [

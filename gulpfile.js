@@ -1,7 +1,7 @@
 var gulp      = require('gulp'),
     $             = require('gulp-load-plugins')({
                         pattern       : ['*'],
-                        replaceString : /^(gulp|node)(-|\.)/,
+                        replaceString : /^(gulp|node|vinyl)(-|\.)/,
                     }),
     utils         = require('./gulp/utils')(gulp, $),
     debugMoudle   = [], //调试用，只加载数组里的模块，如：['web']

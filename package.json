@@ -24,7 +24,6 @@
     "gulp-csso": "^1.0.1",
     "gulp-data": "^1.2.1",
     "gulp-file-include": "^0.13.7",
-    "gulp-ftp": "^1.1.0",
     "gulp-iconfont": "^5.0.1",
     "gulp-if": "^2.0.0",
     "gulp-imagemin": "^2.4.0",
@@ -50,6 +49,7 @@
     "moment": "^2.10.6",
     "node.extend": "^1.1.5",
     "request": "^2.67.0",
+    "vinyl-ftp": "^0.4.5",
     "wiredep": "^2.2.2",
     "yargs": "^3.29.0"
   }
