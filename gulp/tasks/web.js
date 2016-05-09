@@ -58,17 +58,24 @@ module.exports = function(gulp, $) {
             })
         };
 
-    var sourcemaps = function (filePath) {
-        var src = path.relative(config.path, config.src);
-        var absSrc = '/' + src;
-        return $.sourcemaps.write(absSrc, {
-            includeContent: false,
-            sourceMappingURL: function(file) {
-                return path.join(absSrc, file.relative + '.map').split(path.sep).join('/');
-            },
-            sourceRoot: absSrc,
-            // addComment: false,
-        });
+    var sourcemaps = function(filePath) {
+            // filePath 源文件path, 整个过程从生成文件目录找到src目录
+            // 相对对src目录
+            var fileRelative = path.relative(config.src, filePath)
+            var distDir = path.dirname(path.join(config.distEx || config.dist, fileRelative))
+            var relativePath = path.relative(distDir, config.src);
+            // 一定要写入src目录
+            return $.sourcemaps.write(config.src, {
+                includeContent: false,
+                // 相对dist目录
+                sourceMappingURL: function(file) {
+                    var srcMapURL = path.join(relativePath, file.relative + '.map')
+                    return srcMapURL;
+                },
+                // 相对dist目录
+                sourceRoot: relativePath,
+                // addComment: false,
+            });
     }
     var isNeedTpl = function(file) {
             return path.basename(file.path) === 'seajs.config.js' ||
@@ -304,21 +311,6 @@ module.exports = function(gulp, $) {
                 }
             }));
         });
-        // $.async.eachLimit(files, 10, function(file, callback) {
-        //         stream.add(fun(file, callback));
-        //     }, function(err) {
-        //         if (!err) {
-        //             if (config.isBuild && isLast) {
-        //                 if (config.distEx) {
-        //                     gulp.src([config.dist + '/**/*', '!' + config.dist + '/src/**/*'])
-        //                         .pipe(gulp.dest(config.distEx));
-        //                 }
-        //                 gulp.src('./package.json', {read: false })
-        //                     .pipe($.notify('build ok'));
-        //             }
-        //             cb0();
-        //         }
-        //     })
         return stream;
     }
     // tasks start
@@ -476,17 +468,6 @@ module.exports = function(gulp, $) {
                 return false;
             }
             ftp = $.ftp.create(config.ftp);
-            // $.watch([
-            //     config.dist + '/**/*.{html,css,js}', 
-            //     '!' + config.dist + '/src/**/*'
-            // ], function(cssFile) {
-            //     console.log('本地：' + cssFile.path);
-            //     console.log('远程：' + path.join(config.ftp.remotePath, path.relative(config.path, cssFile.path)));
-            //     return gulp.src(cssFile.path, {base: config.dist})
-            //         .pipe(ftp.newer(cssFile.path))
-            //         .pipe(ftp.dest(config.ftp.remotePath))
-            //         .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
-            // });
         } else {
             // 只刷新html
             $.watch([
@@ -502,7 +483,7 @@ module.exports = function(gulp, $) {
             });
         }
             
-        // 扩展dist
+        // 扩展dist 直接将生成好的文件复制过去
         if (config.distEx) {
             $.watch([config.dist + '/**/*', '!' + config.dist + '/src/**/*'], function (file) {
                 if (file.event == 'unlink') {
