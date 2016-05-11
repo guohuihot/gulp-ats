@@ -73,7 +73,7 @@ module.exports = function(gulp, $) {
                     return srcMapURL;
                 },
                 // 相对dist目录
-                sourceRoot: relativePath,
+                sourceRoot: relativePath.split(path.sep).join('/'),
                 // addComment: false,
             });
     }
@@ -284,10 +284,10 @@ module.exports = function(gulp, $) {
     var JS = function(filePath, cb) {
         var stream = gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
-            .pipe($.if(argv.d, $.sourcemaps.init()))
+            .pipe($.if(argv.d, $.sourcemaps.init(), $.uglify(configs.uglify)))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
-            .pipe($.uglify(configs.uglify))
+            // .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
             .pipe($.template())
         

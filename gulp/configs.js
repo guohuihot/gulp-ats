@@ -49,7 +49,8 @@ module.exports =  {
                 booleans      : true, //优化布尔表达式
                 properties    : false, //类似a["foo"] 智能优化为 a.foo
                 unsafe        : false, //不安全的优化
-                join_vars     : true //合并多个变量声明
+                join_vars     : true, //合并多个变量声明
+                drop_debugger : false //移除调试代码，如果debugger
             },
             preserveComments: 'some',
             mangle: {
