@@ -273,8 +273,8 @@ module.exports = function(gulp, $) {
                 }
             }))
             .pipe($.template())
-            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            // .pipe($.uglify(configs.uglify))
             .pipe($.concat(pathRelative + '.js'))
         
         cb && cb();
