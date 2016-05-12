@@ -38,9 +38,20 @@
         border: 1px solid #eee;
         text-align: center;
         font-family: arial;
-        color: #555;
+        color: #fff;
+        height: <%= H + 58 %>px;
+        width: <%= W + 10 %>px;
         line-height: 1.5;
-        background-color: #ddd;
+        background-color: #272822;
+        position: relative;
+    }
+    .class {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 48px;
+        width: 100%;
+        cursor: pointer;
     }
     pre {
         margin: 15px 0;
@@ -48,6 +59,27 @@
         font-family: Consolas;
         font-size: 14px;
         padding: 15px;
+        background-color: #272822;
+    }
+    .bg i {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        margin-left: 10px;
+        cursor: pointer;
+        background-color: #22D5BB;
+        float: right;
+    }
+    .bg i:nth-child(2) {
+        background-color: #E1F4D8;
+    }
+    .bg i:nth-child(3) {
+        background-color: #8B9D37;
+    }
+    .bg i:nth-child(4) {
+        background-color: #FE842E;
+    }
+    .bg i:nth-child(5) {
         background-color: #272822;
     }
     
@@ -72,18 +104,18 @@
 &lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
 </pre>
 
-        <h3>详细代码</h3>
+        <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i></i></span>详细代码</h3>
         点击下面文字直接复制到剪切板
     </div>
-    <ul>
-    <% _.forEach(cssData, function(data, name) { %>
-    <li>
-        <i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
-        <div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
-    </li>
-    <% }); %>
-    </ul>
 </div>
+<ul>
+<% _.forEach(cssData, function(data, name) { %>
+<li>
+    <i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
+    <div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
+</li>
+<% }); %>
+</ul>
 <script type="text/javascript">
     var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
 </script>
@@ -101,6 +133,11 @@ seajs.use(['clipboard'], function() {
                 e.clipboardData.clearData();
                 e.clipboardData.setData("text/plain", $(this).css({color:'#f00'}).text());
                 e.preventDefault();
+            })
+            .on('click', '.bg i', function() {
+                $('li').css({
+                    backgroundColor: $(this).css('background-color'),
+                })
             })
     });
 })

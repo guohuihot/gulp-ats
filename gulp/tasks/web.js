@@ -155,14 +155,20 @@ module.exports = function(gulp, $) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
-                    // console.log(jsonArr[0].contents);
+                    var dataJSON = JSON.parse(jsonArr[0].contents), maxH = 0, maxW = 0;
+                    for (item in dataJSON) {
+                        maxH = Math.max(dataJSON[item].height, maxH);
+                        maxW = Math.max(dataJSON[item].width, maxW);
+                    }
                     cb1(undefined, {
-                        cssData : JSON.parse(jsonArr[0].contents),
+                        cssData : dataJSON,
                         fUrl    : '../images/' + fName + '.png',
                         path    : pathBase + 'images/' + fName + '.html',
                         rPath   : config.distEx ? '/' : config.rPath,
                         fName   : fName,
-                        sign    : sign.img
+                        sign    : sign.img,
+                        W       : maxW,
+                        H       : maxH,
                     });
                 }));
             };
