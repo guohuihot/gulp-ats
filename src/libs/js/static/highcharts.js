@@ -245,6 +245,8 @@ drawLegendSymbol:F.prototype.drawLegendSymbol,getSymbol:function(){}};X=da(R,X);
 splat:oa,extendClass:da,pInt:A,wrap:function(a,b,c){var d=a[b];a[b]=function(){var a=Array.prototype.slice.call(arguments);a.unshift(d);return c.apply(this,a)}},svg:fa,canvas:$,vml:!fa&&!$,product:"Highcharts",version:"2.3.2"})})();
 !function ($) {
 	$.fn.highcharts = function (option) {
-		new Highcharts.Chart($.extend(true, option, {chart:{renderTo : this[0].id }}));
+		return this.each(function(index, el) {
+			new Highcharts.Chart($.extend(true, option, {chart:{renderTo : el.id }}));
+		});;
 	}
 }(jQuery)

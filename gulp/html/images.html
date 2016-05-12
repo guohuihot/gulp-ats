@@ -94,17 +94,13 @@ seajs.use(['clipboard'], function() {
         $('.index').click(function(event) {
             location.href = BASE_URL;
         });
-        var $icons = $('.class,.text');
-        $icons.on('click', function(e) {
-            e.preventDefault();
-        })
-        .clipboard({
-            path: BASE_URL + '<%= rPath %>js/static/jquery.clipboard.swf',
-            copy: function() {
+        var $icons = $('.class, .text');
+        $('body').on('copy', '.class, .text', function(e) {
                 $icons.removeAttr('style');
-                return $(this).css({color:'#f00'}).text();
-            }
-        });
+                e.clipboardData.clearData();
+                e.clipboardData.setData("text/plain", $(this).css({color:'#f00'}).text());
+                e.preventDefault();
+            })
     });
 })
 </script>
