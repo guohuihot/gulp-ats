@@ -2,6 +2,7 @@ module.exports = function(gulp, $) {
     // base
     var path      = require('path'),
         configs   = require('../configs'),
+        fs = require('fs'),
         argv      = $.yargs
                         .alias({
                             path    : 'p',
@@ -18,12 +19,15 @@ module.exports = function(gulp, $) {
                         }).argv,
         cwd       = process.cwd() + '/',
         sourceUrl = path.join(cwd, './gulp/'),
+            
         sign      = {
             img: 'img',
             font: 'font'
         },
         ftp = {},
-        config = {};
+        config = {},
+        _dir,
+        _timer;
 
     // functions
     var getInfo = function () {
@@ -49,11 +53,11 @@ module.exports = function(gulp, $) {
         }
         return taskInfo;
     }
-    var message = function () {
+    var message = function (msg) {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
-                if (path.extname(file.path) != '.map' && !config.isBuild) {
-                    return path.relative(config.path, file.path) + ' ok !';
+                if (!config.isBuild) {
+                    return msg || path.relative(config.path, file.path) + ' ok !';
                 };
             })
         };
@@ -78,8 +82,8 @@ module.exports = function(gulp, $) {
             });
     }
     var isNeedTpl = function(file) {
-            return path.basename(file.path) === 'seajs.config.js' ||
-                    path.extname(file.path) === '.html';
+            return file.basename === 'seajs.config.js' ||
+                    file.extname === '.html';
         };
     var ext = function(file) {
             return path.extname(file.path);
@@ -110,9 +114,16 @@ module.exports = function(gulp, $) {
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
             .pipe(gulp.dest(config.dist))
+            .pipe($.through2.obj(function(file, encoding, done) {
+                if (file.extname != '.map') {
+                    file.contents = new Buffer(file.contents);
+                    this.push(file);
+                }
+                done();
+            }))
 
         if (argv.f) {
-           s.pipe(ftp.dest(config.ftp.remotePath))
+            s.pipe(ftp.dest(config.ftp.remotePath))
                 .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                 .pipe(message())
         } else {
@@ -317,8 +328,7 @@ module.exports = function(gulp, $) {
     // tasks start
 
     gulp.task('init', function(cb) {
-        var fs = require('fs'),
-            base, customConfig;
+        var base, customConfig;
 
         if (!fs.existsSync(sourceUrl + 'base.json')) {
             fs.writeFileSync(sourceUrl + 'base.json', '');
@@ -474,7 +484,7 @@ module.exports = function(gulp, $) {
             $.watch([
                 config.dist + '/**/*.{html,htm}',
                 '!' + config.dist + '/**/{fonts,images,src}/*.{html,htm}'
-            ], function(file) {
+            ], {read: false}, function(file) {
                 gulp.src(file.path, {
                         read: false
                     })
@@ -486,7 +496,7 @@ module.exports = function(gulp, $) {
             
         // 扩展dist 直接将生成好的文件复制过去
         if (config.distEx) {
-            $.watch([config.dist + '/**/*', '!' + config.dist + '/src/**/*'], function (file) {
+            $.watch([config.dist + '/**/*', '!' + config.dist + '/src/**/*'], {read: false}, function (file) {
                 if (file.event == 'unlink') {
                     var pathRelative = path.relative(config.dist, file.path);
                     $.del([config.distEx + '/' + pathRelative], {force: true});
@@ -500,7 +510,7 @@ module.exports = function(gulp, $) {
         $.watch([
                 config.src + '/**/*.{html,htm}',
                 '!' + config.dist + '/**/_*.{html,htm}'
-            ], function(file) {
+            ], {read: false}, function(file) {
                 if (file.event == 'unlink') {
                     var pathRelative = path.relative(config.src, file.path);
                     $.del([config.dist + '/' + pathRelative], {force: true});
@@ -514,7 +524,7 @@ module.exports = function(gulp, $) {
                 }
             });
         // images
-        $.watch([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], function(file) {
+        $.watch([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], {read: false}, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
                 $.del([config.dist + '/' + pathRelative], {force: true});
@@ -526,56 +536,38 @@ module.exports = function(gulp, $) {
             }
         });
         // sprites
-        $.watch(config.src + '/**/images/*/*.{png,gif,jpg,jpeg}', function(file) {
-            sprites(file.dirname);
+        $.watch(config.src + '/**/images/*/*.{png,gif,jpg,jpeg}', {read: false}, function(file) {
+            return sprites(file.dirname);
         });
         // fonts
-        $.watch(config.src + '/**/fonts/*/*.svg', function(file) {
-            fonts(file.dirname)
+        $.watch(config.src + '/**/fonts/*/*.svg', {read: false}, function(file) {
+            return fonts(file.dirname);
         });
         // scss
-        $.watch([config.src + '/**/css/*.scss'], function (file) {
-             file.pipe($.through2(function(chunk, enc, callback) {
-                // chunk.match(/'.+';/)
-                console.log(typeof chunk);
-                // var fileName = file.basename.slice(1, -5);
-                // var fileJson; 
-
-                // if (!fs.existsSync(file.path.slice(0, -5) + '.json')) {
-                //     fs.writeFileSync(file.path.slice(0, -5) + '.json', '');
-                // }
-
-                // fileJson = $.jsonFilePlus.sync(file.path.slice(0, -5) + '.json');
-
-                // console.log(file.basename.slice(1, -5));
-                callback()
-            }))
-
-            if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path.replace(/.scss/,'.css'));
-                $.del([config.dist + '/' + pathRelative], {force: true});
+        $.watch([config.src + '/**/css/*.scss'], {read: false}, function (file) {
+            if (file.basename.slice(0, 1) === '_') {
+                var fileName = file.stem.slice(1);
+                var files = $.glob.sync(config.src + '/**/css/!(_*).scss');
+                var reg = new RegExp('(\'|\")\s*'+ fileName +'\s*(\'|\")');
+                
+                files.forEach(function(filePath) {
+                    // console.log(fs.readFileSync(p).toString().search(reg));
+                    // 处理所有包括当前'_base'的scss
+                    if (fs.readFileSync(filePath).toString().search(reg) != -1) {
+                        scss(filePath);      
+                    }
+                });
             } else {
-                scss(file.path);
+                if (file.event == 'unlink') {
+                    var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
+                    $.del([config.dist + '/' + pathRelative], {force: true});
+                } else {
+                    scss(file.path);
+                }
             }
         });
-        // _scss
-        $.watch([config.src + '/**/css/_*.scsss'], function (file) {
-            file.pipe($.through2(function(chunk, enc, callback) {
-                var fileName = file.basename.slice(1, -5);
-                var fileJson; 
-
-                if (!fs.existsSync(file.path.slice(0, -5) + '.json')) {
-                    fs.writeFileSync(file.path.slice(0, -5) + '.json', '');
-                }
-
-                fileJson = $.jsonFilePlus.sync(file.path.slice(0, -5) + '.json');
-
-                console.log(file.basename.slice(1, -5));
-                callback()
-            }))
-        });
         // js
-        $.watch([config.src + '/**/js/*.js', config.src + '/**/js/plugin/*.js'], function(file) {
+        $.watch([config.src + '/**/js/*.js', config.src + '/**/js/plugin/*.js'], {read: false}, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
                 $.del([config.dist + '/' + pathRelative], {force: true});
@@ -584,7 +576,7 @@ module.exports = function(gulp, $) {
             }
         });
         // 直接复制
-        $.watch([config.src + '/**/{static,test}/*'], function(file) {
+        $.watch([config.src + '/**/{static,test}/*'], {read: false}, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
                 $.del([config.dist + '/' + pathRelative], {force: true});
@@ -598,7 +590,7 @@ module.exports = function(gulp, $) {
         $.watch([
             config.src + '/**/js/*/*.js',
             '!' + config.src + '/**/js/{static,plugin}/*.js'
-        ], function(file) {
+        ], {read: false}, function(file) {
             concatJS(file.dirname);
         });
         if (argv.s) {
@@ -610,7 +602,7 @@ module.exports = function(gulp, $) {
                 // host: host, // Server host
                 basePath: config.path, // Path to prepend all given paths
                 start: true, // Automatically start
-                quiet: false//, // Disable console logging
+                quiet: true//, // Disable console logging
                 //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
             });
         };
@@ -630,9 +622,7 @@ module.exports = function(gulp, $) {
         var atsSrc = config.tpl;
         var proSrc = config.src;
         var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
-        var isVariables = function(file) {
-                return path.basename(file.path) === '_variables.scss';
-            };
+
         // 内容字串
         var sss = (argv.m == 11 || argv.m == 21) ? [
                     path.join(atsFromSrc, '/css/**/*'),
@@ -655,7 +645,9 @@ module.exports = function(gulp, $) {
             return gulp.src(sss, {base: atsSrc})
                 // .pipe($.if(isNeedTpl, $.data(tplData)))
                 // .pipe($.if(isNeedTpl, $.template()))
-                .pipe($.if(isVariables, $.rename({basename: '__variables'})))
+                .pipe($.if(function(file) {
+                        return file.basename === '_variables.scss';
+                    }, $.rename({basename: '__variables'})))
                 .pipe(gulp.dest(proSrc));
         }
     });
