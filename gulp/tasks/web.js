@@ -90,7 +90,7 @@ module.exports = function(gulp, $) {
             var pathRelative = path.relative(path.dirname(file.path), config.src);
             var pathRelative1 = path.relative(config.src, file.path);
             var sExtLen = path.extname(file.path).length;
-            
+            // console.log(config.distEx ? '/' : config.rPath);
             return {
                 name   : path.basename(file.path).slice(0, -sExtLen),
                 author : config.author,
@@ -228,6 +228,7 @@ module.exports = function(gulp, $) {
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
+                includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
                 outputStyle: 'nested',
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
                 sourceMap: true
@@ -269,7 +270,7 @@ module.exports = function(gulp, $) {
                     author : config.author,
                     date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                     // base   : host,
-                    rPath  : config.rPath
+                    rPath  : config.distEx ? '../' : config.rPath,
                 }
             }))
             .pipe($.template())
@@ -534,12 +535,44 @@ module.exports = function(gulp, $) {
         });
         // scss
         $.watch([config.src + '/**/css/*.scss'], function (file) {
+             file.pipe($.through2(function(chunk, enc, callback) {
+                // chunk.match(/'.+';/)
+                console.log(typeof chunk);
+                // var fileName = file.basename.slice(1, -5);
+                // var fileJson; 
+
+                // if (!fs.existsSync(file.path.slice(0, -5) + '.json')) {
+                //     fs.writeFileSync(file.path.slice(0, -5) + '.json', '');
+                // }
+
+                // fileJson = $.jsonFilePlus.sync(file.path.slice(0, -5) + '.json');
+
+                // console.log(file.basename.slice(1, -5));
+                callback()
+            }))
+
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path.replace(/.scss/,'.css'));
                 $.del([config.dist + '/' + pathRelative], {force: true});
             } else {
                 scss(file.path);
             }
+        });
+        // _scss
+        $.watch([config.src + '/**/css/_*.scsss'], function (file) {
+            file.pipe($.through2(function(chunk, enc, callback) {
+                var fileName = file.basename.slice(1, -5);
+                var fileJson; 
+
+                if (!fs.existsSync(file.path.slice(0, -5) + '.json')) {
+                    fs.writeFileSync(file.path.slice(0, -5) + '.json', '');
+                }
+
+                fileJson = $.jsonFilePlus.sync(file.path.slice(0, -5) + '.json');
+
+                console.log(file.basename.slice(1, -5));
+                callback()
+            }))
         });
         // js
         $.watch([config.src + '/**/js/*.js', config.src + '/**/js/plugin/*.js'], function(file) {
