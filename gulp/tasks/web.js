@@ -120,18 +120,18 @@ module.exports = function(gulp, $) {
                     this.push(file);
                 }
                 done();
-            }))
+            }));
 
         if (argv.f) {
-            s.pipe(ftp.dest(config.ftp.remotePath))
+            var s1 = s.pipe(ftp.dest(config.ftp.remotePath))
                 .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                 .pipe(message())
         } else {
-            s.pipe($.if(argv.s, $.connect.reload(), $.livereload()))
+            var s1 = s.pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                 .pipe(message());
         }
         
-        return s;
+        return s1;
     }
 
     var sprites = function(dir, cb) {
@@ -155,7 +155,10 @@ module.exports = function(gulp, $) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
-                    var dataJSON = JSON.parse(jsonArr[0].contents), maxH = 0, maxW = 0;
+                    var dataJSON = JSON.parse(jsonArr[0].contents),
+                        maxH = 0,
+                        maxW = 0;
+
                     for (item in dataJSON) {
                         maxH = Math.max(dataJSON[item].height, maxH);
                         maxW = Math.max(dataJSON[item].width, maxW);
@@ -238,8 +241,6 @@ module.exports = function(gulp, $) {
     }
     // scss
     var scss = function(filePath, cb) {
-        // console.log(config.tpl + config.libs + '/css/');
-        // return false;
         var stream = gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
@@ -268,7 +269,7 @@ module.exports = function(gulp, $) {
             }))*/
 
         
-        cb && cb();
+        // cb && cb();
         return gulpMiddleWare(stream, filePath);
     }
     // concatjs
@@ -321,10 +322,15 @@ module.exports = function(gulp, $) {
             stream.add(fun(file, function() {
                 if (config.isBuild && isLast) {
                     if (config.distEx) {
-                        gulp.src([config.dist + '/**/*', '!' + config.dist + '/src/**/*'])
+                        gulp.src([
+                                config.dist + '/**/*',
+                                '!' + config.dist + '/src/**/*'
+                            ])
                             .pipe(gulp.dest(config.distEx));
                     }
-                    gulp.src('./package.json', {read: false })
+                    gulp.src('./package.json', {
+                            read: false
+                        })
                         .pipe($.notify('build ok'));
                 }
             }));
@@ -502,47 +508,73 @@ module.exports = function(gulp, $) {
             
         // 扩展dist 直接将生成好的文件复制过去
         if (config.distEx) {
-            $.watch([config.dist + '/**/*', '!' + config.dist + '/src/**/*'], {read: false}, function (file) {
+            $.watch([
+                config.dist + '/**/*',
+                '!' + config.dist + '/src/**/*'
+            ], {
+                read: false
+            }, function(file) {
                 if (file.event == 'unlink') {
                     var pathRelative = path.relative(config.dist, file.path);
-                    $.del([config.distEx + '/' + pathRelative], {force: true});
+                    $.del([config.distEx + '/' + pathRelative], {
+                        force: true
+                    });
                 } else {
-                    gulp.src(file.path, {base: config.dist})
-                        .pipe(gulp.dest(config.distEx));
+                    gulp.src(file.path, {
+                            base: config.dist
+                        })
+                        .pipe(gulp.dest(config.distEx))
+                        .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
                 }
             })
         }
         // html
         $.watch([
-                config.src + '/**/*.{html,htm}',
-                '!' + config.dist + '/**/_*.{html,htm}'
-            ], {read: false}, function(file) {
-                if (file.event == 'unlink') {
-                    var pathRelative = path.relative(config.src, file.path);
-                    $.del([config.dist + '/' + pathRelative], {force: true});
-                } else {
-                    gulp.src(file.path, {base: config.src})
-                        .pipe($.plumber())
-                        .pipe($.fileInclude())
-                        .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
-                        .pipe(gulp.dest(config.dist))
-                        .pipe(message('html处理ok'));
-                }
-            });
-        // images
-        $.watch([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], {read: false}, function(file) {
+            config.src + '/**/*.{html,htm}',
+            '!' + config.dist + '/**/_*.{html,htm}'
+        ], {
+            read: false
+        }, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {force: true});
+                $.del([config.dist + '/' + pathRelative], {
+                    force: true
+                });
             } else {
-                gulp.src(file.path, {base: config.src})
+                gulp.src(file.path, {
+                        base: config.src
+                    })
+                    .pipe($.plumber())
+                    .pipe($.fileInclude())
+                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                        to: 'gbk'
+                    })))
+                    .pipe(gulp.dest(config.dist))
+                    .pipe(message('html处理ok'));
+            }
+        });
+        // images
+        $.watch([config.src + '/**/images/*.{png,gif,jpg,jpeg}'], {
+            read: false
+        }, function(file) {
+            if (file.event == 'unlink') {
+                var pathRelative = path.relative(config.src, file.path);
+                $.del([config.dist + '/' + pathRelative], {
+                    force: true
+                });
+            } else {
+                gulp.src(file.path, {
+                        base: config.src
+                    })
                     .pipe($.imagemin(configs.imagemin))
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('复制并压缩'));
             }
         });
         // sprites
-        $.watch(config.src + '/**/images/*/*.{png,gif,jpg,jpeg}', {read: false}, function(file) {
+        $.watch(config.src + '/**/images/*/*.{png,gif,jpg,jpeg}', {
+            read: false
+        }, function(file) {
             return sprites(file.dirname);
         });
         // fonts
@@ -566,28 +598,46 @@ module.exports = function(gulp, $) {
             } else {
                 if (file.event == 'unlink') {
                     var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
-                    $.del([config.dist + '/' + pathRelative], {force: true});
+                    $.del([config.dist + '/' + pathRelative], {
+                        force: true
+                    });
                 } else {
-                    scss(file.path);
+                    clearTimeout(_timer);
+                    _timer = setTimeout(function() {
+                        scss(file.path);
+                    }, 100);
                 }
             }
         });
         // js
-        $.watch([config.src + '/**/js/*.js', config.src + '/**/js/plugin/*.js'], {read: false}, function(file) {
+        $.watch([
+            config.src + '/**/js/*.js',
+            config.src + '/**/js/plugin/*.js'
+        ], {
+            read: false
+        }, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {force: true});
+                $.del([config.dist + '/' + pathRelative], {
+                    force: true
+                });
             } else {
                 JS(file.path);
             }
         });
         // 直接复制
-        $.watch([config.src + '/**/{static,test}/*'], {read: false}, function(file) {
+        $.watch([config.src + '/**/{static,test}/*'], {
+            read: false
+        }, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {force: true});
+                $.del([config.dist + '/' + pathRelative], {
+                    force: true
+                });
             } else {
-                gulp.src(file.path, {base: config.src})
+                gulp.src(file.path, {
+                        base: config.src
+                    })
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('直接复制'));
             }
@@ -606,7 +656,7 @@ module.exports = function(gulp, $) {
             $.livereload.listen({
                 port: 35729, // Server port
                 // host: host, // Server host
-                basePath: config.path, // Path to prepend all given paths
+                basePath: config.distEx || config.path, // Path to prepend all given paths
                 start: true, // Automatically start
                 quiet: true//, // Disable console logging
                 //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
