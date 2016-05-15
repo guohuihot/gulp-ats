@@ -554,7 +554,8 @@ module.exports = function(gulp, $) {
         });
         // images
         $.watch([config.src + '/**/{images,pic}/**/*.{png,gif,jpg,jpeg}'], {
-            read: false
+            read: false,
+            usePolling: true
         }, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
@@ -575,7 +576,10 @@ module.exports = function(gulp, $) {
             }
         });
         // fonts
-        $.watch(config.src + '/**/fonts/*/*.svg', {read: false}, function(file) {
+        $.watch(config.src + '/**/fonts/*/*.svg', {
+            read: false,
+            usePolling: true
+        }, function(file) {
             return fonts(file.dirname);
         });
         // scss
