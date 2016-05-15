@@ -97,7 +97,11 @@
 <pre>
 @import 'img-<%= fName %>'; //导入css 标识-文件名
 @include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
-
+.img-demo-home {
+    width: nth($img-<%= fName %>, 1);
+    height: nth($img-<%= fName %>, 2);
+    background-position: nth($img-<%= fName %>, 3) nth($img-<%= fName %>, 4);
+}
 </pre>
         <h3>html</h3>
 <pre>

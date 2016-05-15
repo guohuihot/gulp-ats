@@ -155,9 +155,7 @@ module.exports = function(gulp, $) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
-                    var dataJSON = JSON.parse(jsonArr[0].contents),
-                        maxH = 0,
-                        maxW = 0;
+                    var dataJSON = JSON.parse(jsonArr[0].contents), maxH = 0, maxW = 0;
                     for (item in dataJSON) {
                         maxH = Math.max(dataJSON[item].height, maxH);
                         maxW = Math.max(dataJSON[item].width, maxW);
@@ -240,6 +238,8 @@ module.exports = function(gulp, $) {
     }
     // scss
     var scss = function(filePath, cb) {
+        // console.log(config.tpl + config.libs + '/css/');
+        // return false;
         var stream = gulp.src(filePath, {base: config.src})
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
@@ -268,7 +268,7 @@ module.exports = function(gulp, $) {
             }))*/
 
         
-        // cb && cb();
+        cb && cb();
         return gulpMiddleWare(stream, filePath);
     }
     // concatjs
@@ -321,15 +321,10 @@ module.exports = function(gulp, $) {
             stream.add(fun(file, function() {
                 if (config.isBuild && isLast) {
                     if (config.distEx) {
-                        gulp.src([
-                                config.dist + '/**/*',
-                                '!' + config.dist + '/src/**/*'
-                            ])
+                        gulp.src([config.dist + '/**/*', '!' + config.dist + '/src/**/*'])
                             .pipe(gulp.dest(config.distEx));
                     }
-                    gulp.src('./package.json', {
-                            read: false
-                        })
+                    gulp.src('./package.json', {read: false })
                         .pipe($.notify('build ok'));
                 }
             }));
@@ -522,36 +517,27 @@ module.exports = function(gulp, $) {
                     gulp.src(file.path, {
                             base: config.dist
                         })
-                        .pipe(gulp.dest(config.distEx))
-                        .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
+                        .pipe(gulp.dest(config.distEx));
                 }
             })
         }
         // html
         $.watch([
-            config.src + '/**/*.{html,htm}',
-            '!' + config.dist + '/**/_*.{html,htm}'
-        ], {
-            read: false
-        }, function(file) {
-            if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
-                    force: true
-                });
-            } else {
-                gulp.src(file.path, {
-                        base: config.src
-                    })
-                    .pipe($.plumber())
-                    .pipe($.fileInclude())
-                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                        to: 'gbk'
-                    })))
-                    .pipe(gulp.dest(config.dist))
-                    .pipe(message('html处理ok'));
-            }
-        });
+                config.src + '/**/*.{html,htm}',
+                '!' + config.dist + '/**/_*.{html,htm}'
+            ], {read: false}, function(file) {
+                if (file.event == 'unlink') {
+                    var pathRelative = path.relative(config.src, file.path);
+                    $.del([config.dist + '/' + pathRelative], {force: true});
+                } else {
+                    gulp.src(file.path, {base: config.src})
+                        .pipe($.plumber())
+                        .pipe($.fileInclude())
+                        .pipe($.if(argv.charset == 'gbk', $.convertEncoding({to: 'gbk'})))
+                        .pipe(gulp.dest(config.dist))
+                        .pipe(message('html处理ok'));
+                }
+            });
         // images
         $.watch([config.src + '/**/{images,pic}/**/*.{png,gif,jpg,jpeg}'], {
             read: false
@@ -602,17 +588,10 @@ module.exports = function(gulp, $) {
             }
         });
         // js
-        $.watch([
-            config.src + '/**/js/*.js',
-            config.src + '/**/js/plugin/*.js'
-        ], {
-            read: false
-        }, function(file) {
+        $.watch([config.src + '/**/js/*.js', config.src + '/**/js/plugin/*.js'], {read: false}, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
-                    force: true
-                });
+                $.del([config.dist + '/' + pathRelative], {force: true});
             } else {
                 JS(file.path);
             }
@@ -642,7 +621,7 @@ module.exports = function(gulp, $) {
             $.livereload.listen({
                 port: 35729, // Server port
                 // host: host, // Server host
-                basePath: config.distEx || config.path, // Path to prepend all given paths
+                basePath: config.path, // Path to prepend all given paths
                 start: true, // Automatically start
                 quiet: true//, // Disable console logging
                 //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
