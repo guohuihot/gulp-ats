@@ -81,13 +81,17 @@ module.exports = function(gulp, $) {
                 // addComment: false,
             });
     }
-    var isNeedTpl = function(file) {
-            return file.basename === 'seajs.config.js' ||
-                    file.extname === '.html';
-        };
-    var ext = function(file) {
-            return path.extname(file.path);
-        };
+    /**
+     * 配合$.if使用，含有"文件名or扩展名"
+     * @param  {array}  arr ['.js', 'aa.js'] 当前文件扩展名是.js或者文件名是aa.js
+     * @return {Boolean}     
+     */
+    var hasProp = function(arr) {
+        return function(file) {
+            return arr.indexOf(path.extname(file.path)) != -1 || 
+                arr.indexOf(path.basename(file.path)) != -1;
+        }
+    };
     // 复制时替换的数据
     var tplData = function(file) {
             // src文件到src = dist文件到dist
@@ -585,9 +589,9 @@ module.exports = function(gulp, $) {
         // scss
         $.watch([config.src + '/**/css/*.scss'], {read: false}, function (file) {
             if (file.basename.slice(0, 1) === '_') {
-                var fileName = file.stem.slice(1);
-                var files = $.glob.sync(config.src + '/**/css/!(_*).scss');
-                var reg = new RegExp('(\'|\")\s*'+ fileName +'\s*(\'|\")');
+                var fileName = file.stem.slice(1),
+                    files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
+                    reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
                 
                 files.forEach(function(filePath) {
                     // console.log(fs.readFileSync(p).toString().search(reg));
@@ -671,15 +675,15 @@ module.exports = function(gulp, $) {
 
         // 内容字串
         var sss = (argv.m == 11 || argv.m == 21) ? [
-                    path.join(atsFromSrc, '/css/**/*'),
-                    path.join(atsFromSrc, '/images/**/*'),
-                    path.join(atsFromSrc, '/fonts/**/*'),
-                    path.join(atsFromSrc, '/pic/**/*'),
-                    path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
-                    path.join(atsFromSrc, '/**/*.html'),
-                ] : [
-                    atsFromSrc + '/**/*',
-                ];
+            path.join(atsFromSrc, '/css/**/*'),
+            path.join(atsFromSrc, '/images/**/*'),
+            path.join(atsFromSrc, '/fonts/**/*'),
+            path.join(atsFromSrc, '/pic/**/*'),
+            path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
+            path.join(atsFromSrc, '/**/*.html'),
+        ] : [
+            atsFromSrc + '/**/*',
+        ];
         // 只重建核心
         config.isBuild = true;
 
@@ -688,12 +692,12 @@ module.exports = function(gulp, $) {
             cb();
         } else {
             // 复制核心代码
-            return gulp.src(sss, {base: atsSrc})
-                // .pipe($.if(isNeedTpl, $.data(tplData)))
-                // .pipe($.if(isNeedTpl, $.template()))
-                .pipe($.if(function(file) {
-                        return file.basename === '_variables.scss';
-                    }, $.rename({basename: '__variables'})))
+            return gulp.src(sss, {
+                    base: atsSrc
+                })
+                .pipe($.if(hasProp(['_variables.scss', '_base.scss']), $.rename({
+                    prefix: '_'
+                })))
                 .pipe(gulp.dest(proSrc));
         }
     });
@@ -703,7 +707,9 @@ module.exports = function(gulp, $) {
         var proDist = config.dist;
         var stream = $.mergeStream();
         // 处理img
-        stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {base: proSrc})
+        stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {
+                base: proSrc
+            })
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
 
