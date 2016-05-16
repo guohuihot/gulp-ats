@@ -27,7 +27,8 @@ module.exports = function(gulp, $) {
         ftp = {},
         config = {},
         _dir,
-        _timer;
+        _timer,
+        pExt;
 
     // functions
     var getInfo = function () {
@@ -626,12 +627,18 @@ module.exports = function(gulp, $) {
             }
         });
         // 直接复制
-        $.watch([config.src + '/**/{static,test}/*'], {read: false}, function(file) {
+        $.watch([config.src + '/**/{static,test}/*'], {
+            read: false
+        }, function(file) {
             if (file.event == 'unlink') {
                 var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {force: true});
+                $.del([config.dist + '/' + pathRelative], {
+                    force: true
+                });
             } else {
-                gulp.src(file.path, {base: config.src})
+                gulp.src(file.path, {
+                        base: config.src
+                    })
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('直接复制'));
             }
@@ -640,7 +647,9 @@ module.exports = function(gulp, $) {
         $.watch([
             config.src + '/**/js/*/*.js',
             '!' + config.src + '/**/js/{static,plugin}/*.js'
-        ], {read: false}, function(file) {
+        ], {
+            read: false
+        }, function(file) {
             concatJS(file.dirname);
         });
         if (argv.s) {
