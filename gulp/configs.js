@@ -62,5 +62,51 @@ module.exports =  {
             progressive       : true, //类型：Boolean 默认：false 无损压缩jpg图片
             interlaced        : true, //类型：Boolean 默认：false 隔行扫描gif进行渲染
             multipass         : true //类型：Boolean 默认：false 多次优化svg直到完全优化
+        },
+        jsdoc: {
+            "tags": {
+                "allowUnknownTags": true
+            },
+            "source": {
+                "excludePattern": "(^|\\/|\\\\)_"
+            },
+            "opts": {
+                "destination": "./docs/gen"
+            },
+            "plugins": [
+                "plugins/markdown"
+            ],
+            "templates": {
+                "cleverLinks": false,
+                "monospaceLinks": false,
+                "default": {
+                    "outputSourceFiles": true,
+                },
+                "path": "ink-docstrap",
+                "theme": "cerulean",
+                "systemName": "08cms文档",
+                "outputSourcePath": true, //显示文件来源
+                "outputSourceFiles": true,
+                "navType": "vertical",
+                "linenums": true,
+                "copyright": '08cms说明文档 by <a href="https://www.08cms.com/">08cms</a> ',
+                "dateFormat": "MMMM Do YYYY, h:mm:ss a"
+
+                /*"systemName"            : "{string}",
+                "footer"                : "{string}",
+                "copyright"             :  "{string}",
+                "includeDate"           : "{boolean}",
+                "navType"               : "{vertical|inline}",
+                "theme"                 : "{theme}",
+                "linenums"              : "{boolean}",
+                "collapseSymbols"       : "{boolean}",
+                "inverseNav"            : "{boolean}",
+                "outputSourceFiles"     : "{boolean}" ,
+                "outputSourcePath"      : "{boolean}",
+                "dateFormat"            : "{string}",
+                "syntaxTheme"           : "{string}",
+                "sort"                  : "{boolean|string}"*/
+            }
         }
+
 	}

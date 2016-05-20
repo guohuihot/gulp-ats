@@ -1,31 +1,31 @@
 module.exports = function(gulp, $) {
     // base
-    var path      = require('path'),
+    var path  = require('path'),
         configs   = require('../configs'),
-        fs = require('fs'),
+        fs        = require('fs'),
         argv      = $.yargs
-                        .alias({
-                            path    : 'p',
-                            author  : 'a',
-                            custom  : 'c',
-                            libs    : 'l',
-                            dev     : 'd',
-                            server  : 's',
-                            open    : 'o',
-                            ftp     : 'f',
-                            reverse : 'r',
-                            mode    : 'm',
-                            tpl     : 't'
-                        }).argv,
+        .alias({
+            path      : 'p',
+            author    : 'a',
+            custom    : 'c',
+            libs      : 'l',
+            dev       : 'd',
+            server    : 's',
+            open      : 'o',
+            ftp       : 'f',
+            reverse   : 'r',
+            mode      : 'm',
+            tpl       : 't'
+        }).argv,
         cwd       = process.cwd() + '/',
         sourceUrl = path.join(cwd, './gulp/'),
-            
+        
         sign      = {
-            img: 'img',
-            font: 'font'
+        img       : 'img',
+        font      : 'font'
         },
-        ftp = {},
-        config = {},
+        ftp       = {},
+        config    = {},
         _dir,
         _timer,
         pExt;
@@ -114,7 +114,9 @@ module.exports = function(gulp, $) {
         }
     // gulpMiddleWare
     var gulpMiddleWare = function(stream, filePath) {
-        var s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+        var s;
+
+        s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
@@ -417,23 +419,22 @@ module.exports = function(gulp, $) {
 
         // console.log(config);
         config = $.extend({
-            author : 'author',
-            distEx : '',
-            libs   : '',
-            tpl    : './src/libs/', // ats源目录
-            dist   : '', // 项目的dist
-            src    : 'src', // 项目的src
-            mode   : 1
-        }, 
-        config,
-        {
-            path   : argv.p,
-            author : argv.a,
-            dist   : argv.dist,
-            distEx : argv.distEx,
-            src    : argv.src,
-            mode   : argv.m
-        }, customConfig);
+                author: 'author',
+                distEx: '',
+                libs: '',
+                tpl: './src/libs/', // ats源目录
+                dist: '', // 项目的dist
+                src: 'src', // 项目的src
+                mode: 1
+            },
+            config, {
+                path: argv.p,
+                author: argv.a,
+                dist: argv.dist,
+                distEx: argv.distEx,
+                src: argv.src,
+                mode: argv.m
+            }, customConfig);
         // 目录不存在时直接返回
         if (!config.path) {
             console.log('error: 请设置项目目录path!');
@@ -778,6 +779,19 @@ module.exports = function(gulp, $) {
             force: true
         }, cb);
     });
+    // doc
+    gulp.task('doc', ['init'], function(cb) {
+        configs.jsdoc.opts.destination = path.join(config.path, 'docs');
+        gulp.src([
+                path.join(config.src, '**/*.{js,scss,md}'),
+                // '!' + config.dist + '/docs/**/*',
+                '!' + config.src + '/**/static/*.{js,scss,md}',
+            ], {
+                base: config.src,
+                read: false
+            })
+            .pipe($.jsdoc3(configs.jsdoc))
+    })
     // php copy
     gulp.task('php-copy', function(cb) {
         argv.p = argv.p || 'E:/wwwroot/newcore';
