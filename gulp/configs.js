@@ -85,12 +85,13 @@ module.exports =  {
                 "path": "ink-docstrap",
                 "theme": "cerulean",
                 "systemName": "08cms文档",
-                "outputSourcePath": true, //显示文件来源
+                "outputSourcePath": false, //显示文件来源
                 "outputSourceFiles": true,
                 "navType": "vertical",
+                "collapseSymbols" : false,
                 "linenums": true,
                 "copyright": '08cms说明文档 by <a href="https://www.08cms.com/">08cms</a> ',
-                "dateFormat": "MMMM Do YYYY, h:mm:ss a"
+                "dateFormat": "MMMM Do YYYY, h:mm:ss"
 
                 /*"systemName"            : "{string}",
                 "footer"                : "{string}",
