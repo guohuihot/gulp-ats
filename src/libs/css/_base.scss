@@ -88,3 +88,110 @@ ul, li {
     margin: 0;
     padding: 0;
 }
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: normal;
+}
+
+//
+// Utility classes
+// --------------------------------------------------
+
+
+.clearfix {
+  @extend %clearfix;
+}
+// Floats
+// -------------------------
+
+.fr {
+  float: right !important;
+}
+.fl {
+  float: left !important;
+}
+
+// Toggling content
+// -------------------------
+
+.dn {
+  display: none !important;
+}
+.db {
+  display: block !important;
+}
+.vh {
+  visibility: hidden;
+}
+.text-hide {
+  @extend text-overflow;
+}
+
+// -------------------------
+.pos {
+  position: static;
+}
+.pof {
+  position: fixed;
+}
+.por {
+  position: relative;
+}
+.poa {
+  position: absolute;
+}
+
+.tal {
+    text-align: left !important;
+}
+
+.tac {
+    text-align: center !important;
+}
+
+.tar {
+    text-align: right !important;
+}
+
+.ma {
+    margin: 0 auto !important;
+}
+// blank
+%blank {
+    font-size: 1px;
+
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+@for $i from 1 through 30 {
+  .blank#{$i} { 
+        @extend %blank;
+        height: #{$i}px; 
+    }
+}
+
+// margin padding
+$param: (t: top, r: right, b: bottom, l: left);
+
+@each $k, $v in $param {
+    @for $i from 1 through 40 {
+        @if $i % 5 == 0 {
+            .m#{$k}#{$i} {
+                margin-#{$v}: #{$i}px !important;
+            }
+            .p#{$k}#{$i} {
+                padding-#{$v}: #{$i}px !important;
+            }
+        }
+    }
+}
+// font
+
+@for $i from 12 through 34 {
+  .fz#{$i} { 
+        font-size: #{$i}px !important; 
+    }
+}

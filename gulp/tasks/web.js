@@ -705,7 +705,7 @@ module.exports = function(gulp, $) {
             return gulp.src(sss, {
                     base: atsSrc
                 })
-                .pipe($.if(hasProp(['_variables.scss', '_base.scss']), $.rename({
+                .pipe($.if(hasProp(['_variables.scss', '_utilities.scss']), $.rename({
                     prefix: '_'
                 })))
                 .pipe(gulp.dest(proSrc));

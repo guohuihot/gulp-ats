@@ -91,6 +91,7 @@ module.exports =  {
                 "collapseSymbols" : false,
                 "linenums": true,
                 "copyright": '08cms说明文档 by <a href="https://www.08cms.com/">08cms</a> ',
+                "footer": '<style type="text/css">.name h4, h4.name {border-radius: 3px;padding: 5px;color: #fff;background-color: #2FA4E7;}</style>',
                 "dateFormat": "MMMM Do YYYY, h:mm:ss"
 
                 /*"systemName"            : "{string}",
