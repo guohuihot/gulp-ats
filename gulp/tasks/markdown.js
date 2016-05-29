@@ -96,7 +96,9 @@ module.exports = function(gulp, $, utils) {
                             .pipe($.if(hasProp(['.js']), $.rename({
                                 extname: '.md'
                             })))
-                        .pipe($.marked())
+                        .pipe($.marked({
+                            // gfm: false
+                        }))
                         .pipe($.through2.obj(function(file2, encoding, done) {
                             var contents = String(file2.contents);
                             if (contents) {
