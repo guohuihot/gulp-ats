@@ -16,6 +16,10 @@ module.exports = function(gulp, $, utils) {
             tpl: 't'
         }).argv;
 
+    if (!argv.p) {
+        console.log('err:需要指定路径！');
+        return;
+    };
     var hasProp = function(arr) {
         return function(file) {
             return arr.indexOf(path.extname(file.path)) != -1 || 
@@ -25,16 +29,21 @@ module.exports = function(gulp, $, utils) {
 
     var files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/*.md')),
         tree = {},
-        searchableDocuments = {};
+        // 存储搜索数据
+        searchableDocuments = {},
+        // 处理一次js保存起来后面用
+        markdownData = {};
 
     var processTree = function(file, contents) {
         var basename = path.basename(file).slice(0, -3),
             extname = path.extname(file),
             dir = extname == '.js' ? 'JS文档' : path.basename(path.dirname(file)),
             cur;
+
         contents = $.htmlToText.fromString(String(contents), {
                     wordwrap: 130
                 });
+
         if (contents) {
             cur = tree[dir] || [];
             cur.push(basename)
@@ -44,25 +53,24 @@ module.exports = function(gulp, $, utils) {
                 title: basename,
                 body: contents,
             }
+        } else if (extname == '.js') {
+            files.splice(files.indexOf(file), 1)
         }
+        
     }
-    if (!argv.p) {
-        console.log('err:需要指定路径！');
-        return;
-    };
-    files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
-    // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
-    //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
+    // files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
+    files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
+                $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
 
     gulp.task('tree', function() {
         var stream = $.mergeStream();
-
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
                             .pipe($.plumber())
                             .pipe($.jsdocToMarkdown({template: "{{>main}}"}))
                             .pipe($.through2.obj(function(file2, encoding, done) {
+                                markdownData[path.basename(file).slice(0, -3)] = file2.contents;
                                 processTree(file, file2.contents);
                                 done();
                             })));
@@ -96,9 +104,9 @@ module.exports = function(gulp, $, utils) {
                 dataFun = function(file1, cb1) {
                     gulp.src(file)
                         .pipe($.plumber())
-                        .pipe($.if(hasProp(['.js']), $.jsdocToMarkdown({
-                            template: "{{>main}}"
-                        })))
+                        // .pipe($.if(hasProp(['.js']), $.jsdocToMarkdown({
+                        //     template: "{{>main}}"
+                        // })))
                         .pipe($.if(hasProp(['.js']), $.rename({
                             extname: '.md'
                         })))
@@ -118,6 +126,7 @@ module.exports = function(gulp, $, utils) {
                               smartLists: true,
                               smartypants: false
                             });*/
+                            file2.contents = markdownData[basename] || file2.contents;
                             var contents = String(file2.contents);
                             contents = $.marked(contents, {
                                             renderer: renderer
@@ -135,9 +144,11 @@ module.exports = function(gulp, $, utils) {
                         }));
                 },
                 dist;
+            if (path.join(argv.p, 'readme.md') == file) {
+                basename = 'index';
+            }
 
-            dist = path.join('docs/', (basename == 'readme' ? 'index' : basename) + '.html');
-
+            dist = path.join('docs/', basename + '.html');
             gulp.src('./gulp/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))
