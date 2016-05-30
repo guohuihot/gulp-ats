@@ -22,7 +22,8 @@ module.exports = function(gulp, $, utils) {
                 arr.indexOf(path.basename(file.path)) != -1;
         }
     };
-    var files = $.glob.sync(path.join(argv.p, '/**/!(vendor)/**/doc/**/*.md')),
+
+    var files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/*.md')),
         tree = {},
         searchableDocuments = {};
 
@@ -31,7 +32,9 @@ module.exports = function(gulp, $, utils) {
             extname = path.extname(file),
             dir = extname == '.js' ? 'JS文档' : path.basename(path.dirname(file)),
             cur;
-        contents = String(contents);
+        contents = $.htmlToText.fromString(String(contents), {
+                    wordwrap: 130
+                });
         if (contents) {
             cur = tree[dir] || [];
             cur.push(basename)
@@ -43,9 +46,13 @@ module.exports = function(gulp, $, utils) {
             }
         }
     }
-
-    files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
-                $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
+    if (!argv.p) {
+        console.log('err:需要指定路径！');
+        return;
+    };
+    files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
+    // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
+    //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
 
     gulp.task('tree', function() {
         var stream = $.mergeStream();
@@ -53,6 +60,7 @@ module.exports = function(gulp, $, utils) {
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
+                            .pipe($.plumber())
                             .pipe($.jsdocToMarkdown({template: "{{>main}}"}))
                             .pipe($.through2.obj(function(file2, encoding, done) {
                                 processTree(file, file2.contents);
@@ -76,6 +84,7 @@ module.exports = function(gulp, $, utils) {
             .pipe(gulp.dest(path.join(argv.p, 'docs')));
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
+            .pipe($.plumber())
             .pipe($.template({
                 searchableDocuments: JSON.stringify(searchableDocuments)
             }))
@@ -88,19 +97,33 @@ module.exports = function(gulp, $, utils) {
                     gulp.src(file)
                         .pipe($.plumber())
                         .pipe($.if(hasProp(['.js']), $.jsdocToMarkdown({
-                                template: "{{>main}}",
-                                'no-gfm': false,
-                                'heading-depth': 3,
-                                // 'separators': false,
-                            })))
-                            .pipe($.if(hasProp(['.js']), $.rename({
-                                extname: '.md'
-                            })))
-                        .pipe($.marked({
-                            // gfm: false
-                        }))
+                            template: "{{>main}}"
+                        })))
+                        .pipe($.if(hasProp(['.js']), $.rename({
+                            extname: '.md'
+                        })))
                         .pipe($.through2.obj(function(file2, encoding, done) {
+                            var renderer = new $.marked.Renderer();
+                            // renderer.code = function (code, language) {
+                            //      // console.log(code);
+                            //     return '<pre class="prettyprint lang-' + language + '"><code>' + code.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '</code></pre>'
+                            // }
+                            /*$.marked.setOptions({
+                              renderer: new $.marked.Renderer(),
+                              gfm: true,
+                              tables: true,
+                              breaks: false,
+                              pedantic: false,
+                              sanitize: true,
+                              smartLists: true,
+                              smartypants: false
+                            });*/
                             var contents = String(file2.contents);
+                            contents = $.marked(contents, {
+                                            renderer: renderer
+                                        })
+                                        .replace(/\s+$/, '')
+                                        .replace(/&#39;/g, "'");
                             if (contents) {
                                 cb1(undefined, {
                                     contents: contents,
@@ -116,6 +139,7 @@ module.exports = function(gulp, $, utils) {
             dist = path.join('docs/', (basename == 'readme' ? 'index' : basename) + '.html');
 
             gulp.src('./gulp/markdown/index.html')
+                .pipe($.plumber())
                 .pipe($.data(dataFun))
                 .pipe($.template())
                 .pipe($.rename(dist))
