@@ -58,9 +58,9 @@ module.exports = function(gulp, $, utils) {
         }
         
     }
-    // files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
-    files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
-                $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
+    files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
+    // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
+    //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
 
     gulp.task('tree', function() {
         var stream = $.mergeStream();
