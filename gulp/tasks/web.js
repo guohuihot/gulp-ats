@@ -699,7 +699,7 @@ module.exports = function(gulp, $) {
         // 只重建核心
         config.isBuild = true;
 
-        if (config.mode == 4) {
+        if (config.mode == 4 || argv.sync) {
             // 如果是核心开发，不复制直接处理代码
             cb();
         } else {
@@ -781,19 +781,6 @@ module.exports = function(gulp, $) {
             force: true
         }, cb);
     });
-    // doc
-    gulp.task('doc', ['init'], function(cb) {
-        configs.jsdoc.opts.destination = path.join(config.path, 'docs');
-        gulp.src([
-                path.join(config.src, '**/*.{js,scss,md}'),
-                // '!' + config.dist + '/docs/**/*',
-                '!' + config.src + '/**/static/*.{js,scss,md}',
-            ], {
-                base: config.src,
-                read: false
-            })
-            .pipe($.jsdoc3(configs.jsdoc))
-    })
     // php copy
     gulp.task('php-copy', function(cb) {
         argv.p = argv.p || 'E:/wwwroot/newcore';

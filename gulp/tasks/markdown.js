@@ -73,6 +73,7 @@ module.exports = function(gulp, $, utils) {
                                 // console.log(file, !!String(file2.contents));
                                 var contents = String(file2.contents);
                                 if (contents) {
+                                    // if (path.basename(file) == 'main.js' ) {console.log(contents);};
                                     markdownData[path.basename(file).slice(0, -3)] = file2.contents;
                                     processTree(file, contents);
                                 } else {
