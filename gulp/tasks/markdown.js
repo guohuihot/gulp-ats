@@ -27,7 +27,7 @@ module.exports = function(gulp, $, utils) {
         }
     };
 
-    var files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/*.md')),
+    var files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md')),
         tree = {},
         // 存储搜索数据
         searchableDocuments = {},
@@ -38,30 +38,30 @@ module.exports = function(gulp, $, utils) {
         var basename = path.basename(file).slice(0, -3),
             extname = path.extname(file),
             dir = extname == '.js' ? 'JS文档' : path.basename(path.dirname(file)),
-            cur;
-
-        contents = $.htmlToText.fromString(String(contents), {
-                    wordwrap: 130
-                });
+            cur = [];
 
         if (contents) {
-            cur = tree[dir] || [];
-            cur.push(basename)
+            if (tree[dir]) {
+                cur = cur.concat(tree[dir]);
+            }
+            if (cur.indexOf(basename) == -1) {
+                cur.push(basename)
+            }
             tree[dir] = cur;
             searchableDocuments[basename + '.html'] = {
                 id: basename + '.html',
                 title: basename,
-                body: contents,
+                body: $.htmlToText.fromString(contents, {
+                        wordwrap: 130
+                    }),
             }
-        } else if (extname == '.js') {
-            files.splice(files.indexOf(file), 1)
         }
         
     }
-    files = files.concat($.glob.sync(path.join(argv.p, '/**/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
+    files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
     // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
     //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
-
+    // console.log(files);
     gulp.task('tree', function() {
         var stream = $.mergeStream();
         files.forEach(function(file) {
@@ -70,8 +70,14 @@ module.exports = function(gulp, $, utils) {
                             .pipe($.plumber())
                             .pipe($.jsdocToMarkdown({template: "{{>main}}"}))
                             .pipe($.through2.obj(function(file2, encoding, done) {
-                                markdownData[path.basename(file).slice(0, -3)] = file2.contents;
-                                processTree(file, file2.contents);
+                                // console.log(file, !!String(file2.contents));
+                                var contents = String(file2.contents);
+                                if (contents) {
+                                    markdownData[path.basename(file).slice(0, -3)] = file2.contents;
+                                    processTree(file, contents);
+                                } else {
+                                    files.splice(files.indexOf(file), 1)
+                                }
                                 done();
                             })));
             }
@@ -84,7 +90,7 @@ module.exports = function(gulp, $, utils) {
         // 处理树结构
         files.forEach(function(file) {
             if (path.extname(file) == '.md') {
-                processTree(file, fs.readFileSync(file));
+                processTree(file, String(fs.readFileSync(file)));
             }
         });
         // 复制resources
@@ -104,35 +110,15 @@ module.exports = function(gulp, $, utils) {
                 dataFun = function(file1, cb1) {
                     gulp.src(file)
                         .pipe($.plumber())
-                        // .pipe($.if(hasProp(['.js']), $.jsdocToMarkdown({
-                        //     template: "{{>main}}"
-                        // })))
                         .pipe($.if(hasProp(['.js']), $.rename({
                             extname: '.md'
                         })))
                         .pipe($.through2.obj(function(file2, encoding, done) {
-                            var renderer = new $.marked.Renderer();
-                            // renderer.code = function (code, language) {
-                            //      // console.log(code);
-                            //     return '<pre class="prettyprint lang-' + language + '"><code>' + code.replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '</code></pre>'
-                            // }
-                            /*$.marked.setOptions({
-                              renderer: new $.marked.Renderer(),
-                              gfm: true,
-                              tables: true,
-                              breaks: false,
-                              pedantic: false,
-                              sanitize: true,
-                              smartLists: true,
-                              smartypants: false
-                            });*/
+                            var contents;
+                            
                             file2.contents = markdownData[basename] || file2.contents;
-                            var contents = String(file2.contents);
-                            contents = $.marked(contents, {
-                                            renderer: renderer
-                                        })
-                                        .replace(/\s+$/, '')
-                                        .replace(/&#39;/g, "'");
+                            contents = String(file2.contents);
+                            contents = $.marked(contents);
                             if (contents) {
                                 cb1(undefined, {
                                     contents: contents,
@@ -144,11 +130,8 @@ module.exports = function(gulp, $, utils) {
                         }));
                 },
                 dist;
-            if (path.join(argv.p, 'readme.md') == file) {
-                basename = 'index';
-            }
 
-            dist = path.join('docs/', basename + '.html');
+            dist = path.join('docs/', basename == 'readme' ? 'index.htm' : basename + '.html');
             gulp.src('./gulp/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))

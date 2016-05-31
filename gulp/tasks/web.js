@@ -183,12 +183,14 @@ module.exports = function(gulp, $) {
             };
 
         stream.add(gulp.src([sourceUrl + 'css/images.scss'])
+            .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(cssPath))
             .pipe(gulp.dest(config.src))
             .pipe(message()));
         gulp.src([sourceUrl + 'html/images.html'])
+            .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(pathBase + 'images/' + fName + '.html'))
