@@ -1,6 +1,6 @@
 /*!
 * @name:gallery.js
-* @author:ahuing
+* @author:ahuing1
 * @date:2014-01-15
 * @modify:2014-01-15
 */

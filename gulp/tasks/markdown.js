@@ -14,20 +14,8 @@ module.exports = function(gulp, $, utils) {
             reverse: 'r',
             mode: 'm',
             tpl: 't'
-        }).argv;
-
-    if (!argv.p) {
-        console.log('err:需要指定路径！');
-        return;
-    };
-    var hasProp = function(arr) {
-        return function(file) {
-            return arr.indexOf(path.extname(file.path)) != -1 || 
-                arr.indexOf(path.basename(file.path)) != -1;
-        }
-    };
-
-    var files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md')),
+        }).argv,
+        files,
         tree = {},
         // 存储搜索数据
         searchableDocuments = {},
@@ -58,29 +46,38 @@ module.exports = function(gulp, $, utils) {
         }
         
     }
-    files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
-    // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
-    //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
-    // console.log(files);
     gulp.task('tree', function() {
         var stream = $.mergeStream();
+
+        if (!argv.p) {
+            console.log('err:需要指定路径！');
+            return;
+        };
+    
+        files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md'))
+        files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
+        // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
+        //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
+        // console.log(files);
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
-                            .pipe($.plumber())
-                            .pipe($.jsdocToMarkdown({template: "{{>main}}"}))
-                            .pipe($.through2.obj(function(file2, encoding, done) {
-                                // console.log(file, !!String(file2.contents));
-                                var contents = String(file2.contents);
-                                if (contents) {
-                                    // if (path.basename(file) == 'main.js' ) {console.log(contents);};
-                                    markdownData[path.basename(file).slice(0, -3)] = file2.contents;
-                                    processTree(file, contents);
-                                } else {
-                                    files.splice(files.indexOf(file), 1)
-                                }
-                                done();
-                            })));
+                    .pipe($.plumber())
+                    .pipe($.jsdocToMarkdown({
+                        template: "{{>main}}"
+                    }))
+                    .pipe($.through2.obj(function(file2, encoding, done) {
+                        // console.log(file, !!String(file2.contents));
+                        var contents = String(file2.contents);
+                        if (contents) {
+                            // if (path.basename(file) == 'main.js' ) {console.log(contents);};
+                            markdownData[path.basename(file).slice(0, -3)] = file2.contents;
+                            processTree(file, contents);
+                        } else {
+                            files.splice(files.indexOf(file), 1)
+                        }
+                        done();
+                    })));
             }
         });
 
@@ -108,15 +105,17 @@ module.exports = function(gulp, $, utils) {
         files.push(path.join(argv.p, 'readme.md'));
         files.forEach(function(file) {
             var basename = path.basename(file).slice(0, -3),
-                dataFun = function(file1, cb1) {
+                renderer = new $.marked.Renderer();
+
+            var dataFun = function(file1, cb1) {
                     gulp.src(file)
                         .pipe($.plumber())
-                        .pipe($.if(hasProp(['.js']), $.rename({
+                        .pipe($.if(utils.hasProp(['.js']), $.rename({
                             extname: '.md'
                         })))
                         .pipe($.through2.obj(function(file2, encoding, done) {
                             var contents;
-                            
+
                             file2.contents = markdownData[basename] || file2.contents;
                             contents = String(file2.contents);
                             contents = $.marked(contents);
@@ -141,4 +140,5 @@ module.exports = function(gulp, $, utils) {
                 .pipe(gulp.dest(argv.p));
         });
     });
+
 };

@@ -1,4 +1,4 @@
-module.exports = function(gulp, $) {
+module.exports = function(gulp, $, utils) {
     // base
     var path  = require('path'),
         configs   = require('../configs'),
@@ -30,30 +30,6 @@ module.exports = function(gulp, $) {
         _timer,
         pExt;
 
-    // functions
-    var getInfo = function () {
-        // 处理demo
-        var tasks = require('../tasks'),
-            taskInfo = '',
-            params;
-
-        taskInfo += [
-            '\n',
-            '例：',
-            'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\' -a \'ahuing\' -m 1',
-            '显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)',
-            '\n'
-        ].join('\n');
-
-        for(var i in tasks) {
-            params = '';
-            for (var j in tasks[i]['argv']) {
-                params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
-            }
-            taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
-        }
-        return taskInfo;
-    }
     var message = function (msg) {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
@@ -82,17 +58,6 @@ module.exports = function(gulp, $) {
                 // addComment: false,
             });
     }
-    /**
-     * 配合$.if使用，含有"文件名or扩展名"
-     * @param  {array}  arr ['.js', 'aa.js'] 当前文件扩展名是.js或者文件名是aa.js
-     * @return {Boolean}     
-     */
-    var hasProp = function(arr) {
-        return function(file) {
-            return arr.indexOf(path.extname(file.path)) != -1 || 
-                arr.indexOf(path.basename(file.path)) != -1;
-        }
-    };
     // 复制时替换的数据
     var tplData = function(file) {
             // src文件到src = dist文件到dist
@@ -162,6 +127,10 @@ module.exports = function(gulp, $) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
+                    if (!jsonArr[0]) {
+                        console.error('错误：' + file);
+                        cb1()
+                    };
                     var dataJSON = JSON.parse(jsonArr[0].contents),
                         maxH = 0,
                         maxW = 0;
@@ -326,6 +295,8 @@ module.exports = function(gulp, $) {
 
     var buildCB = function(fun, files, cb0, isLast) {
         var stream = $.mergeStream();
+        stream.add(gulp.src('./src/libs/demo.html'));
+        
         files.forEach(function(file) {
             stream.add(fun(file, function() {
                 if (config.isBuild && isLast) {
@@ -343,6 +314,7 @@ module.exports = function(gulp, $) {
                 }
             }));
         });
+
         return stream;
     }
     // tasks start
@@ -466,7 +438,7 @@ module.exports = function(gulp, $) {
 
         // console.log(config);
         // getInfo
-        config.info = getInfo();
+        config.info = utils.getInfo();
         cb();
     });
     // connect
@@ -685,29 +657,50 @@ module.exports = function(gulp, $) {
         var proSrc = config.src;
         var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
 
-        // 内容字串
-        var sss = (argv.m == 11 || argv.m == 21) ? [
-            path.join(atsFromSrc, '/css/**/*'),
-            path.join(atsFromSrc, '/images/**/*'),
-            path.join(atsFromSrc, '/fonts/**/*'),
-            path.join(atsFromSrc, '/pic/**/*'),
-            path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
-            path.join(atsFromSrc, '/**/*.html'),
-        ] : [
-            atsFromSrc + '/**/*',
-        ];
         // 只重建核心
         config.isBuild = true;
 
-        if (config.mode == 4 || argv.sync) {
+        if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
             cb();
+        } else if (argv.sync) {
+            var stream = $.mergeStream();
+            var atsFromData = $.glob.sync(atsFromSrc + '/**/*');
+            var proSrcData = $.glob.sync(proSrc + '/**/*');
+            stream.add(gulp.src('./src/libs/demo.html'));
+            // console.log(proSrcData);
+            atsFromData.forEach(function(from) {
+                proSrcData.forEach(function(pro) {
+                    if (path.relative(config.tpl, from) == path.relative(proSrc, pro)) {
+                        stream.add(gulp.src(from, {
+                                base: atsSrc
+                            })
+                            .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
+                                prefix: '_'
+                            })))
+                            .pipe(gulp.dest(proSrc)));
+                    };
+                });
+            });
+
+            return stream;
         } else {
+            // 内容字串
+            var sss = (argv.m == 11 || argv.m == 21) ? [
+                path.join(atsFromSrc, '/css/**/*'),
+                path.join(atsFromSrc, '/images/**/*'),
+                path.join(atsFromSrc, '/fonts/**/*'),
+                path.join(atsFromSrc, '/pic/**/*'),
+                path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
+                path.join(atsFromSrc, '/**/*.html'),
+            ] : [
+                atsFromSrc + '/**/*',
+            ];
             // 复制核心代码
             return gulp.src(sss, {
                     base: atsSrc
                 })
-                .pipe($.if(hasProp(['_variables.scss', '_utilities.scss']), $.rename({
+                .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
                     prefix: '_'
                 })))
                 .pipe(gulp.dest(proSrc));
@@ -718,6 +711,8 @@ module.exports = function(gulp, $) {
         var proSrc = config.src;
         var proDist = config.dist;
         var stream = $.mergeStream();
+
+        stream.add(gulp.src('./src/libs/demo.html'));
         // 处理img
         stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {
                 base: proSrc
@@ -741,6 +736,7 @@ module.exports = function(gulp, $) {
             // return false;
         // 处理正常的js
         stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js'), cb));
+
         return stream;
     });
     // concatjs 异步处理
