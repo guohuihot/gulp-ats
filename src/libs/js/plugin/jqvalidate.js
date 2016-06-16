@@ -7,41 +7,41 @@
 
 !function ($) {
     /*
-    v1.01 ä¿®å¤äº†æ’ä»¶å„ä¸ªæ–¹æ³•çš„å‚æ•°å’Œjqçš„å‚æ•°ä¸€è‡´,å¯ä»¥æ˜¯'#xxx'æˆ–è€…jså¯¹è±¡
-    v1.02 æ”¹è¿›äº†å•ä¸ªè¡¨å•å¯¹è±¡ä¹Ÿå¯ä»¥æŒ‡å®šæç¤ºæ¡†
-    v1.03 ä¿®å¤äº†å•é€‰æ¡†é€šè¿‡æ—¶æç¤ºé”™è¯¯
-    v1.04 ä¿®å¤å­—ç¬¦ä¸²é•¿åº¦éªŒè¯å’Œæç¤ºä¸€è‡´ï¼Œä¸€ä¸ªä¸­æ–‡ç®—ä¸¤ä¸ªå­—ç¬¦
-    events æ–¹æ³•
-        validatePass $('form').on('validatePass', function () { éªŒè¯é€šè¿‡åçš„åŠ¨ä½œ })
+    v1.01 ĞŞ¸´ÁË²å¼ş¸÷¸ö·½·¨µÄ²ÎÊıºÍjqµÄ²ÎÊıÒ»ÖÂ,¿ÉÒÔÊÇ'#xxx'»òÕßjs¶ÔÏó
+    v1.02 ¸Ä½øÁËµ¥¸ö±íµ¥¶ÔÏóÒ²¿ÉÒÔÖ¸¶¨ÌáÊ¾¿ò
+    v1.03 ĞŞ¸´ÁËµ¥Ñ¡¿òÍ¨¹ıÊ±ÌáÊ¾´íÎó
+    v1.04 ĞŞ¸´×Ö·û´®³¤¶ÈÑéÖ¤ºÍÌáÊ¾Ò»ÖÂ£¬Ò»¸öÖĞÎÄËãÁ½¸ö×Ö·û
+    events ·½·¨
+        validatePass $('form').on('validatePass', function () { ÑéÖ¤Í¨¹ıºóµÄ¶¯×÷ })
 
-        forms å•ä¸ªè¡¨å•é¡¹çš„config 
-        vadmode : 0 // éªŒè¯æ–¹å¼ï¼š0=å¤±ç„¦éªŒè¯ 1=é€ä¸ªéªŒè¯ 2=å®æ—¶éªŒè¯
-        tipmode : 0 // æç¤ºæ–¹å¼ï¼š0=ä¸æ˜¾ç¤º 1=ç›´æ¥æ˜¾ç¤º 2=èšç„¦æ˜¾ç¤º expr=é€ä¸ªéªŒè¯+æç¤ºåœ¨å•ä¸ªæç¤ºæ¡†ï¼ˆé•¿åº¦>1ï¼‰
-        url ajax éªŒè¯åœ°å€
-        ignore å¿½ç•¥åˆå§‹éªŒè¯
-        recheck é‡å¤éªŒè¯ï¼Œå€¼å¯¹åº”çš„è¦éªŒè¯çš„è¡¨å•
-        monitor ç›‘æ§æç¤ºï¼Œå®æ—¶æç¤º 1:æç¤ºæ¡†æ˜¾ç¤ºæç¤ºå†…å®¹ expr:å¯¹åº”çš„æ ‡ç­¾é‡Œé¢æ˜¾ç¤ºæç¤ºå†…å®¹
-        offset æç¤ºæ¡†åç§»ä½ç½®
-        init åˆå§‹æç¤º
-        pass é€šè¿‡æ—¶çš„æç¤º
-        error å¤±è´¥æ—¶æç¤º
+        forms µ¥¸ö±íµ¥ÏîµÄconfig 
+        vadmode : 0 // ÑéÖ¤·½Ê½£º0=Ê§½¹ÑéÖ¤ 1=Öğ¸öÑéÖ¤ 2=ÊµÊ±ÑéÖ¤
+        tipmode : 0 // ÌáÊ¾·½Ê½£º0=²»ÏÔÊ¾ 1=Ö±½ÓÏÔÊ¾ 2=¾Û½¹ÏÔÊ¾ expr=Öğ¸öÑéÖ¤+ÌáÊ¾ÔÚµ¥¸öÌáÊ¾¿ò£¨³¤¶È>1£©
+        url ajax ÑéÖ¤µØÖ·
+        ignore ºöÂÔ³õÊ¼ÑéÖ¤
+        recheck ÖØ¸´ÑéÖ¤£¬Öµ¶ÔÓ¦µÄÒªÑéÖ¤µÄ±íµ¥
+        monitor ¼à¿ØÌáÊ¾£¬ÊµÊ±ÌáÊ¾ 1:ÌáÊ¾¿òÏÔÊ¾ÌáÊ¾ÄÚÈİ expr:¶ÔÓ¦µÄ±êÇ©ÀïÃæÏÔÊ¾ÌáÊ¾ÄÚÈİ
+        offset ÌáÊ¾¿òÆ«ÒÆÎ»ÖÃ
+        init ³õÊ¼ÌáÊ¾
+        pass Í¨¹ıÊ±µÄÌáÊ¾
+        error Ê§°ÜÊ±ÌáÊ¾
         type 
             string: "*" , "*6-16" , "n" , "n6-16" , "s" , "s6-18" , "p" , "m" , "e" , "url"
-            number: åªå¯¹å¤šé€‰æ‹©æœ‰ç”¨
-            regexp: ç›´æ¥ç”¨è¡¨è¾¾å¼éªŒè¯
+            number: Ö»¶Ô¶àÑ¡ÔñÓĞÓÃ
+            regexp: Ö±½ÓÓÃ±í´ïÊ½ÑéÖ¤
     */
     $('<link rel="stylesheet">').appendTo('head').attr('href', (typeof tplurl != 'undefined' ? tplurl : '') + 'css/jqvalidate.css');
-    // ä¸­æ–‡å­—ç¬¦ä¸²é•¿åº¦
+    // ÖĞÎÄ×Ö·û´®³¤¶È
     String.prototype.Tlength = function() {
         return this.replace(/[^\x00-\xff]/g,'aa').length;
     }
 
-    // å¤„ç†typeè¡¨è¾¾å¼
+    // ´¦Àítype±í´ïÊ½
     function setRegExp(obj, sType) {
         var regex = /^(.+?)(\d+)-(\d+)$/
         , aCustomReg = sType.match(regex);
         
-        // type ä¸åœ¨é»˜è®¤è§„åˆ™ä¸­&&å­—ç¬¦ä¸²è½¬åŒ–çš„æ•°ç»„
+        // type ²»ÔÚÄ¬ÈÏ¹æÔòÖĞ&&×Ö·û´®×ª»¯µÄÊı×é
         !(sType in obj.regType) && aCustomReg && $.each(obj.regType, $.proxy(function (i, n) {
             var defReg = i.match(regex);
             if (defReg && defReg[1] == aCustomReg[1]) {
@@ -66,65 +66,65 @@
     }
 
     Validate.defaults = {
-        submit    : '[type="submit"]' // ç‚¹å‡»éªŒè¯çš„æŒ‰é’®
-        , vadmode : 0 // éªŒè¯æ–¹å¼ï¼š0=å¤±ç„¦éªŒè¯ 1=é€ä¸ªéªŒè¯ 2=å®æ—¶éªŒè¯
-        , tipmode : 0 // æç¤ºæ–¹å¼ï¼š0=ä¸æ˜¾ç¤º 1=ç›´æ¥æ˜¾ç¤º 2=èšç„¦æ˜¾ç¤º expr=é€ä¸ªéªŒè¯+æç¤ºåœ¨å•ä¸ªæç¤ºæ¡†ï¼ˆé•¿åº¦>1ï¼‰
-        , tipTpl  : '$1' // æç¤ºæ¡†çš„æ¨¡æ¿ï¼Œ$1:æ ·å¼å,$2:æç¤ºä¿¡æ¯
+        submit    : '[type="submit"]' // µã»÷ÑéÖ¤µÄ°´Å¥
+        , vadmode : 0 // ÑéÖ¤·½Ê½£º0=Ê§½¹ÑéÖ¤ 1=Öğ¸öÑéÖ¤ 2=ÊµÊ±ÑéÖ¤
+        , tipmode : 0 // ÌáÊ¾·½Ê½£º0=²»ÏÔÊ¾ 1=Ö±½ÓÏÔÊ¾ 2=¾Û½¹ÏÔÊ¾ expr=Öğ¸öÑéÖ¤+ÌáÊ¾ÔÚµ¥¸öÌáÊ¾¿ò£¨³¤¶È>1£©
+        , tipTpl  : '$1' // ÌáÊ¾¿òµÄÄ£°å£¬$1:ÑùÊ½Ãû,$2:ÌáÊ¾ĞÅÏ¢
     }
 
     Validate.prototype = {
         regTips : {
             w : {
-                "*"       : "è¯·å¡«å†™æ­¤å­—æ®µ"
-                // , "*6-16" : "è¯·å¡«å†™6åˆ°16ä½ä»»æ„å­—ç¬¦ï¼2-16ä¸ªå­—ç¬¦ï¼šè‹±æ–‡ã€æ•°å­—æˆ–ä¸­æ–‡"
-                , "*6-16" : "6-16ä¸ªå­—ç¬¦ï¼"
-                , "n"     : "è¯·å¡«å†™æ•°å­—ï¼"
-                // , "n6-16" : "è¯·å¡«å†™6åˆ°16ä½æ•°å­—ï¼"
-                , "n6-16" : "6-16ä¸ªæ•°å­—ï¼"
-                , "s"     : "ä¸èƒ½è¾“å…¥ç‰¹æ®Šå­—ç¬¦ï¼"
-                , "s6-18" : "è¯·å¡«å†™6åˆ°18ä½å­—ç¬¦ï¼"
-                , "p"     : "é‚®æ”¿ç¼–ç æ ¼å¼ä¸å¯¹ï¼"
-                , "m"     : "æ‰‹æœºå·ç æ ¼å¼ä¸å¯¹ï¼"
-                , "e"     : "é‚®ç®±åœ°å€æ ¼å¼ä¸å¯¹ï¼"
-                , "url"   : "è¯·å¡«å†™ç½‘å€ï¼"
+                "*"       : "ÇëÌîĞ´´Ë×Ö¶Î"
+                // , "*6-16" : "ÇëÌîĞ´6µ½16Î»ÈÎÒâ×Ö·û£¡2-16¸ö×Ö·û£ºÓ¢ÎÄ¡¢Êı×Ö»òÖĞÎÄ"
+                , "*6-16" : "6-16¸ö×Ö·û£¡"
+                , "n"     : "ÇëÌîĞ´Êı×Ö£¡"
+                // , "n6-16" : "ÇëÌîĞ´6µ½16Î»Êı×Ö£¡"
+                , "n6-16" : "6-16¸öÊı×Ö£¡"
+                , "s"     : "²»ÄÜÊäÈëÌØÊâ×Ö·û£¡"
+                , "s6-18" : "ÇëÌîĞ´6µ½18Î»×Ö·û£¡"
+                , "p"     : "ÓÊÕş±àÂë¸ñÊ½²»¶Ô£¡"
+                , "m"     : "ÊÖ»úºÅÂë¸ñÊ½²»¶Ô£¡"
+                , "e"     : "ÓÊÏäµØÖ·¸ñÊ½²»¶Ô£¡"
+                , "url"   : "ÇëÌîĞ´ÍøÖ·£¡"
             } 
-            // textæ ¹æ®data-typeåˆå§‹åŒ–æç¤º
-            , "e" : "è¯·å¡«å†™é‚®ç®±åœ°å€"
-            , "m" : "è¯·å¡«å†™æ‰‹æœºå·ç "
-            , "s" : "è¯·å¡«å†™å­—ç¬¦å’Œæ•°å­—"
-            , "p" : "è¯·å¡«å†™é‚®æ”¿ç¼–ç ï¼"
-            // étextæ ¹æ®typeåˆå§‹åŒ–æç¤ºåŠé”™è¯¯æç¤º
-            , 'password'       : 'è¯·å¡«å†™å¯†ç '
-            , 'ajax'            : 'æ­£åœ¨éªŒè¯...'
-            , 'checkbox'        : 'è¯·è‡³å°‘é€‰æ‹©$1é¡¹ï¼'
-            , 'date'            : 'è¯·è¾“å…¥æ—¥æœŸ'
-            , 'error'           : 'å¡«å†™å†…å®¹ä¸æ­£ç¡®'
-            , 'init'            : 'è¯·å¡«å†™æ­¤å­—æ®µ'
-            , 'monitorTip'      : ['è¿˜èƒ½è¾“å…¥', 'å·²ç»è¶…å‡º', 'ä¸ªå­—ç¬¦']
+            // text¸ù¾İdata-type³õÊ¼»¯ÌáÊ¾
+            , "e" : "ÇëÌîĞ´ÓÊÏäµØÖ·"
+            , "m" : "ÇëÌîĞ´ÊÖ»úºÅÂë"
+            , "s" : "ÇëÌîĞ´×Ö·ûºÍÊı×Ö"
+            , "p" : "ÇëÌîĞ´ÓÊÕş±àÂë£¡"
+            // ·Çtext¸ù¾İtype³õÊ¼»¯ÌáÊ¾¼°´íÎóÌáÊ¾
+            , 'password'       : 'ÇëÌîĞ´ÃÜÂë'
+            , 'ajax'            : 'ÕıÔÚÑéÖ¤...'
+            , 'checkbox'        : 'ÇëÖÁÉÙÑ¡Ôñ$1Ïî£¡'
+            , 'date'            : 'ÇëÊäÈëÈÕÆÚ'
+            , 'error'           : 'ÌîĞ´ÄÚÈİ²»ÕıÈ·'
+            , 'init'            : 'ÇëÌîĞ´´Ë×Ö¶Î'
+            , 'monitorTip'      : ['»¹ÄÜÊäÈë', 'ÒÑ¾­³¬³ö', '¸ö×Ö·û']
             , 'pass'            : '&nbsp;'
-            , 'radio'           : 'è¯·é€‰æ‹©ä¸€é¡¹'
-            , 'recheck'         : 'ä¸¤æ¬¡å¡«å†™å¯†ç ä¸ä¸€è‡´'
-            , 'select-multiple' : 'æŒ‰ctrlé”®è¿›è¡Œå¤šé€‰'
-            , 'select-one'      : 'è¯·é€‰æ‹©åˆ—è¡¨ä¸­çš„ä¸€é¡¹'
+            , 'radio'           : 'ÇëÑ¡ÔñÒ»Ïî'
+            , 'recheck'         : 'Á½´ÎÌîĞ´ÃÜÂë²»Ò»ÖÂ'
+            , 'select-multiple' : '°´ctrl¼ü½øĞĞ¶àÑ¡'
+            , 'select-one'      : 'ÇëÑ¡ÔñÁĞ±íÖĞµÄÒ»Ïî'
         }
         , regType : {
-            "*"       : /[\w\W]+/ // ä»»æ„å­—ç¬¦
+            "*"       : /[\w\W]+/ // ÈÎÒâ×Ö·û
             , "*6-16" : /^[\w\W]{6,16}$/
-            , "n"     : /^\d+$/ // æ•°å­—
+            , "n"     : /^\d+$/ // Êı×Ö
             , "n6-16" : /^\d{6,16}$/
-            , "s"     : /^[\u4E00-\u9FA5\uf900-\ufa2d\w\.\s]+$/ // å­—ç¬¦ä¸²
+            , "s"     : /^[\u4E00-\u9FA5\uf900-\ufa2d\w\.\s]+$/ // ×Ö·û´®
             , "s6-18" : /^[\u4E00-\u9FA5\uf900-\ufa2d\w\.\s]{6,18}$/
-            , "p"     : /^[0-9]{6}$/ // é‚®ç¼–
-            , "m"     : /^13[0-9]{9}$|14[0-9]{9}|15[0-9]{9}$|18[0-9]{9}$/ // æ‰‹æœº
+            , "p"     : /^[0-9]{6}$/ // ÓÊ±à
+            , "m"     : /((\d{11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)/ // ÊÖ»ú
             , "e"     : /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/ // email
-            , "url"   : /^(\w+:\/\/)?\w+(\.\w+)+.*$/ // ç½‘å€
+            , "url"   : /^(\w+:\/\/)?\w+(\.\w+)+.*$/ // ÍøÖ·
         }
-        // è®¾ç½®tip
+        // ÉèÖÃtip
         , setTip : function (ele, cls, i) {
             var $ele = $(ele)
             , eleData = $ele.data();
 
-            // è·å–tip
+            // »ñÈ¡tip
             if (cls == 1 || typeof cls == 'undefined') {
                 var oft = eleData.offset
                 , $before = oft && $ele.nextAll().length > 0 && ($ele.nextAll().eq(oft - 1)) || $ele;
@@ -134,7 +134,7 @@
 
             var opt = this.o
             // ele = $ele[0];
-            // å…ƒç´ ä¸Šè‡ªå®šä¹‰ || æ‰‹åŠ¨ä¼ è¿›æ¥çš„ || é»˜è®¤
+            // ÔªËØÉÏ×Ô¶¨Òå || ÊÖ¶¯´«½øÀ´µÄ || Ä¬ÈÏ
             , info = eleData[cls] || i || this.regTips[cls]
             , $eleGroup = eleData.group && this._self.find('.' + eleData.group);
             var $tip = opt.tipmode.length > 1 && this._self.find(opt.tipmode) || $eleGroup || this.setTip($ele);
@@ -142,7 +142,7 @@
 
             return cls == 'pass';
         }
-        // resetè¡¨å•
+        // reset±íµ¥
         , resetForm : function (e) {
             (e && $(e) || this.$fmItems).each($.proxy(function(i, ele) {
                 var $ele  = $(ele)
@@ -158,7 +158,7 @@
                     $(this.o.tipmode).removeClass('error');
                     return;
                 }
-                // åˆå§‹åŒ–tip
+                // ³õÊ¼»¯tip
                 var $tip = this.setTip($eleEx).removeClass('error init monitor pass ajax')
                     .addClass(this.o.tipmode == 1 && !eleData.ignore && 'init' || '')
                     .html(this.o.tipTpl.replace('$1', eleData.init));
@@ -169,23 +169,23 @@
             if (!e) this._self.removeClass('submitted').trigger('resetForm')[0].reset();
             return true;
         }
-        // éªŒè¯
+        // ÑéÖ¤
         , validateBase : function(ele) {
             var $ele    = $(ele)
             , eleData   = $ele.data()
             , eleDType  = eleData.type
             , eleDTypeT = $.type(eleDType)
             , _self     = this._self;
-            // è·å–jså¯¹è±¡æ–¹ä¾¿åé¢ä½¿ç”¨
+            // »ñÈ¡js¶ÔÏó·½±ãºóÃæÊ¹ÓÃ
             ele = $ele[0];
 
-            // ä¸ºç©º
+            // Îª¿Õ
             if (!ele.value) {
                 return eleData.ignore && this.resetForm(ele) || this.setTip(ele, 'error', eleData['init']);
             }
             else if (ele.type == 'select-one') return this.setTip(ele, 'pass');
 
-            // typeæ˜¯æ•°å­— checkbox radio
+            // typeÊÇÊı×Ö checkbox radio
             if (!isNaN(eleDType)) {
                 var checkNum = _self.find('input[data-option="'+ eleData.option +'"]:checked').length
                 , rr = checkNum < eleDType;
@@ -194,19 +194,19 @@
                 if (eleDType < 0) rr = checkNum > -eleDType || checkNum == 0; 
                 return this.setTip(ele, rr && 'error' || 'pass', rr && eleData['init']);
             }
-            // typeå­—ç¬¦ä¸²
+            // type×Ö·û´®
             else if (eleDTypeT == 'string') {
                         
                 var eleRegex = this.regType[eleDType];
-                // æ­£åˆ™
+                // ÕıÔò
                 if (/\/.+\//.test(eleDType)) eleRegex = eval(eleDType);
 
-                // è¿›è¡Œä¸¤æ¬¡å¯†ç éªŒè¯
+                // ½øĞĞÁ½´ÎÃÜÂëÑéÖ¤
                 if (eleData.recheck) return ele.value === _self[0][eleData.recheck].value && this.setTip(ele, 'pass') || this.setTip(ele, 'error', this.regTips.recheck);
 
-                // æœªé€šè¿‡
+                // Î´Í¨¹ı
                 if (!eleRegex.test(ele.value.replace(/[^\x00-\xff]/g,'aa'))) return this.setTip(ele, 'error', this.regTips.w[eleDType]);
-                // é€šè¿‡åè¿›è¡ŒajaxéªŒè¯ isSubmitæäº¤è¡¨å•æ—¶ä¸éªŒè¯
+                // Í¨¹ıºó½øĞĞajaxÑéÖ¤ isSubmitÌá½»±íµ¥Ê±²»ÑéÖ¤
                 else if (eleData.url) {
                     // 13423045270
                     if (!$ele.hasClass('ajax')) {
@@ -219,8 +219,8 @@
                         setTimeout(function () {
                             $.ajax({
                                 url: eleData.url,
-                                type: 'GET',
-                                dataType: 'json',
+                                type: eleData.ajaxType || 'GET',
+                                dataType: eleData.ajaxDatatype || 'json',
                                 data: param
                             }).done(function (res) {
                                 _self.removeClass('locked');
@@ -238,7 +238,7 @@
                                 } else doneFun(res.result, res.info);
 
                             }).fail(function (res) {
-                                obj.setTip(ele, 'error', 'æœåŠ¡å™¨è¯·æ±‚å¤±è´¥');
+                                obj.setTip(ele, 'error', '·şÎñÆ÷ÇëÇóÊ§°Ü');
                             })
                         }, 300)
                     }
@@ -255,7 +255,7 @@
             if (_self.hasClass('locked')) return false;
 
             var validateValue = true;
-            // éªŒè¯çš„å¯¹è±¡ä¸å‚ç”¨$fmItems,æœ‰æ—¶è¡¨å•çš„é¡¹å¯èƒ½ä¼šåŠ¨æ€åˆ é™¤
+            // ÑéÖ¤µÄ¶ÔÏó²»²ÎÓÃ$fmItems,ÓĞÊ±±íµ¥µÄÏî¿ÉÄÜ»á¶¯Ì¬É¾³ı
             this._self.find('[data-type]').each($.proxy(function(a, b) {
                 var $b = $(b), curValVlue;
                 if ($b.data('value') != b.value) {
@@ -272,18 +272,18 @@
                     oError && (curValVlue = this.validate(oError));
                 }
 
-                // éªŒè¯é”™è¯¯é¡¹èšç„¦
+                // ÑéÖ¤´íÎóÏî¾Û½¹
                 if (!curValVlue && validateValue) {
                     validateValue = false;
                     setTimeout(function () {
                         $b.trigger('focus');
                     },0)
-                    // é€ä¸ªéªŒè¯ || æç¤ºæ–¹å¼æ˜¯ä¸€ä¸ªæç¤ºæ¡†æ—¶ä¹Ÿé€ä¸ªéªŒè¯
+                    // Öğ¸öÑéÖ¤ || ÌáÊ¾·½Ê½ÊÇÒ»¸öÌáÊ¾¿òÊ±Ò²Öğ¸öÑéÖ¤
                     if (this.o.vadmode == 1 || this.o.tipmode.length > 1) return false;
                 };
 
             }, this))
-            // éªŒè¯é€šè¿‡çš„æ“ä½œï¼Œä¸€èˆ¬ä½œajaxæäº¤
+            // ÑéÖ¤Í¨¹ıµÄ²Ù×÷£¬Ò»°ã×÷ajaxÌá½»
             if (validateValue && _self.hasEvent('validatePass')) {
                 _self.trigger('validatePass');
                 return false;
@@ -298,7 +298,7 @@
         , init : function () {
             var _self = this._self.addClass('jqValidate')
             , obj = this;
-            // å¤„ç†å¤šé€‰,å°†é…ç½®ç§»åˆ°æœ€åä¸€ä¸ªé€‰é¡¹ä¸Š
+            // ´¦Àí¶àÑ¡,½«ÅäÖÃÒÆµ½×îºóÒ»¸öÑ¡ÏîÉÏ
             _self.find('input[data-type][data-option]').each(function(i, el) {
                var $el = $(el)
                , elData = $el.data();
@@ -324,18 +324,18 @@
                 , tipCls   = 'tip '
                 , isItem   = $.inArray(ele.type, ['text','password','select-one','textarea']) >= 0;
 
-                // å¤„ç†type
+                // ´¦Àítype
                 $.type(eleDType) == 'string' && setRegExp(obj, eleDType);
                 // console.log(this.regTips.w);
                 if (!isNaN(eleDType)) {
-                    // è‡³å¤šé€‰é¡¹
+                    // ÖÁ¶àÑ¡Ïî
                     eleData['init'] = eleData['init'] || (obj.regTips[ele.type]).replace('$1', Math.abs(eleDType));
-                    if (eleDType < 0) eleData['init'] = eleData['init'].replace('å°‘','å¤š');
+                    if (eleDType < 0) eleData['init'] = eleData['init'].replace('ÉÙ','¶à');
                 };
 
                 var tipInfo = eleData['init'] = eleData['init'] || obj.regTips[ele.type] || obj.regTips[eleDType] || obj.regTips.w[eleDType] || obj.regTips['init'];
 
-                // ç›¸åŒçš„è®¾ç½®ä¼˜å…ˆä½¿ç”¨è¡¨å•é¡¹çš„è®¾ç½®
+                // ÏàÍ¬µÄÉèÖÃÓÅÏÈÊ¹ÓÃ±íµ¥ÏîµÄÉèÖÃ
                 eleData.tipmode == null && isItem && ($ele.attr('data-tipmode', obj.o.tipmode));
                 eleData.vadmode == null && isItem && ($ele.attr('data-vadmode', obj.o.vadmode));
 
@@ -344,7 +344,7 @@
                     $eleEx = _self.find('[data-group="' + eleData.group + '"]').eq(-1).addClass('group-last');
                     tipCls += eleData.group
                 };
-                // åˆå§‹åŒ–tip
+                // ³õÊ¼»¯tip
                 if (obj.o.tipmode <= 2) {
                     if (obj.o.tipmode == 1 && !eleData.ignore) tipCls += ' init';
                     var $tip = eleData.tipmode && eleData.tipmode.length > 1 && $(eleData.tipmode) || $('<div>').insertAfter(obj.setTip($eleEx, 1));
@@ -354,7 +354,7 @@
                 if (eleData.monitor) {
                     var aType = eleDType.match(/^(.+?)(\d+)-(\d+)$/);
 
-                    if (!aType) return; // æ²¡è§„åˆ™,æ²¡æ³•æç¤º,è¿”å›
+                    if (!aType) return; // Ã»¹æÔò,Ã»·¨ÌáÊ¾,·µ»Ø
 
                     var sMonitor  = eleData.monitor
                     , maxNum   = aType[3]
@@ -377,30 +377,30 @@
             })
 
             _self
-            // æäº¤è¡¨å•
+            // Ìá½»±íµ¥
             .on('click', obj.o.submit, $.proxy(obj.validateForm, obj))
-            // å›è½¦æäº¤
+            // »Ø³µÌá½»
             .on('keypress', 'input[type="text"]', function(e){
                if (e.keyCode == 13) return obj.validate();
             })
-            // ä¸‹æ‹‰åˆ—è¡¨
+            // ÏÂÀ­ÁĞ±í
             .on('change', 'select[data-type], [data-url]', function () {
                 _self.removeClass('submitted');
                 obj.validate(this);
             })
-            // å•é€‰ã€å¤šé€‰
+            // µ¥Ñ¡¡¢¶àÑ¡
             .on('click', 'input[data-option]', function () {
                 obj.validate(_self.find('input[data-option=' + $(this).data('option') + ']').get(-1));
             })
-            // èšç„¦æ˜¾ç¤ºåˆå§‹æç¤º
+            // ¾Û½¹ÏÔÊ¾³õÊ¼ÌáÊ¾
             .on('focus', '[data-tipmode=2]', function() {
                 $(this).data('ignore') || obj.setTip(this, 'init');
             })
-            // å®æ—¶éªŒè¯
+            // ÊµÊ±ÑéÖ¤
             .on('input propertychange','[data-vadmode=2]', function () {
                 $(this).data('url') || obj.validate(this);
             })
-            // å¤±ç„¦éªŒè¯
+            // Ê§½¹ÑéÖ¤
             .on('blur','[data-vadmode=0], [data-vadmode=1]', function() {
                 $(this).data('url') && this.value || obj.validate(this);
             })

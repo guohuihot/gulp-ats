@@ -116,6 +116,7 @@ module.exports = function(gulp, $, utils) {
         // console.log(pathBase);
         // return false;
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
+            .pipe($.changed(config.dist, {extension: fName + '.png'}))
             .pipe($.spritesmith({
                 imgName: pathBase + 'images/' + fName + '.png',
                 cssName: 'sprite.json',
@@ -127,7 +128,7 @@ module.exports = function(gulp, $, utils) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
-                    if (!jsonArr[0]) {
+                    if (!jsonArr[0].contents) {
                         console.error('错误：' + file);
                         cb1()
                     };
@@ -152,6 +153,7 @@ module.exports = function(gulp, $, utils) {
             };
 
         stream.add(gulp.src([sourceUrl + 'css/images.scss'])
+            .pipe($.changed(config.src, {extension: cssPath}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
@@ -159,6 +161,7 @@ module.exports = function(gulp, $, utils) {
             .pipe(gulp.dest(config.src))
             .pipe(message()));
         gulp.src([sourceUrl + 'html/images.html'])
+            .pipe($.changed(config.dist, {extension: 'images/' + fName + '.html'}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
@@ -180,6 +183,7 @@ module.exports = function(gulp, $, utils) {
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
         var stream1 = gulp.src(dir + '/*.svg', {base: config.src })
+            .pipe($.changed(config.dist))
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
@@ -200,11 +204,13 @@ module.exports = function(gulp, $, utils) {
                     };
 
                 stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
+                    .pipe($.changed(config.src))
                     .pipe($.template(templateData))
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(config.src))
                     .pipe(message()));
                 gulp.src([sourceUrl + 'html/fonts.html'])
+                    .pipe($.changed(config.dist))
                     .pipe($.template(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     .pipe(gulp.dest(config.dist))
@@ -219,6 +225,7 @@ module.exports = function(gulp, $, utils) {
     // scss
     var scss = function(filePath, cb) {
         var stream = gulp.src(filePath, {base: config.src})
+            .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
@@ -255,6 +262,7 @@ module.exports = function(gulp, $, utils) {
             fName        = path.basename(dir);
 
         var stream = gulp.src(dir + '/*.js', {base: config.src })
+            .pipe($.changed(config.dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -279,6 +287,7 @@ module.exports = function(gulp, $, utils) {
     // js
     var JS = function(filePath, cb) {
         var stream = gulp.src(filePath, {base: config.src})
+            .pipe($.changed(config.dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init(), $.uglify(configs.uglify)))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -305,6 +314,7 @@ module.exports = function(gulp, $, utils) {
                                 config.dist + '/**/*',
                                 '!' + config.dist + '/src/**/*'
                             ])
+                            .pipe($.changed(config.distEx))
                             .pipe(gulp.dest(config.distEx));
                     }
                     gulp.src('./package.json', {
@@ -478,7 +488,8 @@ module.exports = function(gulp, $, utils) {
             ], {read: false}, function(file) {
                 gulp.src(file.path, {
                         read: false
-                    })
+                    })                
+                    .pipe($.changed(config.dist))
                     .pipe(gulp.dest(config.dist))
                     .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                     .pipe(message('livereload'));
@@ -502,6 +513,7 @@ module.exports = function(gulp, $, utils) {
                     gulp.src(file.path, {
                             base: config.dist
                         })
+                        .pipe($.changed(config.distEx))
                         .pipe(gulp.dest(config.distEx))
                         .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
                 }
@@ -523,6 +535,7 @@ module.exports = function(gulp, $, utils) {
                 gulp.src(file.path, {
                         base: config.src
                     })
+                    .pipe($.changed(config.dist))
                     .pipe($.plumber())
                     .pipe($.fileInclude())
                     .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
@@ -546,7 +559,8 @@ module.exports = function(gulp, $, utils) {
                 if (file.dirname.slice(-7) == '\\images' || file.dirname.slice(-4) == '\\pic') {
                     gulp.src(file.path, {
                             base: config.src
-                        })
+                        })                    
+                        .pipe($.changed(config.dist))
                         .pipe($.imagemin(configs.imagemin))
                         .pipe(gulp.dest(config.dist))
                         .pipe(message('复制并压缩'));
@@ -614,6 +628,7 @@ module.exports = function(gulp, $, utils) {
                 gulp.src(file.path, {
                         base: config.src
                     })
+                    .pipe($.changed(config.dist))
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('直接复制'));
             }
@@ -675,6 +690,7 @@ module.exports = function(gulp, $, utils) {
                         stream.add(gulp.src(from, {
                                 base: atsSrc
                             })
+                            .pipe($.changed(proSrc))
                             .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
                                 prefix: '_'
                             })))
@@ -700,6 +716,7 @@ module.exports = function(gulp, $, utils) {
             return gulp.src(sss, {
                     base: atsSrc
                 })
+                .pipe($.changed(proSrc))
                 .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
                     prefix: '_'
                 })))
@@ -717,19 +734,23 @@ module.exports = function(gulp, $, utils) {
         stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {
                 base: proSrc
             })
+            .pipe($.changed(proDist))
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
 
         // 直接复制plugin目录
         stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
+            .pipe($.changed(proDist))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe(gulp.dest(proDist)));
 
         // 直接复制static目录
         stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
+            .pipe($.changed(proDist))
             .pipe(gulp.dest(proDist)));
 
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
+            .pipe($.changed(proDist))
             .pipe($.data(tplData))
             .pipe($.template())
             .pipe(gulp.dest(proDist)));

@@ -3,17 +3,17 @@ module.exports = function(gulp, $, utils) {
         fs = require('fs'),
         argv = $.yargs
         .alias({
-            path: 'p',
-            author: 'a',
-            custom: 'c',
-            libs: 'l',
-            dev: 'd',
-            server: 's',
-            open: 'o',
-            ftp: 'f',
-            reverse: 'r',
-            mode: 'm',
-            tpl: 't'
+            path    : 'p',
+            author  : 'a',
+            custom  : 'c',
+            libs    : 'l',
+            dev     : 'd',
+            server  : 's',
+            open    : 'o',
+            ftp     : 'f',
+            reverse : 'r',
+            mode    : 'm',
+            tpl     : 't'
         }).argv,
         files,
         tree = {},
@@ -46,6 +46,7 @@ module.exports = function(gulp, $, utils) {
         }
         
     }
+
     gulp.task('tree', function() {
         var stream = $.mergeStream();
 
@@ -53,20 +54,19 @@ module.exports = function(gulp, $, utils) {
             console.log('err:需要指定路径！');
             return;
         };
-    
         files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md'))
-        files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')));
-        // files = files.concat($.glob.sync(path.join(argv.p, '/!(vendor|.git)/**/src/**/!(static|seajs)/*.js')), 
-        //             $.glob.sync(path.join(argv.p, '/src/**/!(static|seajs)/*.js')));
+        files = files.concat($.glob.sync(path.join(argv.p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs)/*.js'), {ignore: path.join(argv.p, '/**/vendor/**/*.js')}));
         // console.log(files);
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
+                    .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                     .pipe($.plumber())
                     .pipe($.jsdocToMarkdown({
                         template: "{{>main}}"
                     }))
                     .pipe($.through2.obj(function(file2, encoding, done) {
+                        console.log(file);
                         // console.log(file, !!String(file2.contents));
                         var contents = String(file2.contents);
                         if (contents) {
@@ -93,6 +93,7 @@ module.exports = function(gulp, $, utils) {
         });
         // 复制resources
         gulp.src('./gulp/markdown/*/**')
+            .pipe($.changed(path.join(argv.p, 'docs')))
             .pipe(gulp.dest(path.join(argv.p, 'docs')));
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
@@ -113,6 +114,7 @@ module.exports = function(gulp, $, utils) {
                         .pipe($.if(utils.hasProp(['.js']), $.rename({
                             extname: '.md'
                         })))
+                        .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                         .pipe($.through2.obj(function(file2, encoding, done) {
                             var contents;
 
