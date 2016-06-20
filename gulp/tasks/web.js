@@ -489,7 +489,7 @@ module.exports = function(gulp, $, utils) {
                 gulp.src(file.path, {
                         read: false
                     })                
-                    .pipe($.changed(config.dist))
+                    // .pipe($.changed(config.dist))
                     .pipe(gulp.dest(config.dist))
                     .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                     .pipe(message('livereload'));
