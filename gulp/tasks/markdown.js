@@ -60,7 +60,7 @@ module.exports = function(gulp, $, utils) {
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
-                    .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
+                    // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                     .pipe($.plumber())
                     .pipe($.jsdocToMarkdown({
                         template: "{{>main}}"
@@ -93,7 +93,7 @@ module.exports = function(gulp, $, utils) {
         });
         // 复制resources
         gulp.src('./gulp/markdown/*/**')
-            .pipe($.changed(path.join(argv.p, 'docs')))
+            // .pipe($.changed(path.join(argv.p, 'docs')))
             .pipe(gulp.dest(path.join(argv.p, 'docs')));
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
@@ -114,7 +114,7 @@ module.exports = function(gulp, $, utils) {
                         .pipe($.if(utils.hasProp(['.js']), $.rename({
                             extname: '.md'
                         })))
-                        .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
+                        // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                         .pipe($.through2.obj(function(file2, encoding, done) {
                             var contents;
 

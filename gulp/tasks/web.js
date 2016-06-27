@@ -225,7 +225,7 @@ module.exports = function(gulp, $, utils) {
     // scss
     var scss = function(filePath, cb) {
         var stream = gulp.src(filePath, {base: config.src})
-            .pipe($.changed(config.dist, {extension: '.css'}))
+            // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
@@ -577,7 +577,9 @@ module.exports = function(gulp, $, utils) {
             return fonts(file.dirname);
         });
         // scss
-        $.watch([config.src + '/**/css/*.scss'], {read: false}, function (file) {
+        $.watch([config.src + '/**/css/*.scss'], {
+                    read: false
+                }, function(file) {
             if (file.basename.slice(0, 1) === '_') {
                 var fileName = file.stem.slice(1),
                     files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
