@@ -7027,6 +7027,19 @@ dt.name h4, h4.name {
   border-color: #2FA4E7;
 }
 
+.list-level-1 {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.list-level-2 {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.list-level-3 {
+  font-size: 12px;
+}
 
 #toc::-webkit-scrollbar {
     width: 8px;

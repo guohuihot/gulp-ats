@@ -71,7 +71,7 @@
 
     var scrollTo = function(e) {
       e.preventDefault();
-      var target = $(e.target);
+      var target = $(e.currentTarget);
       if (target.prop('tagName').toLowerCase() !== "a") {
         target = target.parent();
       }
@@ -149,6 +149,7 @@
       //build TOC
       var el = $(this);
       var ul = $('<div class="list-group">');
+      var firstTag;
 
       headings.each(function(i, heading) {
         var $h = $(heading);
@@ -157,22 +158,43 @@
 
         var span = $('<span/>')
           .text(opts.headerText(i, heading, $h));
-
+        var tag = $h[0].tagName.toLowerCase().slice(1);
         //build TOC item
         var a = $('<a class="list-group-item"/>')
           .append(span)
           .attr('href', '#' + opts.anchorName(i, heading, opts.prefix))
+          .attr('data-tag', tag)
           .bind('click', function(e) {
             scrollTo(e);
             el.trigger('selected', $(this).attr('href'));
           });
-
+        if (!firstTag) firstTag = tag;
         span.addClass(opts.itemClass(i, heading, $h, opts.prefix));
 
         tocs.push(a);
 
         ul.append(a);
       });
+
+      ul.find('[data-tag="'+ firstTag +'"]').each(function(a, b) {
+        var tag1 = $(this).data('tag');
+        $(this).addClass('list-level-1').find('span').html(function(i, v) {
+            return (a + 1) + '. ' + v;
+        })
+        $(this).nextUntil('[data-tag="' + (tag1) + '"]').filter('[data-tag="' + (tag1 + 1) + '"]').each(function(e, f) {
+          var tag2 = $(this).data('tag');
+          $(this).addClass('list-level-2').find('span').html(function(i, v) {
+              return (a + 1) + '.' + (e + 1) + '. ' + v;
+          })
+
+          $(this).nextUntil('[data-tag="' + (tag2) + '"]').filter('[data-tag="' + (tag2 + 1) + '"]').each(function(g, h) {
+            $(this).addClass('list-level-3').find('span').html(function(i, v) {
+                return (a + 1) + '.' + (e + 1) + '.' + (g + 1) + '. ' + v;
+            })
+          });
+        }); 
+      });
+
       el.html(ul);
 
       calcHadingOffsets();
