@@ -4,13 +4,6 @@
  * @date 2016-1-15
  */
 
-// 这个可以自己定义变量c-variables.scss，请参考variables.scss,没有定义的话使用默认的
-// @import 'c-variables';
-// 全局变量
-@import 'variables'; // 重置css
-@import 'reset'; // 导入继承
-@import 'inherit'; // 导入mixins
-@import 'mixins'; // 基本设置
-@import 'base'; // 通用类
-@import 'utilities'; // 导入插件modal css
-@import 'modal';
+@import 'static/reset'; // 重置，仅通用类文件引入，一般一个网站只导入一次
+@import 'static/ats'; // 工具类, 每个文件都要导入
+@import 'static/base'; // // 通用类，仅通用类文件引入，一般一个网站只导入一次

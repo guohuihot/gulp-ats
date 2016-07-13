@@ -1,4 +1,8 @@
-// Utilities
+@import 'variables'; // 重置css
+@import 'inherit/clearfix';
+@import 'inherit/outline';
+@import 'inherit/text-overflow'; 
+// Layout
 // opacity(透明度)
 @import 'mixins/opacity';
 // ico
@@ -6,3 +10,4 @@
 @import 'mixins/triangle';
 @import 'mixins/nav-divider';
 @import 'mixins/reset-filter';
+

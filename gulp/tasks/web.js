@@ -244,13 +244,13 @@ module.exports = function(gulp, $, utils) {
                 author: config.author,
                 date: $.moment().format('YYYY-MM-DD HH:mm:ss')
             }))
-            /*.pipe($.autoprefixer({
+            .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
                 //-webkit-transform: rotate(45deg);
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true
-            }))*/
+            }))
 
         
         // cb && cb();
@@ -455,7 +455,7 @@ module.exports = function(gulp, $, utils) {
     gulp.task('connect', function() {
             $.connect.server({
                 root: config.path,
-                port: 8080,
+                port: 8888,
                 // 静态服务器使用
                 livereload: true,
                 /*middleware: function(connect, opt) {
@@ -468,7 +468,7 @@ module.exports = function(gulp, $, utils) {
             });
             if (argv.o) {
                 var demoUrl = config.rPath + 'demo.html';
-                require('child_process').exec('start http://localhost:8080/' + demoUrl);
+                require('child_process').exec('start http://localhost:8888/' + demoUrl);
             }
         });
     // watch
@@ -693,8 +693,8 @@ module.exports = function(gulp, $, utils) {
                                 base: atsSrc
                             })
                             .pipe($.changed(proSrc))
-                            .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
-                                prefix: '_'
+                            .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
+                                suffix: '_demo'
                             })))
                             .pipe(gulp.dest(proSrc)));
                     };
@@ -719,8 +719,8 @@ module.exports = function(gulp, $, utils) {
                     base: atsSrc
                 })
                 .pipe($.changed(proSrc))
-                .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss']), $.rename({
-                    prefix: '_'
+                .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
+                    suffix: '_demo'
                 })))
                 .pipe(gulp.dest(proSrc));
         }
