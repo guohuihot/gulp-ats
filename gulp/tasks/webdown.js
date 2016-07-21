@@ -32,7 +32,7 @@
                     fileName: (argv.n || 'index') + '.html'
                 }, {});
             // 创建下载目录
-            utils.mkdir(webConfig.downDir, webConfig.src);
+            fs.mkdir(webConfig.downDir);
             // 设置目录 保存配置
 
             cb(null, reqConfig, webConfig);
@@ -142,10 +142,9 @@
                             };
 
                             fs.writeFile(webConfig.downDir ? webConfig.downDir + v : v, fileData, function(err) {
-                                console.log(webConfig.downDir ? webConfig.downDir + v : v,1111);
-                                if (err) {
+                                /*if (err) {
                                     callback(err);
-                                };
+                                };*/
                             })
                             console.log(webConfig.downDir + v + ' created');
                             callback();

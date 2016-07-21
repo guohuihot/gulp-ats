@@ -1,3 +1,4 @@
+// @include triangle(10px, #f00, up);
 @mixin triangle ($size, $color, $direction) {
   height: 0;
   width: 0;
