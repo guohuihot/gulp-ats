@@ -111,7 +111,7 @@ module.exports = function(gulp, $, utils) {
         var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + './';
 
-        var fName    = path.basename(dir),
+        var fName    = path.basename(dir).slice(1),
             cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
         // console.log(pathBase);
         // return false;
@@ -259,7 +259,7 @@ module.exports = function(gulp, $, utils) {
     // concatjs
     var concatJS = function(dir, cb) {
         var pathRelative = path.relative(config.src, dir),
-            fName        = path.basename(dir);
+            fName        = path.basename(dir).slice(1);
 
         var stream = gulp.src(dir + '/*.js', {base: config.src })
             .pipe($.changed(config.dist))
@@ -556,7 +556,8 @@ module.exports = function(gulp, $, utils) {
                     force: true
                 });
             } else {
-                if (file.dirname.slice(-7) == '\\images' || file.dirname.slice(-4) == '\\pic') {
+                var tag = path.basename(file.dirname)[0];
+                if (tag != '_') {
                     gulp.src(file.path, {
                             base: config.src
                         })                    
@@ -570,7 +571,7 @@ module.exports = function(gulp, $, utils) {
             }
         });
         // fonts
-        $.watch(config.src + '/**/fonts/*/*.svg', {
+        $.watch(config.src + '/**/fonts/_*/*.svg', {
             read: false,
             usePolling: true
         }, function(file) {
@@ -604,7 +605,7 @@ module.exports = function(gulp, $, utils) {
         // js
         $.watch([
             config.src + '/**/js/*.js',
-            config.src + '/**/js/plugin/*.js'
+            '!' + config.src + '/**/js/_*/*.js'
         ], {
             read: false
         }, function(file) {
@@ -637,8 +638,7 @@ module.exports = function(gulp, $, utils) {
         });
         // concat js
         $.watch([
-            config.src + '/**/js/*/*.js',
-            '!' + config.src + '/**/js/{static,plugin}/*.js'
+            config.src + '/**/js/_*/*.js',
         ], {
             read: false
         }, function(file) {
@@ -741,15 +741,15 @@ module.exports = function(gulp, $, utils) {
             .pipe(gulp.dest(proDist)));
 
         // 直接复制plugin目录
-        stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
-            .pipe($.changed(proDist))
-            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe(gulp.dest(proDist)));
+        // stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
+        //     .pipe($.changed(proDist))
+        //     .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+        //     .pipe(gulp.dest(proDist)));
 
-        // 直接复制static目录
-        stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
-            .pipe($.changed(proDist))
-            .pipe(gulp.dest(proDist)));
+        // // 直接复制static目录
+        // stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
+        //     .pipe($.changed(proDist))
+        //     .pipe(gulp.dest(proDist)));
 
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
             .pipe($.changed(proDist))
@@ -764,16 +764,15 @@ module.exports = function(gulp, $, utils) {
     });
     // concatjs 异步处理
     gulp.task('concat', ['pack'], function(cb) {
-        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/!(plugin|static)/'), cb);
+        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/(_)/'), cb);
     });
-
     // sprites 异步处理
     gulp.task('sprites', ['concat'], function(cb) {
-        return buildCB(sprites, $.glob.sync(config.src + '/**/images/!(static)/'), cb);
+        return buildCB(sprites, $.glob.sync(config.src + '/**/images/(_)/'), cb);
     });
     // fonts 异步处理
     gulp.task('fonts', ['sprites'], function(cb) {
-        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/!(static)/'), cb);
+        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/(_)/'), cb);
     })
     // scss 单独出来，异步处理
     gulp.task('scss', ['fonts'], function(cb) {
