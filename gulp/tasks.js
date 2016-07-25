@@ -67,7 +67,7 @@ module.exports = {
         argv: {
             
             '-p -d -a -m --src --dist --distEx': '同init',
-            '--sync': '仅同步已有的文件并重建',
+            '--all': '重建, 默认不重建，只同步',
         }
     },
     

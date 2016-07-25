@@ -179,7 +179,7 @@ module.exports = function(gulp, $, utils) {
         var stream = $.mergeStream();
         var pathBase = path.relative(config.src, dir + '/../../')
                             .split(path.sep).join('/') + '/',
-            fName    = path.basename(dir),
+            fName    = path.basename(dir).slice(1),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
         var stream1 = gulp.src(dir + '/*.svg', {base: config.src })
@@ -258,11 +258,10 @@ module.exports = function(gulp, $, utils) {
     }
     // concatjs
     var concatJS = function(dir, cb) {
-        var pathRelative = path.relative(config.src, dir),
+        var pathRelative = path.relative(config.src, dir).replace('_', ''),
             fName        = path.basename(dir).slice(1);
-
+        
         var stream = gulp.src(dir + '/*.js', {base: config.src })
-            .pipe($.changed(config.dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -419,6 +418,7 @@ module.exports = function(gulp, $, utils) {
                 src: argv.src,
                 mode: argv.m
             }, customConfig);
+
         // 目录不存在时直接返回
         if (!config.path) {
             console.log('error: 请设置项目目录path!');
@@ -680,7 +680,7 @@ module.exports = function(gulp, $, utils) {
         if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
             cb();
-        } else if (argv.sync) {
+        } else if (!argv.all) {
             var stream = $.mergeStream();
             var atsFromData = $.glob.sync(atsFromSrc + '/**/*');
             var proSrcData = $.glob.sync(proSrc + '/**/*');
@@ -733,46 +733,36 @@ module.exports = function(gulp, $, utils) {
 
         stream.add(gulp.src('./src/libs/demo.html'));
         // 处理img
-        stream.add(gulp.src([proSrc + '/**/images/*.{png,gif,jpg,jpeg}'], {
+        stream.add(gulp.src([
+                proSrc + '/**/images/*/**.{png,gif,jpg,jpeg}',
+                '!' + proSrc + '/**/images/_*/**.{png,gif,jpg,jpeg}',
+            ], {
                 base: proSrc
             })
-            .pipe($.changed(proDist))
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
 
-        // 直接复制plugin目录
-        // stream.add(gulp.src([proSrc + '/**/plugin/*.js'], {base: proSrc})
-        //     .pipe($.changed(proDist))
-        //     .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-        //     .pipe(gulp.dest(proDist)));
-
-        // // 直接复制static目录
-        // stream.add(gulp.src([proSrc + '/**/static/*'], {base: proSrc})
-        //     .pipe($.changed(proDist))
-        //     .pipe(gulp.dest(proDist)));
-
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
-            .pipe($.changed(proDist))
             .pipe($.data(tplData))
             .pipe($.template())
             .pipe(gulp.dest(proDist)));
             // return false;
         // 处理正常的js
-        stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js'), cb));
+        stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*)/*.js')), cb));
 
         return stream;
     });
     // concatjs 异步处理
     gulp.task('concat', ['pack'], function(cb) {
-        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/(_)/'), cb);
+        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/_*/'), cb);
     });
     // sprites 异步处理
     gulp.task('sprites', ['concat'], function(cb) {
-        return buildCB(sprites, $.glob.sync(config.src + '/**/images/(_)/'), cb);
+        return buildCB(sprites, $.glob.sync(config.src + '/**/images/_*/'), cb);
     });
     // fonts 异步处理
     gulp.task('fonts', ['sprites'], function(cb) {
-        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/(_)/'), cb);
+        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/_*/'), cb);
     })
     // scss 单独出来，异步处理
     gulp.task('scss', ['fonts'], function(cb) {
