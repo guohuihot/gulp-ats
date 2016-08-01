@@ -520,33 +520,108 @@ module.exports = function(gulp, $, utils) {
             })
         }
         // html
-        $.watch([
-            config.src + '/**/*.{html,htm}',
-            '!' + config.dist + '/**/_*.{html,htm}'
-        ], {
-            read: false
-        }, function(file) {
-            if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
-                    force: true
-                });
-            } else {
-                gulp.src(file.path, {
-                        base: config.src
-                    })
-                    .pipe($.changed(config.dist))
-                    .pipe($.plumber())
-                    .pipe($.fileInclude())
-                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                        to: 'gbk'
-                    })))
-                    .pipe(gulp.dest(config.dist))
-                    .pipe(message('html处理ok'));
-            }
-        });
+        // $.watch([
+        //     config.src + '/**/*.{html,htm}',
+        //     '!' + config.dist + '/**/_*.{html,htm}'
+        // ], {
+        //     read: false
+        // }, function(file) {
+        //     if (file.event == 'unlink') {
+        //         var pathRelative = path.relative(config.src, file.path);
+        //         $.del([config.dist + '/' + pathRelative], {
+        //             force: true
+        //         });
+        //     } else {
+        //         gulp.src(file.path, {
+        //                 base: config.src
+        //             })
+        //             .pipe($.changed(config.dist))
+        //             .pipe($.plumber())
+        //             .pipe($.fileInclude())
+        //             .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+        //                 to: 'gbk'
+        //             })))
+        //             .pipe(gulp.dest(config.dist))
+        //             .pipe(message('html处理ok'));
+        //     }
+        // });
         // images
-        $.watch([config.src + '/**/{images,pic}/**/*.{png,gif,jpg,jpeg}'], {
+        // $.watch([config.src + '/**/{images,pic}/**/*.{png,gif,jpg,jpeg}'], {
+        //     read: false,
+        //     usePolling: true
+        // }, function(file) {
+        //     if (file.event == 'unlink') {
+        //         var pathRelative = path.relative(config.src, file.path);
+        //         $.del([config.dist + '/' + pathRelative], {
+        //             force: true
+        //         });
+        //     } else {
+        //         var tag = path.basename(file.dirname)[0];
+        //         if (tag != '_') {
+        //             gulp.src(file.path, {
+        //                     base: config.src
+        //                 })                    
+        //                 .pipe($.changed(config.dist))
+        //                 .pipe($.imagemin(configs.imagemin))
+        //                 .pipe(gulp.dest(config.dist))
+        //                 .pipe(message('复制并压缩'));
+        //         } else {
+        //             sprites(file.dirname);
+        //         }
+        //     }
+        // });
+        // fonts
+        // $.watch(config.src + '/**/fonts/_*/*.svg', {
+        //     read: false,
+        //     usePolling: true
+        // }, function(file) {
+        //     return fonts(file.dirname);
+        // });
+        // scss
+        // $.watch([config.src + '/**/css/*.scss'], {
+        //             read: false
+        //         }, function(file) {
+        //     if (file.basename.slice(0, 1) === '_') {
+        //         var fileName = file.stem.slice(1),
+        //             files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
+        //             reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
+                
+        //         files.forEach(function(filePath) {
+        //             // console.log(fs.readFileSync(p).toString().search(reg));
+        //             // 处理所有包括当前'_base'的scss
+        //             if (fs.readFileSync(filePath).toString().search(reg) != -1) {
+        //                 scss(filePath);      
+        //             }
+        //         });
+        //     } else {
+        //         if (file.event == 'unlink') {
+        //             var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
+        //             $.del([config.dist + '/' + pathRelative], {force: true});
+        //         } else {
+        //             scss(file.path);
+        //         }
+        //     }
+        // });
+        // js
+        // $.watch([
+        //     config.src + '/**/js/**/*.js',
+        //     '!' + config.src + '/**/js/_*/*.js'
+        // ], {
+        //     read: false
+        // }, function(file) {
+        //     if (file.event == 'unlink') {
+        //         var pathRelative = path.relative(config.src, file.path);
+        //         $.del([config.dist + '/' + pathRelative], {
+        //             force: true
+        //         });
+        //     } else {
+        //         JS(file.path);
+        //     }
+        // });
+        // 直接复制
+        $.watch([
+                config.src + '/**/*'
+            ], {
             read: false,
             usePolling: true
         }, function(file) {
@@ -555,7 +630,28 @@ module.exports = function(gulp, $, utils) {
                 $.del([config.dist + '/' + pathRelative], {
                     force: true
                 });
-            } else {
+            } else if (file.extname == '.scss') {
+                if (file.basename.slice(0, 1) === '_') {
+                    var fileName = file.stem.slice(1),
+                        files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
+                        reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
+                    
+                    files.forEach(function(filePath) {
+                        // console.log(fs.readFileSync(p).toString().search(reg));
+                        // 处理所有包括当前'_base'的scss
+                        if (fs.readFileSync(filePath).toString().search(reg) != -1) {
+                            scss(filePath);      
+                        }
+                    });
+                } else {
+                    if (file.event == 'unlink') {
+                        var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
+                        $.del([config.dist + '/' + pathRelative], {force: true});
+                    } else {
+                        scss(file.path);
+                    }
+                }
+            } else if (file.extname == 'png,gif,jpg,jpeg') {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
@@ -568,65 +664,35 @@ module.exports = function(gulp, $, utils) {
                 } else {
                     sprites(file.dirname);
                 }
-            }
-        });
-        // fonts
-        $.watch(config.src + '/**/fonts/_*/*.svg', {
-            read: false,
-            usePolling: true
-        }, function(file) {
-            return fonts(file.dirname);
-        });
-        // scss
-        $.watch([config.src + '/**/css/*.scss'], {
-                    read: false
-                }, function(file) {
-            if (file.basename.slice(0, 1) === '_') {
-                var fileName = file.stem.slice(1),
-                    files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
-                    reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
-                
-                files.forEach(function(filePath) {
-                    // console.log(fs.readFileSync(p).toString().search(reg));
-                    // 处理所有包括当前'_base'的scss
-                    if (fs.readFileSync(filePath).toString().search(reg) != -1) {
-                        scss(filePath);      
-                    }
-                });
-            } else {
-                if (file.event == 'unlink') {
-                    var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
-                    $.del([config.dist + '/' + pathRelative], {force: true});
-                } else {
-                    scss(file.path);
-                }
-            }
-        });
-        // js
-        $.watch([
-            config.src + '/**/js/*.js',
-            '!' + config.src + '/**/js/_*/*.js'
-        ], {
-            read: false
-        }, function(file) {
-            if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
-                    force: true
-                });
-            } else {
+            } else if (file.extname == '.svg') {
+               return fonts(file.dirname);
+            } else if (file.extname == '.js') {
                 JS(file.path);
-            }
-        });
-        // 直接复制
-        $.watch([config.src + '/**/{static,test}/*'], {
-            read: false
-        }, function(file) {
-            if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
-                    force: true
-                });
+            } else if (file.extname == '.jpg') {
+                var tag = path.basename(file.dirname)[0];
+                if (tag != '_') {
+                    gulp.src(file.path, {
+                            base: config.src
+                        })                    
+                        .pipe($.changed(config.dist))
+                        .pipe($.imagemin(configs.imagemin))
+                        .pipe(gulp.dest(config.dist))
+                        .pipe(message('复制并压缩'));
+                } else {
+                    sprites(file.dirname);
+                }
+            } else if (file.extname == '.html') {
+                gulp.src(file.path, {
+                        base: config.src
+                    })
+                    .pipe($.changed(config.dist))
+                    .pipe($.plumber())
+                    .pipe($.fileInclude())
+                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                        to: 'gbk'
+                    })))
+                    .pipe(gulp.dest(config.dist))
+                    .pipe(message('html处理ok'));
             } else {
                 gulp.src(file.path, {
                         base: config.src
