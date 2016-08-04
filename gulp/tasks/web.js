@@ -128,7 +128,7 @@ module.exports = function(gulp, $, utils) {
         var dataFun = function(file, cb1) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
-                    if (!jsonArr[0].contents) {
+                    if (!jsonArr[0] || !jsonArr[0].contents) {
                         console.error('错误：' + file);
                         cb1()
                     };
@@ -620,16 +620,34 @@ module.exports = function(gulp, $, utils) {
         // });
         // 直接复制
         $.watch([
-                config.src + '/**/*'
+                config.src + '/**/*',
+                '!' + config.src + '/**/*.map'
             ], {
             read: false,
             usePolling: true
         }, function(file) {
             if (file.event == 'unlink') {
-                var pathRelative = path.relative(config.src, file.path);
-                $.del([config.dist + '/' + pathRelative], {
+                var nFile = file.extname == '.scss' ? file.path.slice(0, -5) + '.css' : file.path;
+                var pathRelative = path.relative(config.src, nFile);
+                var uFile = config.dist + '/' + pathRelative;
+                var delFile = [uFile];
+
+                if (file.extname == '.scss') {
+                    delFile.push(file.path + '.map');
+                }
+                console.log(delFile);
+                $.del.sync(delFile, {
                     force: true
                 });
+
+                var fDirname = path.dirname(uFile);
+                // 删除文件夹
+                var aFiles = $.glob.sync(fDirname + '/**/*');
+                if (!aFiles.length) {
+                    $.del.sync([fDirname], {
+                        force: true
+                    })
+                }
             } else if (file.extname == '.scss') {
                 if (file.basename.slice(0, 1) === '_') {
                     var fileName = file.stem.slice(1),
@@ -644,12 +662,7 @@ module.exports = function(gulp, $, utils) {
                         }
                     });
                 } else {
-                    if (file.event == 'unlink') {
-                        var pathRelative = path.relative(config.src, file.path.slice(0, -5) + '.css');
-                        $.del([config.dist + '/' + pathRelative], {force: true});
-                    } else {
-                        scss(file.path);
-                    }
+                    scss(file.path);
                 }
             } else if (file.extname == 'png,gif,jpg,jpeg') {
                 var tag = path.basename(file.dirname)[0];
