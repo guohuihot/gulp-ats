@@ -631,31 +631,48 @@ module.exports = function(gulp, $, utils) {
                 var pathRelative = path.relative(config.src, nFile);
                 var uFile = config.dist + '/' + pathRelative;
                 var delFile = [uFile];
+                var tag = path.basename(file.dirname)[0];
 
-                if (file.extname == '.scss') {
-                    delFile.push(file.path + '.map');
+                if ({'.scss': 1, '.js': 1}[file.extname]) {
+                    // 同时删除map文件
+                    delFile.push(nFile + '.map');
                 }
-                console.log(delFile);
+
                 $.del.sync(delFile, {
                     force: true
                 });
 
+                // 目标目录
                 var fDirname = path.dirname(uFile);
-                // 删除文件夹
-                var aFiles = $.glob.sync(fDirname + '/**/*');
-                if (!aFiles.length) {
-                    $.del.sync([fDirname], {
-                        force: true
-                    })
+
+                if (tag == '_') {
+                    // 删除合并文件夹
+                    var aFiles = $.glob.sync(file.dirname + '/**/*');
+                    // 原目录
+                    var oDirname = path.dirname(nFile).replace('_', '');
+
+                    fDirname = fDirname.replace('_', '');
+                    if (!aFiles.length) {
+                        $.del.sync([fDirname + '.*', oDirname + '.js.map'], {
+                            force: true
+                        })
+                    }
+                } else {
+                    // 删除文件夹
+                    var aFiles = $.glob.sync(fDirname + '/**/*');
+                    if (!aFiles.length) {
+                        $.del.sync([fDirname], {
+                            force: true
+                        })
+                    }
                 }
             } else if (file.extname == '.scss') {
-                if (file.basename.slice(0, 1) === '_') {
+                if (file.basename[0] === '_') {
                     var fileName = file.stem.slice(1),
                         files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
                         reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
                     
                     files.forEach(function(filePath) {
-                        // console.log(fs.readFileSync(p).toString().search(reg));
                         // 处理所有包括当前'_base'的scss
                         if (fs.readFileSync(filePath).toString().search(reg) != -1) {
                             scss(filePath);      
@@ -664,7 +681,7 @@ module.exports = function(gulp, $, utils) {
                 } else {
                     scss(file.path);
                 }
-            } else if (file.extname == 'png,gif,jpg,jpeg') {
+            } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
@@ -678,23 +695,25 @@ module.exports = function(gulp, $, utils) {
                     sprites(file.dirname);
                 }
             } else if (file.extname == '.svg') {
-               return fonts(file.dirname);
-            } else if (file.extname == '.js') {
-                JS(file.path);
-            } else if (file.extname == '.jpg') {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
                             base: config.src
                         })                    
                         .pipe($.changed(config.dist))
-                        .pipe($.imagemin(configs.imagemin))
                         .pipe(gulp.dest(config.dist))
-                        .pipe(message('复制并压缩'));
+                        .pipe(message('复制'));
                 } else {
-                    sprites(file.dirname);
+                    fonts(file.dirname);
                 }
-            } else if (file.extname == '.html') {
+            } else if (file.extname == '.js') {
+                var tag = path.basename(file.dirname)[0];
+                if (tag != '_') {
+                    JS(file.path);
+                } else {
+                    concatJS(file.dirname);
+                }
+            } else if ({".html": 1, ".htm": 1}[file.extname]) {
                 gulp.src(file.path, {
                         base: config.src
                     })
@@ -706,22 +725,14 @@ module.exports = function(gulp, $, utils) {
                     })))
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('html处理ok'));
-            } else {
+            }/* else {
                 gulp.src(file.path, {
                         base: config.src
                     })
                     .pipe($.changed(config.dist))
                     .pipe(gulp.dest(config.dist))
                     .pipe(message('直接复制'));
-            }
-        });
-        // concat js
-        $.watch([
-            config.src + '/**/js/_*/*.js',
-        ], {
-            read: false
-        }, function(file) {
-            concatJS(file.dirname);
+            }*/
         });
         if (argv.s) {
             gulp.start('connect');
