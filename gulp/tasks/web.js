@@ -224,12 +224,20 @@ module.exports = function(gulp, $, utils) {
     }
     // scss
     var scss = function(filePath, cb) {
+        var scssPaths = [path.dirname(filePath)];
+        if (config.scssPaths) {
+            config.scssPaths.split(',').forEach(function(p) {
+                scssPaths.push(p);
+            })
+        };
+        scssPaths.push(config.tpl + config.libs + '/css/');
+        // console.log(scssPaths);
         var stream = gulp.src(filePath, {base: config.src})
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
-                includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
+                includePaths: scssPaths,
                 // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
                 outputStyle: 'nested',
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
@@ -416,6 +424,7 @@ module.exports = function(gulp, $, utils) {
                 dist: argv.dist,
                 distEx: argv.distEx,
                 src: argv.src,
+                scssPaths: argv.scssPaths,
                 mode: argv.m
             }, customConfig);
 
@@ -620,8 +629,7 @@ module.exports = function(gulp, $, utils) {
         // });
         // 直接复制
         $.watch([
-                config.src + '/**/*',
-                '!' + config.src + '/**/*.map'
+                config.src + '/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'
             ], {
             read: false,
             usePolling: true
