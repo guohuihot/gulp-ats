@@ -50,6 +50,12 @@ module.exports = {
                 'PS：与p的相对路径',
             ].join('\n\t\t\t'),
 
+            '--scssPaths\t': [
+                'scss源目录',
+                '类型：string,  默认值：保留上次的值',
+                'PS：需要绝对路径',
+            ].join('\n\t\t\t'),
+
             '--distEx': [
                 '扩展生成目录，有时我们生成的目录不仅仅只dist目标，',
                 '可能还要将生成的文件复制到另一个目录，',
@@ -138,7 +144,8 @@ module.exports = {
         
         argv: {
             
-            '-p': 'markdown文件目录'
+            '-p': 'markdown文件目录',
+            '--dirs': '要处理的目录多个用|分割'
         }
     },
     

@@ -55,13 +55,19 @@ module.exports = function(gulp, $, utils) {
             return;
         };
         files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md'))
-        files = files.concat($.glob.sync(path.join(argv.p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs)/*.js'), {ignore: path.join(argv.p, '/**/vendor/**/*.js')}));
+        files = files.concat($.glob.sync(path.join(argv.p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs|_seajs)/*.js'), {ignore: path.join(argv.p, '/**/vendor/**/*.js')}));
         // console.log(files);
         files.forEach(function(file) {
             if (path.extname(file) == '.js') {
                 stream.add(gulp.src(file)
                     // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
-                    .pipe($.plumber())
+                    .pipe($.plumber(function(err) {
+                        console.log('#####');
+                        console.log('文件内容错误：' + file);
+                        console.log(err.message);
+                        console.log(err.plugin);
+                        console.log('#####');
+                    }))
                     .pipe($.jsdocToMarkdown({
                         template: "{{>main}}"
                     }))
