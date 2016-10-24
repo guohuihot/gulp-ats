@@ -1,0 +1,94 @@
+$font-modal-fz: inherit !default;
+
+@font-face {
+	font-family: "modal";
+    font-weight: normal;
+    font-style: normal;
+	src: url('../fonts/modal.eot');
+	src: url('../fonts/modal.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/modal.woff') format('woff');/*,
+		url('../fonts/modal.ttf') format('truetype'),
+		url('../fonts/modal.svg#modal') format('svg');*/
+}
+$font-modal-fz: inherit !default;
+$font-modal-fl: none !default;
+$font-modal-m: 0 !default;
+$font-modal-va: -.25em !default;
+[class^="font-modal-"],
+[class*=" font-modal-"] {
+	font-family: "modal";
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	font-size: $font-modal-fz;
+	float: $font-modal-fl;
+	margin: $font-modal-m;
+	vertical-align: $font-modal-va;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	/* speak: none; only necessary if not using the private unicode range (firstdata option) */
+	text-decoration: none;
+	text-transform: none;
+}
+
+
+.font-modal-ask:before {
+	content: "\EA01";
+}
+
+.font-modal-ask1:before {
+	content: "\EA02";
+}
+
+.font-modal-close:before {
+	content: "\EA03";
+}
+
+.font-modal-error:before {
+	content: "\EA04";
+}
+
+.font-modal-error1:before {
+	content: "\EA05";
+}
+
+.font-modal-info:before {
+	content: "\EA06";
+}
+
+.font-modal-info1:before {
+	content: "\EA07";
+}
+
+.font-modal-laugh:before {
+	content: "\EA08";
+}
+
+.font-modal-laugh1:before {
+	content: "\EA09";
+}
+
+.font-modal-load:before {
+	content: "\EA0A";
+}
+
+.font-modal-load1:before {
+	content: "\EA0B";
+}
+
+.font-modal-pop:before {
+	content: "\EA0C";
+}
+
+.font-modal-pop1:before {
+	content: "\EA0D";
+}
+
+.font-modal-success:before {
+	content: "\EA0E";
+}
+
+.font-modal-success1:before {
+	content: "\EA0F";
+}
+

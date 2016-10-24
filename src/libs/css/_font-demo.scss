@@ -1,0 +1,58 @@
+$font-demo-fz: inherit !default;
+
+@font-face {
+	font-family: "demo";
+    font-weight: normal;
+    font-style: normal;
+	src: url('../fonts/demo.eot');
+	src: url('../fonts/demo.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/demo.woff') format('woff');/*,
+		url('../fonts/demo.ttf') format('truetype'),
+		url('../fonts/demo.svg#demo') format('svg');*/
+}
+$font-demo-fz: inherit !default;
+$font-demo-fl: none !default;
+$font-demo-m: 0 !default;
+$font-demo-va: -.25em !default;
+[class^="font-demo-"],
+[class*=" font-demo-"] {
+	font-family: "demo";
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	font-size: $font-demo-fz;
+	float: $font-demo-fl;
+	margin: $font-demo-m;
+	vertical-align: $font-demo-va;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	/* speak: none; only necessary if not using the private unicode range (firstdata option) */
+	text-decoration: none;
+	text-transform: none;
+}
+
+
+.font-demo-home:before {
+	content: "\EA01";
+}
+
+.font-demo-map:before {
+	content: "\EA02";
+}
+
+.font-demo-menu:before {
+	content: "\EA03";
+}
+
+.font-demo-sc:before {
+	content: "\EA04";
+}
+
+.font-demo-search:before {
+	content: "\EA05";
+}
+
+.font-demo-tel:before {
+	content: "\EA06";
+}
+

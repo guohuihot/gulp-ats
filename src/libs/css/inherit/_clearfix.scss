@@ -1,0 +1,11 @@
+%clearfix {
+    *zoom: 1;
+    @at-root &:after {
+        display: block;
+        clear: both; 
+
+        height: 0;
+
+        content: '\20';
+    }
+}

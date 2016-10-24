@@ -1,0 +1,197 @@
+//
+// base
+// --------------------------------------------------
+
+// Body reset
+
+html {
+    font-size: 10px;
+
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+    font-family: $ff;
+    font-size: $fz;
+    line-height: $lh;
+
+    color: $color;
+    background-color: $bgc;
+}
+
+// Reset fonts for relevant elements
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+
+// Links
+
+a {
+    text-decoration: none;
+
+    color: $link-color;
+    &:hover {
+        text-decoration: $hover-decoration;
+
+        color: $hover-color;
+    }
+    &:focus {
+        @extend %outline;
+    }
+}
+
+
+// Figures
+//
+// We reset this here because previously Normalize had no `figure` margins. This
+// ensures we don't break anyone's use of the element.
+
+figure {
+    margin: 0;
+}
+
+
+// Images
+
+img {
+    vertical-align: middle;
+}
+
+// Horizontal rules
+
+[type='button'],
+[type='submit'],
+[type='image'] {
+    cursor: pointer;
+}
+
+.container {
+    width: $screen;
+    min-width: $min-screen;
+    @extend %clearfix;
+    margin: auto;
+}
+/* 兼容百度编辑器内容 */
+.list-paddingleft-2 {
+    padding-left: 30px;
+}
+
+menu,
+ul, li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: normal;
+}
+
+//
+// Utility classes
+// --------------------------------------------------
+
+
+.clearfix {
+  @extend %clearfix;
+}
+// Floats
+// -------------------------
+
+.fr {
+  float: right !important;
+}
+.fl {
+  float: left !important;
+}
+
+// Toggling content
+// -------------------------
+
+.dn {
+  display: none !important;
+}
+.db {
+  display: block !important;
+}
+.vh {
+  visibility: hidden;
+}
+.text-hide {
+  @extend %text-overflow;
+}
+
+// -------------------------
+.pos {
+  position: static;
+}
+.pof {
+  position: fixed;
+}
+.por {
+  position: relative;
+}
+.poa {
+  position: absolute;
+}
+
+.tal {
+    text-align: left !important;
+}
+
+.tac {
+    text-align: center !important;
+}
+
+.tar {
+    text-align: right !important;
+}
+
+.ma {
+    margin: 0 auto !important;
+}
+// blank
+%blank {
+    font-size: 1px;
+
+    display: block;
+    clear: both;
+    overflow: hidden;
+}
+
+@for $i from 1 through 30 {
+  .blank#{$i} { 
+        @extend %blank;
+        height: #{$i}px; 
+    }
+}
+
+// margin padding
+$param: (t: top, r: right, b: bottom, l: left);
+
+@each $k, $v in $param {
+    @for $i from 1 through 40 {
+        @if $i % 5 == 0 {
+            .m#{$k}#{$i} {
+                margin-#{$v}: #{$i}px !important;
+            }
+            .p#{$k}#{$i} {
+                padding-#{$v}: #{$i}px !important;
+            }
+        }
+    }
+}
+// font
+
+@for $i from 12 through 34 {
+  .fz#{$i} { 
+        font-size: #{$i}px !important; 
+    }
+}

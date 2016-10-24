@@ -1,0 +1,34 @@
+// 规范：
+// 变量名用中线连接
+$screen: 1000px !default; // 页面宽度
+$min-screen: 1000px !default; // 页面宽度
+
+// 字体
+$color : #333 !default; // 字体颜色
+$fz    : 14px !default; // 字号
+$ff    : microsoft yahei !default; // 字体
+$lh    : 1.5 !default; // 行高
+$bgc   : transparent !default; // 背景
+
+// link
+$link-color       : #333 !default; // 颜色
+$hover-color      : #f00 !default; // hover颜色
+$hover-decoration : underline !default; // 下划线
+
+// modal
+$success-color: #2ECC71 !default;
+$info-color: #5BADE5 !default;
+$error-color: #E74D3E !default;
+$ask-color: #3498DB !default;
+$load-color: #EA8214 !default;
+$pop-color: #3BB4F2 !default;
+$close-color: #666 !default;
+$close-color-hover: #c00 !default;
+
+$modal-miw: 150px !default;
+$modal-bdrs: 6px !default;
+$modal-ico-fz: 32px !default;
+$modal-body-p: 10px 25px !default;
+$modal-border-w: 0px !default;
+
+

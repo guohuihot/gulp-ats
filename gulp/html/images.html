@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title><%= fName %></title>    
+    <style type="text/css">
+
+<% _.forEach(cssData, function(data, name) { %> 
+    .<%= sign %>-<%= fName %>-<%= name %>,
+<% }); %>
+    .a {
+        display: inline-block;
+        *zoom: 1;
+        *display: inline;
+        background-image: url(<%= fName %>.png);
+    }
+<% _.forEach(cssData, function(data, name) { %>
+    .<%= sign %>-<%= fName %>-<%= name %> {
+        width: <%= data.width ? data.width + 'px' : 0 %>;
+        height: <%= data.height ? data.height + 'px' : 0 %>;
+        background-position: <%= data.offset_x ? data.offset_x + 'px' : 0 %> <%= data.offset_y ? data.offset_y + 'px' : 0 %>;
+    }
+<% }); %>
+
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .container {
+        width: 1200px;
+        margin: 20px auto;
+    }
+    li {
+        float: left;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid #eee;
+        text-align: center;
+        font-family: arial;
+        color: #fff;
+        height: <%= H + 58 %>px;
+        width: <%= W + 10 %>px;
+        min-width: 80px;
+        line-height: 1.5;
+        background-color: #272822;
+        position: relative;
+    }
+    .class {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 48px;
+        width: 100%;
+        cursor: pointer;
+    }
+    pre {
+        margin: 15px 0;
+        color: #FD8520;
+        font-family: Consolas;
+        font-size: 14px;
+        padding: 15px;
+        background-color: #272822;
+    }
+    .bg i {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        margin-left: 10px;
+        cursor: pointer;
+        background-color: #22D5BB;
+        float: right;
+    }
+    .bg i:nth-child(2) {
+        background-color: #E1F4D8;
+    }
+    .bg i:nth-child(3) {
+        background-color: #8B9D37;
+    }
+    .bg i:nth-child(4) {
+        background-color: #FE842E;
+    }
+    .bg i:nth-child(5) {
+        background-color: #272822;
+    }
+    
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <h3>
+            <a class="index"> <i class="img-demo-face1"></i> 返回首页 </a> | <a class="font-demo-home" href="../">上一级</a>
+        </h3>
+        <h2>调用方式</h2>
+
+        <h3>css</h3>
+<pre>
+@import 'img-<%= fName %>'; //导入css 标识-文件名
+@include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
+.img-demo-home {
+    width: nth($img-<%= fName %>, 1);
+    height: nth($img-<%= fName %>, 2);
+    background-position: nth($img-<%= fName %>, 3) nth($img-<%= fName %>, 4);
+}
+</pre>
+        <h3>html</h3>
+<pre>
+&lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
+</pre>
+
+        <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i></i></span>详细代码</h3>
+        点击下面文字直接复制到剪切板
+    </div>
+</div>
+<ul>
+<% _.forEach(cssData, function(data, name) { %>
+<li>
+    <i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
+    <div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
+</li>
+<% }); %>
+</ul>
+<script type="text/javascript">
+    var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
+</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
+
+<script type="text/javascript">
+if (BASE_URL.indexOf('http') == 0) {
+    seajs.use(['clipboard'], function() {
+        $(function() {
+            $('.index').click(function(event) {
+                location.href = BASE_URL;
+            });
+            var $icons = $('.class, .text');
+            $('body').on('copy', '.class, .text', function(e) {
+                    $icons.removeAttr('style');
+                    e.clipboardData.clearData();
+                    e.clipboardData.setData("text/plain", $(this).css({color:'#f00'}).text());
+                    e.preventDefault();
+                })
+                .on('click', '.bg i', function() {
+                    $('li').css({
+                        backgroundColor: $(this).css('background-color'),
+                    })
+                })
+        });
+    })
+};
+</script>
+</body>
+</html>

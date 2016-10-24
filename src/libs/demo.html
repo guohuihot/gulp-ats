@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>Hello, ats!</title>   
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" href="<%= base %>css/ats.css" />
+    <link rel="stylesheet" href="<%= base %>css/demo.css" />
+</head>
+<body>
+<div class="container">
+
+<h2><a class="index" href=""><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a></h2>
+<h3>Hello, ats! 编辑文件测试下</h3>
+<pre style="border:none;width:90%;outline:none;">
+    <%= info %>
+</pre>
+</div>
+<script type="text/javascript">
+    var BASE_URL = window.location.href.replace('<%= path %>', '');
+</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">
+    seajs.use(['modal'], function(modal) {
+        $('.index').click(function(event) {
+            location.href = BASE_URL;
+        });
+        modal.tip('Hello!', 'laugh');
+    });
+</script>
+</body>
+</html>

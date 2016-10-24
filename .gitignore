@@ -1,0 +1,9 @@
+/node_modules
+/down
+/src/src/css/_font-*.scss
+/src/src/css/_img-*.scss
+/gulp/base.js
+/test
+/src/libs/js/*.map
+/src/libs/css/*.map
+/gulp/base.json

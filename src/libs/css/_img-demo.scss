@@ -1,0 +1,32 @@
+
+$img-demo-face1:(24px,24px,0,0,img-demo-face1);
+
+$img-demo-face2:(24px,24px,-34px,0,img-demo-face2);
+
+$img-demo-face3:(24px,24px,0,-34px,img-demo-face3);
+
+$img-demo-face4:(24px,24px,-34px,-34px,img-demo-face4);
+
+$img-demo-face5:(24px,24px,-68px,0,img-demo-face5);
+
+$img-demo: ($img-demo-face1,$img-demo-face2,$img-demo-face3,$img-demo-face4,$img-demo-face5,);
+
+@mixin img-demo($sprites) {
+  %icodemo {
+      display: inline-block;
+      *zoom: 1;
+      *display: inline;
+      vertical-align: middle;
+      line-height: 300px;
+      overflow: hidden;
+      background-image: url(../images/demo.png);
+  }
+  @each $sprite in $sprites {
+    .#{nth($sprite, 5)} {
+        width: nth($sprite, 1);
+        height: nth($sprite, 2);
+        background-position: nth($sprite, 3) nth($sprite, 4);
+      @extend %icodemo;
+    }
+  }
+}

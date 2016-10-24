@@ -1,0 +1,29 @@
+/*!
+ * @name <%= name %>
+ * @author <%= author %>
+ * @date <%= date %>
+ */
+
+@import 'static/ats'; // 工具类, 每个文件都要导入
+// 导入全部font demo 图标
+@import 'font-demo';
+// 导入全部img css
+@import 'img-demo';
+// 生成全部img css
+@include img-demo($img-demo);
+// 导入插件modal css
+@import 'modal';
+.demo {
+	// 单独引入某一个img css
+	@extend .img-demo-face1;
+}
+
+.demo1 {
+	// 调用继承
+	@extend %clearfix;
+	// 调用mixins
+	@include opacity(.5);
+	font-weight: bold;
+	color: #f00;
+}
+

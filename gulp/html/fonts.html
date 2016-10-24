@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title><%= fName %></title>    
+    <style type="text/css">
+        @font-face {
+        font-family: "<%= fName %>";
+        font-weight: normal;
+        font-style: normal;
+        src: url('<%= fName %>.eot');
+        src: url('<%= fName %>.eot?#iefix') format('embedded-opentype'),
+            url('<%= fName %>.woff') format('woff');/*,
+            url('<%= fName %>.ttf') format('truetype'),
+            url('<%= fName %>.svg#<%= fName %>') format('svg');*/
+    }
+
+    [class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
+        font-family: "<%= fName %>";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: normal;
+        font-size: 32px;
+        /* speak: none; only necessary if not using the private unicode range (firstdata option) */
+        text-decoration: none;
+        text-transform: none;
+    }
+
+    <% _.each(cssData, function(data) { %>
+    .<%= sign %>-<%= fName %>-<%= data.name %>:before {
+        content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+    }
+    <% }); %>   
+
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .container {
+        width: 1200px;
+        margin: 20px auto;
+    }
+    li {
+        float: left;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid #eee;
+        text-align: center;
+        font-family: arial;
+        color: #555;
+        line-height: 1.5;
+    }
+    pre {
+        margin: 15px 0;
+        color: #FD8520;
+        font-family: Consolas;
+        font-size: 14px;
+        padding: 15px;
+        background-color: #272822;
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="row">
+    <h3>
+        <a class="index"><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a>
+    </h3>
+    <h2>
+        调用方式
+    </h2>
+    <h3>css</h3>
+<pre>
+ @import 'font-<%= fName %>'; //导入css 标识-文件名
+</pre> 
+    <h3>html</h3>
+<pre>
+ &lt;i class="font-<%= fName %>-xxx"&gt;&lt;/i&gt; // class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
+ &lt;i class="font-<%= fName %>"><span>&</span>#xEA01;&lt;/i&gt; // class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
+</pre> 
+    <h3>详细代码</h3>点击下面文字直接复制到剪切板
+</div>
+    <ul>
+    <% _.each(cssData, function(data) { %>
+    <li>
+        <i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
+        <div class="class"><%= sign %>-<%= fName %>-<%= data.name %></div>
+        <div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
+    </li>
+    <% }); %>   
+    </ul>
+</div>
+<script type="text/javascript">
+    var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
+</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">
+if (BASE_URL.indexOf('http') == 0) {
+    seajs.use(['clipboard'], function() {
+        $('.index').click(function(event) {
+            location.href = BASE_URL;
+        });
+        var $icons = $('.class, .text');
+        $('body').on('copy', '.class, .text', function(e) {
+                $icons.removeAttr('style');
+                e.clipboardData.clearData();
+                e.clipboardData.setData("text/plain", $(this).css({color:'#f00'}).text());
+                e.preventDefault();
+            })
+    })
+};
+</script>
+</body>
+</html>

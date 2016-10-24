@@ -1,0 +1,38 @@
+$<%= sign %>-<%= fName %>-fz: inherit !default;
+
+@font-face {
+	font-family: "<%= fName %>";
+    font-weight: normal;
+    font-style: normal;
+	src: url('<%= fUrl %><%= fName %>.eot');
+	src: url('<%= fUrl %><%= fName %>.eot?#iefix') format('embedded-opentype'),
+		url('<%= fUrl %><%= fName %>.woff') format('woff');/*,
+		url('<%= fUrl %><%= fName %>.ttf') format('truetype'),
+		url('<%= fUrl %><%= fName %>.svg#<%= fName %>') format('svg');*/
+}
+$<%= sign %>-<%= fName %>-fz: inherit !default;
+$<%= sign %>-<%= fName %>-fl: none !default;
+$<%= sign %>-<%= fName %>-m: 0 !default;
+$<%= sign %>-<%= fName %>-va: -.25em !default;
+[class^="<%= sign %>-<%= fName %>-"],
+[class*=" <%= sign %>-<%= fName %>-"] {
+	font-family: "<%= fName %>";
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	font-size: $<%= sign %>-<%= fName %>-fz;
+	float: $<%= sign %>-<%= fName %>-fl;
+	margin: $<%= sign %>-<%= fName %>-m;
+	vertical-align: $<%= sign %>-<%= fName %>-va;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	/* speak: none; only necessary if not using the private unicode range (firstdata option) */
+	text-decoration: none;
+	text-transform: none;
+}
+
+<% _.each(cssData, function(data) { %>
+.<%= sign %>-<%= fName %>-<%= data.name %>:before {
+	content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+}
+<% }); %>

@@ -1,0 +1,14 @@
+//
+// Grid system
+// --------------------------------------------------
+
+.container {
+    @extend clearfix;
+    width: $screen;
+    max-width: $screen;
+    margin: 0 auto;
+}
+
+.row {
+    @extend clearfix;
+}

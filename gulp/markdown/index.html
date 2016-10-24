@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title><%= title %></title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/highlight/solarized-light.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="./">说明文档</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			<% var index = 0; %>
+			<% _.forEach(tree, function(Adirs, dir1) { %>
+				<% if (index < 9) { %>
+			<li class="dropdown <%= index %>">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown"><%= dir1 %><b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<% _.each(Adirs, function(dir) { %>
+					<li><a href="<%= dir %>.html#jsdoc"><%= dir %></a></li>
+				    <% }); %>  
+				</ul>
+			</li>
+				<% } else { %>
+					<% if (index == 9) { %>
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">更多<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<% } %>
+					<li><b style="padding-left: 5px"><%= dir1 %></b></li>
+					<% _.each(Adirs, function(dir) { %>
+					<li><a href="<%= dir %>.html#jsdoc"><%= dir %></a></li>
+				    <% }); %>  
+				<% } %>
+
+				<% index++; %>
+			<% }); %>
+
+			<% if (index >= 9) { %>
+				</ul>
+			</li>
+			<% } %>
+
+		</ul>
+		<div class="col-sm-3 col-md-3">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="搜索关键字" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	<div class="col-md-8">
+		<div id="main">
+			<%= contents %>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	<div class="col-md-3">
+		<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+	</div>
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">搜索结果</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+	<span class="copyright">
+	copyright
+	</span>
+</footer>
+
+<script src="scripts/prettify/jquery.min.js"></script>
+<script src="scripts/prettify/bootstrap.min.js"></script>
+<script src="scripts/highlight.min.js"></script>
+<script src="scripts/toc.js"></script>
+<script src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return  prefix + i;
+			return id && (id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') + i) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table table-bordered table-striped js-options-table');
+    } );
+    $('pre').each(function(index, el) {
+    	$code = $(this).find('code');
+    	$code.attr('class', function(i, c) {
+    		return c && c.replace('xml', 'html');
+    	})
+    });
+    // 高亮
+	hljs.initHighlightingOnLoad();
+
+} );
+</script>
+
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
