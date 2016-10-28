@@ -301,8 +301,7 @@ module.exports = function(gulp, $, utils) {
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
-            // .pipe($.template())
-            .pipe($.if(!utils.hasProp(['template.js']), $.template()))
+            .pipe($.if(utils.hasProp(['template.js'], true), $.template()))
         
         
         cb && cb();
@@ -625,17 +624,20 @@ module.exports = function(gulp, $, utils) {
                     concatJS(file.dirname);
                 }
             } else if ({".html": 1, ".htm": 1}[file.extname]) {
-                gulp.src(file.path, {
-                        base: config.src
-                    })
-                    .pipe($.changed(config.dist))
-                    .pipe($.plumber())
-                    .pipe($.fileInclude())
-                    .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                        to: 'gbk'
-                    })))
-                    .pipe(gulp.dest(config.dist))
-                    .pipe(message('html处理ok'));
+                var tag = path.basename(file.path)[0];
+                if (tag != '_') {
+                    gulp.src(file.path, {
+                            base: config.src
+                        })
+                        .pipe($.changed(config.dist))
+                        .pipe($.plumber())
+                        .pipe($.fileInclude())
+                        .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                            to: 'gbk'
+                        })))
+                        .pipe(gulp.dest(config.dist))
+                        .pipe(message('html处理ok'));
+                }
             }/* else {
                 gulp.src(file.path, {
                         base: config.src

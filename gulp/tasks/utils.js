@@ -7,15 +7,23 @@ module.exports = function(gulp, $) {
         /**
          * 配合$.if使用，含有"文件名or扩展名"
          * @param  {array}  arr ['.js', 'aa.js'] 当前文件扩展名是.js或者文件名是aa.js
-         * @return {Boolean}     
+         * @param {Boolean} reverse=false 为真时返回相反值，表示不含有"文件名or扩展名"
+         * @return {Boolean}        
          */
-        hasProp: function(arr) {
+        hasProp: function(arr, reverse) {
             return function(file) {
-                return arr.indexOf(path.extname(file.path)) != -1 ||
-                    arr.indexOf(path.basename(file.path)) != -1;
+                var result;
+                if (arr.indexOf(path.extname(file.path)) == -1) {
+                    result = false;
+                    if (arr.indexOf(path.basename(file.path)) != -1) {
+                        result = true;
+                    };
+                } else {
+                    result = true;
+                };
+                return reverse ? !result : result;
             }
         },
-        
         getInfo: function() {
             // 处理demo
             var tasks = require('../tasks'),

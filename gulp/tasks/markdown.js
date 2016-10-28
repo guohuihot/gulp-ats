@@ -204,6 +204,7 @@ module.exports = function(gulp, $, utils) {
                             if (contents) {
                                 cb1(undefined, {
                                     contents: contents,
+                                    update: $.moment().format('YYYY-MM-DD HH:mm:ss'),
                                     title: basename,
                                     tree: tree
                                 });
