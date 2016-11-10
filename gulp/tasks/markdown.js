@@ -27,7 +27,7 @@ module.exports = function(gulp, $, utils) {
         var extname = path.extname(filePath),
             basename = path.basename(filePath, extname).replace('.html', '');
 
-        if (extname == '.twig') {
+        if ({'.twig': 1, '.scss': 1}[extname]) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (elem.indexOf('Bundle') != -1) {
@@ -40,9 +40,21 @@ module.exports = function(gulp, $, utils) {
 
     var processTree = function(file, contents) {
         var extname = path.extname(file),
-            basename = getBaseName(file);
-            dir = extname == '.js' ? 'JS文档' : path.basename(path.dirname(file)),
+            basename = getBaseName(file),
             cur = [];
+
+        // 菜单分类命名
+        switch (extname) {
+            case '.scss':
+                dir = 'SCSS文档';
+                break;
+            case '.js':
+                dir = 'JS文档';
+                break;
+            default:
+                dir = path.basename(path.dirname(file));
+        }
+
 
         if (contents) {
             if (tree[dir]) {
@@ -110,11 +122,12 @@ module.exports = function(gulp, $, utils) {
 
         files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md'))
         files = files.concat($.glob.sync(path.join(argv.p, '/**/Macro/*.twig')))
+        files = files.concat($.glob.sync(path.join(argv.p, '/**/{mixins,inherit}/*.scss')))
         files = files.concat($.glob.sync(path.join(argv.p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs|_seajs)/*.js'), {ignore: path.join(argv.p, '/**/vendor/**/*.js')}));
         // console.log(files);
         files.forEach(function(file) {
             var ext = path.extname(file);
-            if ({'.js': 1, '.twig': 1}[ext]) {
+            if ({'.js': 1, '.twig': 1, '.scss': 1}[ext]) {
                 stream.add(gulp.src(file)
                     // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                     .pipe($.plumber(function(err) {
@@ -124,7 +137,7 @@ module.exports = function(gulp, $, utils) {
                         console.log('文件内容错误：' + file);
                         console.log('#####');
                     }))
-                    .pipe($.if(ext == '.twig', $.through2.obj(function(file2, encoding, done) {
+                    .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);
                         if (contents) {
                             var newContents = contents.match(/\/\*\*([\s\S]*?)\*\//g);
@@ -139,7 +152,7 @@ module.exports = function(gulp, $, utils) {
                         this.push(file2);
                         done();
                     })))
-                    .pipe($.if(ext == '.twig', $.rename({extname: '.js'})))
+                    .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.rename({extname: '.js'})))
                     // .pipe($.if(ext == '.twig', gulp.dest(argv.p + '/bbb')))
                     .pipe($.jsdocToMarkdown({
                         template: "{{>main}}"
@@ -191,7 +204,7 @@ module.exports = function(gulp, $, utils) {
             var dataFun = function(file1, cb1) {
                     gulp.src(file)
                         .pipe($.plumber())
-                        .pipe($.if(utils.hasProp(['.js', '.twig']), $.rename({
+                        .pipe($.if(utils.hasProp(['.js', '.twig', 'scss']), $.rename({
                             extname: '.md'
                         })))
                         // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))

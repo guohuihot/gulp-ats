@@ -43,8 +43,9 @@ module.exports = function(gulp, $, utils) {
             // filePath 源文件path, 整个过程从生成文件目录找到src目录
             // 相对对src目录
             var fileRelative = path.relative(config.src, filePath)
-            var distDir = path.dirname(path.join(config.distEx || config.dist, fileRelative))
+            var distDir      = path.dirname(path.join(config.distEx || config.dist, fileRelative))
             var relativePath = path.relative(distDir, config.src);
+            
             // 一定要写入src目录
             return $.sourcemaps.write(config.src, {
                 includeContent: false,
@@ -52,6 +53,9 @@ module.exports = function(gulp, $, utils) {
                 sourceMappingURL: function(file) {
                     var srcMapURL = path.join(relativePath, file.relative + '.map')
                     return srcMapURL;
+                },
+                mapSources: function(sourcePath) {
+                    return fileRelative;
                 },
                 // 相对dist目录
                 sourceRoot: relativePath.split(path.sep).join('/'),
@@ -131,6 +135,7 @@ module.exports = function(gulp, $, utils) {
                     if (!jsonArr[0] || !jsonArr[0].contents) {
                         console.error('错误：' + file);
                         cb1()
+                        return;
                     };
                     var dataJSON = JSON.parse(jsonArr[0].contents),
                         maxH = 0,
@@ -241,7 +246,7 @@ module.exports = function(gulp, $, utils) {
                 // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
                 outputStyle: 'nested',
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
-                sourceMap: true
+                // sourceMap: true
             }).on('error', $.sass.logError))
             .pipe($.if(argv.d,
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
@@ -632,6 +637,8 @@ module.exports = function(gulp, $, utils) {
                         .pipe($.changed(config.dist))
                         .pipe($.plumber())
                         .pipe($.fileInclude())
+                        .pipe($.data(tplData))
+                        .pipe($.template())
                         .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                             to: 'gbk'
                         })))
@@ -744,7 +751,7 @@ module.exports = function(gulp, $, utils) {
             })
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
-
+        // 处理html
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
             .pipe($.data(tplData))
             .pipe($.template())
@@ -752,6 +759,9 @@ module.exports = function(gulp, $, utils) {
             // return false;
         // 处理正常的js
         stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*)/*.js')), cb));
+        // 处理其它
+        stream.add(gulp.src(proSrc + '/**/*.swf', {base: proSrc })
+            .pipe(gulp.dest(proDist)));
 
         return stream;
     });

@@ -1,8 +1,27 @@
-// Horizontal dividers
-//
-// Dividers (basically an hr) within dropdowns and nav lists
+/**
+ * @method 水平线hr nav-divider 
+ * @description 透明层 内容也透明
+ * @param {string} $color=#e5e5e5 - 线的颜色
+ * @param {string} $line-height-computed - 线的高度，空间
+ * @example 调用
+ * 
+ * ```scss
+ * div {
+ *    @ include nav-divider(#e5e5e5, 24px);
+ * }
+ * ```
+ * 
+ * ```css
+ * div {
+	  height: 1px;
+	  margin: 11px 0;
+	  overflow: hidden;
+	  background-color: #e5e5e5;
+ * }
+ * ```
+ */
 
-@mixin nav-divider($color: #e5e5e5) {
+@mixin nav-divider($color: #e5e5e5, $line-height-computed: 20px) {
   height: 1px;
   margin: (($line-height-computed / 2) - 1) 0;
   overflow: hidden;

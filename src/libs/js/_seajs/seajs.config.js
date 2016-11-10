@@ -16,10 +16,10 @@ var cfg = {
 		'login'       : '<%= rPath %>js/common',
 		'uri2MVC'     : '<%= rPath %>js/common',
 		'jqduang'     : '<%= rPath %>js/plugin/jqduang',
-		'validate'    : '<%= rPath %>js/plugin/validate',
-		'fixed'       : '<%= rPath %>js/plugin/fixed',
-		'modal'       : '<%= rPath %>js/plugin/modal',
-		'scrollspy'   : '<%= rPath %>js/plugin/scrollspy'
+		'validate'    : '<%= rPath %>js/plugin/jqvalidate',
+		'fixed'       : '<%= rPath %>js/plugin/jqfixed',
+		'modal'       : '<%= rPath %>js/plugin/jqmodal',
+		'scrollspy'   : '<%= rPath %>js/plugin/jqscrollspy'
     },   
     preload: ['$'],
 	charset: 'utf-8'

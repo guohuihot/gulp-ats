@@ -30,7 +30,7 @@
 		<ul class="nav navbar-nav">
 			<% var index = 0; %>
 			<% _.forEach(tree, function(Adirs, dir1) { %>
-				<% if (index < 9) { %>
+				<% if (index < 8) { %>
 			<li class="dropdown <%= index %>">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown"><%= dir1 %><b class="caret"></b></a>
 				<ul class="dropdown-menu ">
@@ -40,7 +40,7 @@
 				</ul>
 			</li>
 				<% } else { %>
-					<% if (index == 9) { %>
+					<% if (index == 8) { %>
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">更多<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
@@ -54,7 +54,7 @@
 				<% index++; %>
 			<% }); %>
 
-			<% if (index >= 9) { %>
+			<% if (index >= 8) { %>
 				</ul>
 			</li>
 			<% } %>
