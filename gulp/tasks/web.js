@@ -28,26 +28,29 @@ module.exports = function(gulp, $, utils) {
         config    = {},
         _dir,
         _timer,
+        _base,
         pExt;
 
     var message = function (msg) {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
                 if (!config.isBuild) {
-                    return msg || path.relative(config.path, file.path) + ' ok !';
+                    return msg || file.path + ' ok !';
                 };
             })
         };
 
     var sourcemaps = function(filePath) {
+            var dist = getDir(filePath);
+            var src = getDir(filePath, 'src');
             // filePath 源文件path, 整个过程从生成文件目录找到src目录
             // 相对对src目录
-            var fileRelative = path.relative(config.src, filePath)
-            var distDir      = path.dirname(path.join(config.distEx || config.dist, fileRelative))
-            var relativePath = path.relative(distDir, config.src);
+            var fileRelative = path.relative(src, filePath)
+            var distDir      = path.dirname(path.join(config.distEx || dist, fileRelative))
+            var relativePath = path.relative(distDir, src);
             
             // 一定要写入src目录
-            return $.sourcemaps.write(config.src, {
+            return $.sourcemaps.write(src, {
                 includeContent: false,
                 // 相对dist目录
                 sourceMappingURL: function(file) {
@@ -64,9 +67,10 @@ module.exports = function(gulp, $, utils) {
     }
     // 复制时替换的数据
     var tplData = function(file) {
+            var src = getDir(filePath, 'src');
             // src文件到src = dist文件到dist
-            var pathRelative = path.relative(path.dirname(file.path), config.src);
-            var pathRelative1 = path.relative(config.src, file.path);
+            var pathRelative = path.relative(path.dirname(file.path), src);
+            var pathRelative1 = path.relative(src, file.path);
             var sExtLen = path.extname(file.path).length;
             // console.log(config.distEx ? '/' : config.rPath);
             return {
@@ -83,13 +87,14 @@ module.exports = function(gulp, $, utils) {
         }
     // gulpMiddleWare
     var gulpMiddleWare = function(stream, filePath) {
+        var dist = getDir(filePath);
         var s;
 
         s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(gulp.dest(config.dist))
+            .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (file.extname != '.map') {
                     file.contents = new Buffer(file.contents);
@@ -111,8 +116,11 @@ module.exports = function(gulp, $, utils) {
     }
 
     var sprites = function(dir, cb) {
+        var src = getDir(dir, 'src');
+        var dist = getDir(dir);
+
         var stream = $.mergeStream();
-        var pathBase = path.relative(config.src, dir + '/../../')
+        var pathBase = path.relative(src, dir + '/../../')
                             .split(path.sep).join('/') + './';
 
         var fName    = path.basename(dir).slice(1),
@@ -120,7 +128,7 @@ module.exports = function(gulp, $, utils) {
         // console.log(pathBase);
         // return false;
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
-            .pipe($.changed(config.dist, {extension: fName + '.png'}))
+            .pipe($.changed(dist, {extension: fName + '.png'}))
             .pipe($.spritesmith({
                 imgName: pathBase + 'images/' + fName + '.png',
                 cssName: 'sprite.json',
@@ -158,37 +166,40 @@ module.exports = function(gulp, $, utils) {
             };
 
         stream.add(gulp.src([sourceUrl + 'css/images.scss'])
-            .pipe($.changed(config.src, {extension: cssPath}))
+            .pipe($.changed(src, {extension: cssPath}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(cssPath))
-            .pipe(gulp.dest(config.src))
+            .pipe(gulp.dest(src))
             .pipe(message()));
         gulp.src([sourceUrl + 'html/images.html'])
-            .pipe($.changed(config.dist, {extension: 'images/' + fName + '.html'}))
+            .pipe($.changed(dist, {extension: 'images/' + fName + '.html'}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
             .pipe($.template())
             .pipe($.rename(pathBase + 'images/' + fName + '.html'))
-            .pipe(gulp.dest(config.dist))
+            .pipe(gulp.dest(dist))
             .pipe(message());
         stream.add(spriteData.img
-            .pipe(gulp.dest(config.dist))
+            .pipe(gulp.dest(dist))
             .pipe(message('sprites img 生成')));
         // cb && cb();
         return stream;
     }
 
     var fonts = function(dir, cb) {
+        var src = getDir(dir, 'src');
+        var dist = getDir(dir);
+
         var stream = $.mergeStream();
-        var pathBase = path.relative(config.src, dir + '/../../')
+        var pathBase = path.relative(src, dir + '/../../')
                             .split(path.sep).join('/') + '/',
             fName    = path.basename(dir).slice(1),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
-        var stream1 = gulp.src(dir + '/*.svg', {base: config.src })
-            .pipe($.changed(config.dist))
+        var stream1 = gulp.src(dir + '/*.svg', {base: src })
+            .pipe($.changed(dist))
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
@@ -209,26 +220,28 @@ module.exports = function(gulp, $, utils) {
                     };
 
                 stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
-                    .pipe($.changed(config.src))
+                    .pipe($.changed(src))
                     .pipe($.template(templateData))
                     .pipe($.rename(cssPath))
-                    .pipe(gulp.dest(config.src))
+                    .pipe(gulp.dest(src))
                     .pipe(message()));
                 gulp.src([sourceUrl + 'html/fonts.html'])
-                    .pipe($.changed(config.dist))
+                    .pipe($.changed(dist))
                     .pipe($.template(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
-                    .pipe(gulp.dest(config.dist))
+                    .pipe(gulp.dest(dist))
                     .pipe(message());
                 cb && cb();
             })
-            .pipe(gulp.dest(config.dist))
+            .pipe(gulp.dest(dist))
             .pipe(message('font 生成'));
             stream.add(stream1)
         return stream;
     }
     // scss
     var scss = function(filePath, cb) {
+        var src = getDir(filePath, 'src');
+
         var scssPaths = [path.dirname(filePath)];
         if (config.scssPaths) {
             config.scssPaths.split(',').forEach(function(p) {
@@ -237,7 +250,7 @@ module.exports = function(gulp, $, utils) {
         };
         scssPaths.push(config.tpl + config.libs + '/css/');
         // console.log(scssPaths);
-        var stream = gulp.src(filePath, {base: config.src})
+        var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
@@ -271,10 +284,12 @@ module.exports = function(gulp, $, utils) {
     }
     // concatjs
     var concatJS = function(dir, cb) {
-        var pathRelative = path.relative(config.src, dir).replace('_', ''),
+        var src = getDir(filePath, 'src');
+
+        var pathRelative = path.relative(src, dir).replace('_', ''),
             fName        = path.basename(dir).slice(1);
         
-        var stream = gulp.src(dir + '/*.js', {base: config.src })
+        var stream = gulp.src(dir + '/*.js', {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -298,7 +313,9 @@ module.exports = function(gulp, $, utils) {
     }
     // js
     var JS = function(filePath, cb) {
-        var stream = gulp.src(filePath, {base: config.src})
+        var src = getDir(filePath, 'src');
+
+        var stream = gulp.src(filePath, {base: src})
             .pipe($.changed(config.dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init(), $.uglify(configs.uglify)))
@@ -339,128 +356,175 @@ module.exports = function(gulp, $, utils) {
 
         return stream;
     }
+
+    // 处理dist
+    var getDir = function(file, dir) {
+        var dir = dir || 'dist';
+        var _dir = config[dir]; 
+
+        if (config.multiple) {
+            config.path.split(',').forEach(function(p) {
+                if (path.normalize(file).indexOf(p) == 0) {
+                    if (_base.data[p]) {
+                        _dir = path.join(p, _base.data[p][dir]);
+                    } else {
+                        console.log('目录没有预先配置！' + p);
+                        return false;
+                    }
+                }
+            });
+        }
+
+        return _dir;
+    }
+    // 监听对象
+    var getWatchDir = function(str, dir, noStr) {
+        var dir = dir || 'src';
+        var aWatchDir = [];
+        var aWatchDirNo = [];
+        if (config.multiple) {
+            config.path.split(',').forEach(function(p) {
+                if (_base.data[p]) {
+                    var curConfig = _base.data[p];
+                    aWatchDir.push(path.join(curConfig.path, curConfig[dir], str));
+                    if (noStr) {
+                        aWatchDirNo.push(path.join('!' + curConfig.path, curConfig[dir], noStr));
+                    }
+                } else {
+                    console.log('目录没有预先配置！' + p);
+                    return false;
+                };
+            });
+        } else {
+            aWatchDir.push(config[dir] + str);
+        };
+        return aWatchDir.concat(aWatchDirNo);
+    }
     // tasks start
 
     gulp.task('init', function(cb) {
-        var base, customConfig;
+        var customConfig;
 
         if (!fs.existsSync(sourceUrl + 'base.json')) {
             fs.writeFileSync(sourceUrl + 'base.json', '');
         }
 
-        base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
+        _base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
 
-        if (base.data) {
+        if (_base.data) {
             if (argv.p) {
                 // 有路径时直接保存配置及时间戳
-                config = base.data[argv.p] || {};
+                config = _base.data[argv.p] || {};
             } else {
-                // 没有时直接从base里找最后一次配置
-                for (p in base.data) {
-                    if (base.data[p].t > (config.t || 0)) {
-                        config = base.data[p];
+                // 没有时直接从_base里找最后一次配置
+                for (p in _base.data) {
+                    if (_base.data[p].t > (config.t || 0)) {
+                        config = _base.data[p];
                     }
                 }
             }
         } else {
-            base.data = {};
+            _base.data = {};
         }
         // 默认项
         argv.d = argv.d === 0 ? false : true;
         argv.m = argv.m || config.mode;
 
-        switch (argv.m) {
-            case 11:
-                customConfig = {
-                    libs   : '',
-                    tpl    : './src/libs/', // ats源目录
-                    dist   : '', // 项目的dist
-                    src    : 'src', // 项目的src
-                };
-                break;
-            case 2:
-            case 21:
-                customConfig = {
-                    libs   : 'libs',
-                    tpl    : './src/',
-                    dist   : '',
-                    src    : 'src',
-                };
-                break;
-            case 3:
-                customConfig = {
-                    libs   : 'mobile',
-                    tpl    : './src/',
-                    dist   : '',
-                    src    : 'src',
-                };
-                break;
-            case 4:
-                customConfig = {
-                    path   : cwd,
-                    libs   : 'libs',
-                    tpl    : './src/',
-                    dist   : 'test/',
-                    distEx : '',
-                    src    : 'src',
-                };
-                break;
-            case 'c':
-                customConfig = {
-                    libs   : '',
-                    tpl    : './src/libs/',
-                };
-                break;
-        }
+            switch (argv.m) {
+                case 11:
+                    customConfig = {
+                        libs   : '',
+                        tpl    : './src/libs/', // ats源目录
+                        dist   : '', // 项目的dist
+                        src    : 'src', // 项目的src
+                    };
+                    break;
+                case 2:
+                case 21:
+                    customConfig = {
+                        libs   : 'libs',
+                        tpl    : './src/',
+                        dist   : '',
+                        src    : 'src',
+                    };
+                    break;
+                case 3:
+                    customConfig = {
+                        libs   : 'mobile',
+                        tpl    : './src/',
+                        dist   : '',
+                        src    : 'src',
+                    };
+                    break;
+                case 4:
+                    customConfig = {
+                        path   : cwd,
+                        libs   : 'libs',
+                        tpl    : './src/',
+                        dist   : 'test/',
+                        distEx : '',
+                        src    : 'src',
+                    };
+                    break;
+                case 'c':
+                    customConfig = {
+                        libs   : '',
+                        tpl    : './src/libs/',
+                    };
+                    break;
+            }
 
-        // console.log(config);
-        config = $.extend({
-                author: 'author',
-                distEx: '',
-                libs: '',
-                tpl: './src/libs/', // ats源目录
-                dist: '', // 项目的dist
-                src: 'src', // 项目的src
-                mode: 1
-            },
-            config, {
-                path: argv.p,
-                author: argv.a,
-                dist: argv.dist,
-                distEx: argv.distEx,
-                src: argv.src,
-                scssPaths: argv.scssPaths,
-                mode: argv.m
-            }, customConfig);
+            // console.log(config);
+            config = $.extend({
+                    author: 'author',
+                    distEx: '',
+                    libs: '',
+                    tpl: './src/libs/', // ats源目录
+                    dist: '', // 项目的dist
+                    src: 'src', // 项目的src
+                    mode: 1
+                },
+                config, {
+                    path: argv.p,
+                    author: argv.a,
+                    dist: argv.dist,
+                    distEx: argv.distEx,
+                    src: argv.src,
+                    scssPaths: argv.scssPaths,
+                    mode: argv.m
+                }, customConfig);
 
-        // 目录不存在时直接返回
-        if (!config.path) {
-            console.log('error: 请设置项目目录path!');
-            return false;
-        };
+            // 目录不存在时直接返回
+            if (!config.path) {
+                console.log('error: 请设置项目目录path!');
+                return false;
+            };
 
         // 设置时间下次直接用
         config.t = parseInt(new Date().getTime() / 1000);
-        base.data[config.path] = config;
-        base.saveSync();
-        // 固定配置不用保存
-        // config.src = 'src'; // 项目src目录
-        // config.sourcemap = './maps/';
+        _base.data[config.path] = config;
+        _base.saveSync();
 
         console.log('\n');
         console.log('当前配置:\n');
         console.log(config);
         console.log('\n');
+        
+        if (config.path.indexOf(',') != -1) {
+            config.multiple = 1;
 
-        // 转化后
-        config.rPath = config.dist != config.libs ?
-                            config.dist + config.libs + '/' :
-                            '';
-        config.src  = path.join(config.path, config.src);
-        config.dist = path.join(config.path, config.dist);
-        // config.tpl  = path.join(config.path, config.tpl);
+            config.path = path.normalize(config.path);
 
-        // console.log(config);
+        } else {
+            // 转化后
+            config.rPath = config.dist != config.libs ?
+                                config.dist + config.libs + '/' :
+                                '';
+            config.src  = path.join(config.path, config.src);
+            config.dist = path.join(config.path, config.dist);
+            // config.tpl  = path.join(config.path, config.tpl);
+        }
+
         // getInfo
         config.info = utils.getInfo();
         cb();
@@ -496,15 +560,15 @@ module.exports = function(gulp, $, utils) {
             ftp = $.ftp.create(config.ftp);
         } else {
             // 只刷新html
-            $.watch([
-                config.dist + '/**/*.{html,htm}',
-                '!' + config.dist + '/**/{fonts,images,src}/*.{html,htm}'
-            ], {read: false}, function(file) {
+            $.watch(getWatchDir('/**/*', 'dist', '/**/{fonts,images,src}/*.{html,htm}'), {read: false}, function(file) {
+
+                var dist = getDir(file.path);
+
                 gulp.src(file.path, {
                         read: false
                     })                
                     // .pipe($.changed(config.dist))
-                    .pipe(gulp.dest(config.dist))
+                    .pipe(gulp.dest(dist))
                     .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
                     .pipe(message('livereload'));
             });
@@ -512,10 +576,7 @@ module.exports = function(gulp, $, utils) {
             
         // 扩展dist 直接将生成好的文件复制过去
         if (config.distEx) {
-            $.watch([
-                config.dist + '/**/*',
-                '!' + config.dist + '/src/**/*'
-            ], {
+            $.watch(getWatchDir('/**/*', 'dist', '/src/**/*'), {
                 read: false
             }, function(file) {
                 if (file.event == 'unlink') {
@@ -535,15 +596,19 @@ module.exports = function(gulp, $, utils) {
         }
         
         // 直接复制
-        $.watch([
-                config.src + '/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'
-            ], {
+        
+        $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'), {
             read: false,
             usePolling: true
         }, function(file) {
+
+            
+            var dist = getDir(file.path);
+            var src = getDir(file.path, 'src');
+
             if (file.event == 'unlink') {
                 var nFile = file.extname == '.scss' ? file.path.slice(0, -5) + '.css' : file.path;
-                var pathRelative = path.relative(config.src, nFile);
+                var pathRelative = path.relative(src, nFile);
                 var uFile = config.dist + '/' + pathRelative;
                 var delFile = [uFile];
                 var tag = path.basename(file.dirname)[0];
@@ -584,7 +649,7 @@ module.exports = function(gulp, $, utils) {
             } else if (file.extname == '.scss') {
                 if (file.basename[0] === '_') {
                     var fileName = file.stem.slice(1),
-                        files = $.glob.sync(config.src + '/**/css/!(_*).scss'),
+                        files = $.glob.sync(src + '/**/css/!(_*).scss'),
                         reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
                     
                     files.forEach(function(filePath) {
@@ -600,11 +665,11 @@ module.exports = function(gulp, $, utils) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
-                            base: config.src
+                            base: src
                         })                    
-                        .pipe($.changed(config.dist))
+                        .pipe($.changed(dist))
                         .pipe($.imagemin(configs.imagemin))
-                        .pipe(gulp.dest(config.dist))
+                        .pipe(gulp.dest(dist))
                         .pipe(message('复制并压缩'));
                 } else {
                     sprites(file.dirname);
@@ -613,10 +678,10 @@ module.exports = function(gulp, $, utils) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
-                            base: config.src
+                            base: src
                         })                    
-                        .pipe($.changed(config.dist))
-                        .pipe(gulp.dest(config.dist))
+                        .pipe($.changed(dist))
+                        .pipe(gulp.dest(dist))
                         .pipe(message('复制'));
                 } else {
                     fonts(file.dirname);
@@ -632,9 +697,9 @@ module.exports = function(gulp, $, utils) {
                 var tag = path.basename(file.path)[0];
                 if (tag != '_') {
                     gulp.src(file.path, {
-                            base: config.src
+                            base: src
                         })
-                        .pipe($.changed(config.dist))
+                        .pipe($.changed(dist))
                         .pipe($.plumber())
                         .pipe($.fileInclude())
                         .pipe($.data(tplData))
@@ -642,15 +707,15 @@ module.exports = function(gulp, $, utils) {
                         .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                             to: 'gbk'
                         })))
-                        .pipe(gulp.dest(config.dist))
+                        .pipe(gulp.dest(dist))
                         .pipe(message('html处理ok'));
                 }
             }/* else {
                 gulp.src(file.path, {
                         base: config.src
                     })
-                    .pipe($.changed(config.dist))
-                    .pipe(gulp.dest(config.dist))
+                    .pipe($.changed(dist))
+                    .pipe(gulp.dest(dist))
                     .pipe(message('直接复制'));
             }*/
         });

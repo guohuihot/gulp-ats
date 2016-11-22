@@ -27,7 +27,7 @@ module.exports = function(gulp, $, utils) {
         var extname = path.extname(filePath),
             basename = path.basename(filePath, extname).replace('.html', '');
 
-        if ({'.twig': 1, '.scss': 1}[extname]) {
+        if ({'.twig': 1, '.scss': 1, '.js': 1}[extname]) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (elem.indexOf('Bundle') != -1) {
@@ -141,9 +141,12 @@ module.exports = function(gulp, $, utils) {
                         var contents = String(file2.contents);
                         if (contents) {
                             var newContents = contents.match(/\/\*\*([\s\S]*?)\*\//g);
-
                             if (newContents) {
                                 newContents = newContents.join('\n');
+                                if (ext == '.scss') {
+                                    // scss简单过滤下
+                                    newContents = newContents.replace(/\/\/ \*/g, '*');
+                                };
                                 file2.contents = new Buffer(newContents);
                             } else {
                                 file2.contents = new Buffer('a');
