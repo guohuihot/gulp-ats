@@ -31,7 +31,7 @@ module.exports = function(gulp, $, utils) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (elem.indexOf('Bundle') != -1) {
-                    basename = elem + '-' + basename;
+                    basename = elem + extname + '-' + basename;
                 }
             });
         }
@@ -144,8 +144,9 @@ module.exports = function(gulp, $, utils) {
                             if (newContents) {
                                 newContents = newContents.join('\n');
                                 if (ext == '.scss') {
+                                    // console.log(newContents);
                                     // scss简单过滤下
-                                    newContents = newContents.replace(/\/\/ \*/g, '*');
+                                    newContents = newContents.replace(/\/\//g, '');
                                 };
                                 file2.contents = new Buffer(newContents);
                             } else {

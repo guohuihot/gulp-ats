@@ -1,0 +1,22 @@
+// botton
+
+@mixin btn($bdcolor,$hover) {
+	border: 1px solid $bdcolor;
+	text-align: center;
+	&:hover{
+		border-color: $hover;
+		color: $hover;
+		text-decoration: none;
+	}
+}
+
+@mixin fill-btn($bgcolor,$hover) {
+	background: $bgcolor;
+	border: 1px solid $bgcolor;
+	color: #fff;
+	text-align: center;
+	&:hover{
+		background: $hover;
+		border-color: $hover;
+	}
+}

@@ -67,7 +67,7 @@ module.exports = function(gulp, $, utils) {
     }
     // 复制时替换的数据
     var tplData = function(file) {
-            var src = getDir(filePath, 'src');
+            var src = getDir(file.path, 'src');
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), src);
             var pathRelative1 = path.relative(src, file.path);
@@ -81,7 +81,7 @@ module.exports = function(gulp, $, utils) {
                             .split(path.sep).join('/') + '/',
                 path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
                             .split(path.sep).join('/'),
-                rPath  : config.distEx ? '/' : config.rPath,
+                rPath  : getRpath(file.path),
                 info   : config.info,
             }
         }
@@ -128,7 +128,8 @@ module.exports = function(gulp, $, utils) {
         // console.log(pathBase);
         // return false;
         var spriteData = gulp.src(dir + '/*.{png,gif,jpg,jpeg}')
-            .pipe($.changed(dist, {extension: fName + '.png'}))
+            // .pipe($.changed(dist, {extension: fName + '.png'}))
+            .pipe($.plumber())
             .pipe($.spritesmith({
                 imgName: pathBase + 'images/' + fName + '.png',
                 cssName: 'sprite.json',
@@ -156,7 +157,7 @@ module.exports = function(gulp, $, utils) {
                         cssData : dataJSON,
                         fUrl    : '../images/' + fName + '.png',
                         path    : pathBase + 'images/' + fName + '.html',
-                        rPath   : config.distEx ? '/' : config.rPath,
+                        rPath   : getRpath(dir),
                         fName   : fName,
                         sign    : sign.img,
                         W       : maxW,
@@ -214,7 +215,7 @@ module.exports = function(gulp, $, utils) {
                         cssData : glyphs,
                         fUrl    : '../fonts/',
                         path    : pathBase + 'fonts/' + fName + '.html',
-                        rPath   : config.distEx ? '/' : config.rPath,
+                        rPath   : getRpath(dir),
                         sign    : sign.font,
                         fName   : fName
                     };
@@ -284,7 +285,7 @@ module.exports = function(gulp, $, utils) {
     }
     // concatjs
     var concatJS = function(dir, cb) {
-        var src = getDir(filePath, 'src');
+        var src = getDir(dir, 'src');
 
         var pathRelative = path.relative(src, dir).replace('_', ''),
             fName        = path.basename(dir).slice(1);
@@ -300,7 +301,7 @@ module.exports = function(gulp, $, utils) {
                     author : config.author,
                     date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                     // base   : host,
-                    rPath  : config.distEx ? '../' : config.rPath,
+                    rPath  : getRpath(dir),
                 }
             }))
             .pipe($.template())
@@ -314,9 +315,10 @@ module.exports = function(gulp, $, utils) {
     // js
     var JS = function(filePath, cb) {
         var src = getDir(filePath, 'src');
+        var dist = getDir(filePath);
 
         var stream = gulp.src(filePath, {base: src})
-            .pipe($.changed(config.dist))
+            .pipe($.changed(dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init(), $.uglify(configs.uglify)))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -366,7 +368,8 @@ module.exports = function(gulp, $, utils) {
             config.path.split(',').forEach(function(p) {
                 if (path.normalize(file).indexOf(p) == 0) {
                     if (_base.data[p]) {
-                        _dir = path.join(p, _base.data[p][dir]);
+                        var curConfig = _base.data[p];
+                        _dir = dir == 'distEx' ? curConfig[dir] : path.join(p, curConfig[dir]);
                     } else {
                         console.log('目录没有预先配置！' + p);
                         return false;
@@ -397,8 +400,43 @@ module.exports = function(gulp, $, utils) {
             });
         } else {
             aWatchDir.push(config[dir] + str);
-        };
+        }
+
         return aWatchDir.concat(aWatchDirNo);
+    }
+    // 转化后dist目录，相对目录
+    var getRpath = function(file) {
+        var rPath;
+        var _getRpath = function(p) {
+
+                if (path.normalize(file).indexOf(p) == 0) {
+                    if (_base.data[p]) {
+                        var curConfig = _base.data[p];
+                        rPath = config.dist != config.libs ?
+                            config.dist + config.libs + '/' : '';
+
+                        rPath = curConfig.distEx ? '/' : rPath;
+                    } else {
+                        console.log('目录没有预先配置！' + p);
+                        return false;
+                    }
+                }
+
+            };
+
+        if (config.multiple) {
+            if (file) {
+                config.path.split(',').forEach(_getRpath);
+            } else {
+                _getRpath(config.path.split(',')[0]);
+            }
+        } else {
+            rPath = config.dist != config.libs ?
+                            config.dist + config.libs + '/' : '';
+            rPath = config.distEx ? '/' : rPath;
+        }
+
+        return rPath;
     }
     // tasks start
 
@@ -516,10 +554,6 @@ module.exports = function(gulp, $, utils) {
             config.path = path.normalize(config.path);
 
         } else {
-            // 转化后
-            config.rPath = config.dist != config.libs ?
-                                config.dist + config.libs + '/' :
-                                '';
             config.src  = path.join(config.path, config.src);
             config.dist = path.join(config.path, config.dist);
             // config.tpl  = path.join(config.path, config.tpl);
@@ -545,7 +579,8 @@ module.exports = function(gulp, $, utils) {
                 }*/
             });
             if (argv.o) {
-                var demoUrl = config.rPath + 'demo.html';
+
+                var demoUrl = getRpath() + 'demo.html';
                 require('child_process').exec('start http://localhost:8888/' + demoUrl);
             }
         });
@@ -575,21 +610,25 @@ module.exports = function(gulp, $, utils) {
         }
             
         // 扩展dist 直接将生成好的文件复制过去
-        if (config.distEx) {
+
+        if (config.multiple || config.distEx) {
             $.watch(getWatchDir('/**/*', 'dist', '/src/**/*'), {
                 read: false
             }, function(file) {
+                var dist = getDir(file.path);
+                var distEx = getDir(file.path, 'distEx');
+
                 if (file.event == 'unlink') {
-                    var pathRelative = path.relative(config.dist, file.path);
-                    $.del([config.distEx + '/' + pathRelative], {
+                    var pathRelative = path.relative(dist, file.path);
+                    $.del([distEx + '/' + pathRelative], {
                         force: true
                     });
                 } else {
                     gulp.src(file.path, {
-                            base: config.dist
+                            base: dist
                         })
-                        .pipe($.changed(config.distEx))
-                        .pipe(gulp.dest(config.distEx))
+                        .pipe($.changed(distEx))
+                        .pipe(gulp.dest(distEx))
                         .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
                 }
             })
@@ -607,11 +646,11 @@ module.exports = function(gulp, $, utils) {
             var src = getDir(file.path, 'src');
 
             if (file.event == 'unlink') {
-                var nFile = file.extname == '.scss' ? file.path.slice(0, -5) + '.css' : file.path;
+                var nFile        = file.extname == '.scss' ? file.path.slice(0, -5) + '.css' : file.path;
                 var pathRelative = path.relative(src, nFile);
-                var uFile = config.dist + '/' + pathRelative;
-                var delFile = [uFile];
-                var tag = path.basename(file.dirname)[0];
+                var uFile        = dist + '/' + pathRelative;
+                var delFile      = [uFile];
+                var tag          = path.basename(file.dirname)[0];
 
                 if ({'.scss': 1, '.js': 1}[file.extname]) {
                     // 同时删除map文件
@@ -873,5 +912,29 @@ module.exports = function(gulp, $, utils) {
         var _path = argv.p.split(path.sep).join('/') + '/';
         console.log('执行' + 'php ' + _path + 'app/console assets:install ' + _path + 'web');
         return require('child_process').exec('php ' + _path + 'app/console assets:install ' + _path + 'web');
+    });
+
+    gulp.task('sync', ['init'], function() {
+        if (!_base.data) {
+            console.log('没有配置');
+            return;
+        }
+        var aPaths = config.path.split(',');
+        aPaths.forEach(function(p) {
+            var _data = _base.data
+            var _cfg = _data[p];
+            var _src = path.join(p, _cfg.dist, './**/*');
+            var _dist = _cfg.distEx;
+
+            // console.log(_src, _dist);
+            // return false;
+            if (_dist) {
+                gulp.src(_src, {
+                        // base: _src
+                    })
+                    .pipe($.changed(_dist))
+                    .pipe(gulp.dest(_dist));
+            }
+        });
     });
 };

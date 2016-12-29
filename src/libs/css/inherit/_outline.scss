@@ -1,22 +1,22 @@
-/**
- * @method 去掉虚线框 %outline 
- * @description 去掉虚线框
- * @example 调用
- * 
- * ```scss
- * div {
- *    @ extend %outline;
- * }
- * ```
- * 
- * ```css
-	div {
-		outline: thin dotted;
-		outline: 5px auto -webkit-focus-ring-color;
-		outline-offset: -2px;
-	}
- * ```
- */
+// /**
+//  * @method 去掉虚线框 %outline 
+//  * @description 去掉虚线框
+//  * @example 调用
+//  * 
+//  * ```scss
+//  * div {
+//  *    @ extend %outline;
+//  * }
+//  * ```
+//  * 
+//  * ```css
+// 	div {
+// 		outline: thin dotted;
+// 		outline: 5px auto -webkit-focus-ring-color;
+// 		outline-offset: -2px;
+// 	}
+//  * ```
+//  */
 
 %outline {
   // Default

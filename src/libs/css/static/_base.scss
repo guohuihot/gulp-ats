@@ -82,11 +82,8 @@ img {
     padding-left: 30px;
 }
 
-menu,
-ul, li {
+ul, ol, li, dl, dt, dd {
     list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -94,6 +91,24 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
 
+div, p, form, img, menu, ul, ol, li, dl, dt, dd, textarea, object {
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+}
+
+
+input,
+select {
+    margin: 0;
+    padding: 0;
+    outline: none;
+}
+
+i, em {
+    font-style: normal;
+}
 //
 // Utility classes
 // --------------------------------------------------
@@ -173,6 +188,15 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+@for $i from 1 through 40{
+    .p#{$i}{
+        padding: #{$i}px;
+    }
+    .m#{$i}{
+        margin: #{$i}px;
+    }
+}
+
 // margin padding
 $param: (t: top, r: right, b: bottom, l: left);
 
@@ -195,3 +219,5 @@ $param: (t: top, r: right, b: bottom, l: left);
         font-size: #{$i}px !important; 
     }
 }
+
+

@@ -1,22 +1,22 @@
-/**
- * @method 透明层opacity 
- * @description 透明层 内容也透明
- * @param {number} $opacity - 透明度 0 ~ 1之间
- * @example 调用
- * 
- * ```scss
- * div {
- *    @ include opacity(.5);
- * }
- * ```
- * 
- * ```css
- * div {
-	  opacity: .5;
-	  filter: alpha(opacity=50);
- * }
- * ```
- */
+// /**
+//  * @method 透明层opacity 
+//  * @description 透明层 内容也透明
+//  * @param {number} $opacity - 透明度 0 ~ 1之间
+//  * @example 调用
+//  * 
+//  * ```scss
+//  * div {
+//  *    @ include opacity(.5);
+//  * }
+//  * ```
+//  * 
+//  * ```css
+//  * div {
+// 	  opacity: .5;
+// 	  filter: alpha(opacity=50);
+//  * }
+//  * ```
+//  */
 
 @mixin opacity($opacity) {
   opacity: $opacity;

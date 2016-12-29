@@ -1,0 +1,8 @@
+// @include disabled(#e6e6e6, #ababab);
+//$bgColor禁用时背景颜色， $textColor：禁用时字体颜色
+
+@mixin disabled($bgColor: #e6e6e6,$textColor:#ababab){
+    background-color: $bgColor !important;
+    color: $textColor !important;
+    cursor: not-allowed !important;
+}
