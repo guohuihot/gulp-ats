@@ -114,15 +114,17 @@
         position: relative;
         z-index: 2;
 
-        text-align: left;
         overflow: hidden;
 
         min-width: $modal-miw;
+
+        text-align: left;
 
         border: $modal-border-w solid rgba(0,0,0,.3);
         border-radius: $modal-bdrs;
         box-shadow: 0 0 30px rgba(0,0,0,.2),0 0 5px rgba(0,0,0,.1) inset;
     }
+
     .m-head {
         position: relative;
         font-family: Microsoft yahei;

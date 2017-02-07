@@ -30,8 +30,9 @@ module.exports = function(gulp, $, utils) {
         if ({'.twig': 1, '.scss': 1, '.js': 1}[extname]) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
-                if (elem.indexOf('Bundle') != -1) {
-                    basename = elem + extname + '-' + basename;
+                var eIndex = elem.indexOf('Bundle');
+                if (eIndex != -1) {
+                    basename = elem.slice(0, eIndex) + '-' + basename + extname;
                 }
             });
         }
@@ -82,7 +83,8 @@ module.exports = function(gulp, $, utils) {
         var copy = Array.isArray(old) ? [] : {};
         var keys = Object.keys(old).sort();
         keys.forEach(function(key) {
-            copy[key] = objSort(old[key]);
+            var v = old[key];
+            copy[key] = objSort(Array.isArray(v) ? v.sort() : v);
         });
         return copy;
     }
@@ -131,11 +133,11 @@ module.exports = function(gulp, $, utils) {
                 stream.add(gulp.src(file)
                     // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
                     .pipe($.plumber(function(err) {
-                        console.log('#####');
+                        console.log('###########################################');
                         console.log(err.plugin);
                         console.log(err.message);
                         console.log('文件内容错误：' + file);
-                        console.log('#####');
+                        console.log('###########################################');
                     }))
                     .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);

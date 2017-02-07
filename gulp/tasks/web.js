@@ -206,7 +206,9 @@ module.exports = function(gulp, $, utils) {
                 // appendUnicode: true, // recommended option
                 formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
                 normalize: true, // 兼容不同大小的字体图标合成
-                // timestamp: runTimestamp // recommended to get consistent builds when watching files
+                // fontHeight: 32,
+                centerHorizontally: true,
+                // timestamp: Math.round(Date.now()/1000) // recommended to get consistent builds when watching files
             }))
             .on('glyphs', function(glyphs, options) {
                 // console.log(glyphs, options);
@@ -580,7 +582,8 @@ module.exports = function(gulp, $, utils) {
             });
             if (argv.o) {
 
-                var demoUrl = getRpath() + 'demo.html';
+                // var demoUrl = getRpath() + 'demo.html';
+                var demoUrl = path.join(path.relative(config.path, config.dist), 'demo.html');
                 require('child_process').exec('start http://localhost:8888/' + demoUrl);
             }
         });

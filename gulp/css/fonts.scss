@@ -6,9 +6,9 @@ $<%= sign %>-<%= fName %>-fz: inherit !default;
     font-style: normal;
 	src: url('<%= fUrl %><%= fName %>.eot');
 	src: url('<%= fUrl %><%= fName %>.eot?#iefix') format('embedded-opentype'),
-		url('<%= fUrl %><%= fName %>.woff') format('woff');/*,
-		url('<%= fUrl %><%= fName %>.ttf') format('truetype'),
-		url('<%= fUrl %><%= fName %>.svg#<%= fName %>') format('svg');*/
+		url('<%= fUrl %><%= fName %>.woff') format('woff');//,
+		//url('<%= fUrl %><%= fName %>.ttf') format('truetype'),
+		//url('<%= fUrl %><%= fName %>.svg#<%= fName %>') format('svg');
 }
 $<%= sign %>-<%= fName %>-fz: inherit !default;
 $<%= sign %>-<%= fName %>-fl: none !default;
@@ -26,7 +26,7 @@ $<%= sign %>-<%= fName %>-va: -.25em !default;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;
-	/* speak: none; only necessary if not using the private unicode range (firstdata option) */
+	// speak: none; only necessary if not using the private unicode range (firstdata option) 
 	text-decoration: none;
 	text-transform: none;
 }
