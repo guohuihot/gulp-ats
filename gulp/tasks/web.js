@@ -326,8 +326,8 @@ module.exports = function(gulp, $, utils) {
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.uglify(configs.uglify))
-            .pipe($.data(tplData))
-            .pipe($.if(utils.hasProp(['template.js'], true), $.template()))
+            // .pipe($.data(tplData))
+            // .pipe($.if(utils.hasProp(['template.js'], true), $.template()))
         
         
         cb && cb();
@@ -745,12 +745,40 @@ module.exports = function(gulp, $, utils) {
                         .pipe($.plumber())
                         .pipe($.fileInclude())
                         .pipe($.data(tplData))
-                        .pipe($.template())
+                        // .pipe($.template())
                         .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                             to: 'gbk'
                         })))
                         .pipe(gulp.dest(dist))
                         .pipe(message('html处理ok'));
+                } else {
+
+                    var fileName = file.stem.slice(1),
+                        files = $.glob.sync(src + '/**/!(_*).html'),
+                        // reg = new RegExp('@@include(\'\s*_' + fileName + '.html\')');
+                        // reg = new RegExp('@@include\(\'(.*)_' + fileName + '.html\'\)');
+                        reg = new RegExp("@@include\(\'_headinner.html\'\)");
+                        // @@include('../_headinner.html')
+                    files.forEach(function(filePath) {
+                        // 处理所有包括当前'_xxx.html'的html
+                        if (fs.readFileSync(filePath).toString().search(/@@include\('(.*)_headinner.html'\)/) != -1) {
+                            gulp.src(filePath, {
+                                base: src
+                            })
+                            // .pipe($.changed(dist))
+                            .pipe($.plumber())
+                            .pipe($.fileInclude())
+                            .pipe($.data(tplData))
+                            // .pipe($.template())
+                            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                                to: 'gbk'
+                            })))
+                            .pipe(gulp.dest(dist))
+                            .pipe(message('html处理ok'));    
+                        }
+                    });
+
+
                 }
             }/* else {
                 gulp.src(file.path, {

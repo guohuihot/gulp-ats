@@ -6859,6 +6859,9 @@ button.close {
 #main {
   margin-top: 62px;
 }
+#main img {
+  max-width: 750px;
+}
 .navbar-fixed-top .navbar-inner {
   padding-left: 20px;
   padding-right: 20px;

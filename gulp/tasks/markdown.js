@@ -16,7 +16,7 @@ module.exports = function(gulp, $, utils) {
             mode    : 'm',
             tpl     : 't'
         }).argv,
-        files,
+        files = [],
         tree = {},
         // 存储搜索数据
         searchableDocuments = {},
@@ -94,14 +94,14 @@ module.exports = function(gulp, $, utils) {
     }
     // 先清除html
     gulp.task('clean-markdown', function(cb) {
-        if (!argv.p) {
+        var _p = argv.p;
+        if (!_p) {
             console.log('err:需要指定路径！');
             return;
         };
-
         $.del([
-            argv.p + '/docs/*.html',
-            '!' + argv.p
+            _p + '/docs/*.html',
+            '!' + _p
         ], {
             force: true
         }, cb);
@@ -109,29 +109,41 @@ module.exports = function(gulp, $, utils) {
 
     gulp.task('copy-img', function() {
         var stream = $.mergeStream();
-        var imgs = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}'))
+        var _p = argv.p;
+        var APS = [_p];
+        var imgs = [];
+        argv.pEx && APS.push(argv.pEx);
+        // console.log(APS);
+        APS.forEach(function(p) {
+            imgs.concat($.glob.sync(path.join(p, '/!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
+        })
 
         imgs.forEach(function(file) {
             stream.add(gulp.src(file, {base: path.dirname(file)})
                             .pipe($.imagemin(configs.imagemin))
-                            .pipe(gulp.dest(path.join(argv.p, 'docs/images'))))
+                            .pipe(gulp.dest(path.join(_p, 'docs/images'))))
         });
         
     })
 
     gulp.task('tree', ['clean-markdown', 'copy-img'], function() {
+        var _p = argv.p;
+        var APS = [_p];
         var stream = $.mergeStream();
+        argv.pEx && APS.push(argv.pEx);
 
-        files = $.glob.sync(path.join(argv.p, '/!(vendor)/**/doc/**/!(README).md'))
-        files = files.concat($.glob.sync(path.join(argv.p, '/**/Macro/*.twig')))
-        files = files.concat($.glob.sync(path.join(argv.p, '/**/{mixins,inherit}/*.scss')))
-        files = files.concat($.glob.sync(path.join(argv.p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs|_seajs)/*.js'), {ignore: path.join(argv.p, '/**/vendor/**/*.js')}));
+        APS.forEach(function(p) {
+            files = files.concat($.glob.sync(path.join(p, '/!(vendor)/**/doc/**/!(README).md')))
+            files = files.concat($.glob.sync(path.join(p, '/**/Macro/*.twig')))
+            files = files.concat($.glob.sync(path.join(p, '/**/{mixins,inherit}/*.scss')))
+            files = files.concat($.glob.sync(path.join(p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs|_seajs)/*.js'), {ignore: path.join(p, '/**/vendor/**/*.js')}));
+        })
         // console.log(files);
         files.forEach(function(file) {
             var ext = path.extname(file);
             if ({'.js': 1, '.twig': 1, '.scss': 1}[ext]) {
                 stream.add(gulp.src(file)
-                    // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
+                    // .pipe($.changed(path.join(_p 'docs'), {extension: '.html'}))
                     .pipe($.plumber(function(err) {
                         console.log('###########################################');
                         console.log(err.plugin);
@@ -182,6 +194,7 @@ module.exports = function(gulp, $, utils) {
     })
     // markdown
     gulp.task('markdown', ['tree'], function() {
+        var _p = argv.p;
         // 处理树结构
         files.forEach(function(file) {
             if (path.extname(file) == '.md') {
@@ -191,14 +204,14 @@ module.exports = function(gulp, $, utils) {
         // 复制resources
         gulp.src('./gulp/markdown/*/**')
             // .pipe($.changed(path.join(argv.p, 'docs')))
-            .pipe(gulp.dest(path.join(argv.p, 'docs')));
+            .pipe(gulp.dest(path.join(_p, 'docs')));
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
             .pipe($.plumber())
             .pipe($.template({
                 searchableDocuments: JSON.stringify(searchableDocuments)
             }))
-            .pipe(gulp.dest(path.join(argv.p, 'docs')));
+            .pipe(gulp.dest(path.join(_p, 'docs')));
         // 整理顺序
         tree = objSort(tree);
         // 生成每个文件
@@ -239,7 +252,7 @@ module.exports = function(gulp, $, utils) {
                 .pipe($.data(dataFun))
                 .pipe($.template())
                 .pipe($.rename(dist))
-                .pipe(gulp.dest(argv.p));
+                .pipe(gulp.dest(_p));
         });
     });
 

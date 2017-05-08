@@ -11,6 +11,7 @@
 	<link type="text/css" rel="stylesheet" href="styles/highlight/solarized-light.css">
 
 	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+	<link type="text/css" rel="stylesheet" href="styles/jqmodal.css">
 
 </head>
 
@@ -119,6 +120,7 @@
 <script src="scripts/prettify/jquery.min.js"></script>
 <script src="scripts/prettify/bootstrap.min.js"></script>
 <script src="scripts/highlight.min.js"></script>
+<script src="scripts/jqmodal.js"></script>
 <script src="scripts/toc.js"></script>
 <script src="scripts/fulltext-search-ui.js"></script>
 
@@ -159,8 +161,45 @@ $( function () {
     });
     // 高亮
 	hljs.initHighlightingOnLoad();
+	// 图片预览
+	
+	var getImgSize = function(img, maxW, maxH) {
+            var nH, nW, _W, _H;
 
+            nW = _W = img.width;
+            nH = _H = img.height;
+
+            if (_W > 0 && _H > 0) {
+                if (_W / _H >= maxW / maxH && _W > maxW) {
+                    nW = maxW;
+                    nH = parseInt(_H * maxW / _W);
+                } else if (_H > maxH) {
+                    nH = maxH;
+                    nW = parseInt(_W * maxH / _H);
+                }
+            }
+            return [nW, nH];
+        }
+	$('#main').off('.img-click').on('click.img-click', 'img', function() {
+			var imgUrl = this.src;
+            var _img = new Image();
+            // 图片加载完成再弹出，否则会错位
+            _img.onload=function () {
+                var winW = $(window).width();
+                var winH = $(window).height();
+                // 弹窗的图片大小限制在w<1200和h<600
+                var aImgWH = getImgSize(_img, winW * .95, winH * .95);
+                // 处理小图片
+                var _h = Math.max(aImgWH[1], 150) + 'px';
+                var html = '<div class="imgs-lay" style="height: '+ _h +'"><img style="width: '+ aImgWH[0] +'px; height: '+ aImgWH[1] +'px" src="'+ imgUrl +'" /><div class="imgs-prev font-ico-arwl" style="line-height: '+ _h +'"></div><div class="imgs-next font-ico-arwr" style="line-height: '+ _h +'"></div></div>';
+					$.jqModal.lay(html);
+            }
+
+            _img.src = imgUrl;
+
+	})
 } );
+
 </script>
 
 
