@@ -113,11 +113,10 @@ module.exports = function(gulp, $, utils) {
         var APS = [_p];
         var imgs = [];
         argv.pEx && APS.push(argv.pEx);
-        // console.log(APS);
-        APS.forEach(function(p) {
-            imgs.concat($.glob.sync(path.join(p, '/!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
-        })
 
+        APS.forEach(function(p) {
+            imgs = imgs.concat(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}'));
+        })
         imgs.forEach(function(file) {
             stream.add(gulp.src(file, {base: path.dirname(file)})
                             .pipe($.imagemin(configs.imagemin))

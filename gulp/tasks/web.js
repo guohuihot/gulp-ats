@@ -81,7 +81,7 @@ module.exports = function(gulp, $, utils) {
                             .split(path.sep).join('/') + '/',
                 path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
                             .split(path.sep).join('/'),
-                rPath  : getRpath(file.path),
+                rPath  : getRpath(file.path) || '',
                 info   : config.info,
             }
         }
@@ -753,15 +753,12 @@ module.exports = function(gulp, $, utils) {
                         .pipe(message('html处理ok'));
                 } else {
 
-                    var fileName = file.stem.slice(1),
-                        files = $.glob.sync(src + '/**/!(_*).html'),
-                        // reg = new RegExp('@@include(\'\s*_' + fileName + '.html\')');
-                        // reg = new RegExp('@@include\(\'(.*)_' + fileName + '.html\'\)');
-                        reg = new RegExp("@@include\(\'_headinner.html\'\)");
-                        // @@include('../_headinner.html')
+                    var fileName = file.stem,
+                        files = $.glob.sync(src + '/**/!(_*).{html,htm}'),
+                        reg = new RegExp("@@include\\('(\\S*)"+ fileName +".(html|htm)'\\)");
                     files.forEach(function(filePath) {
                         // 处理所有包括当前'_xxx.html'的html
-                        if (fs.readFileSync(filePath).toString().search(/@@include\('(.*)_headinner.html'\)/) != -1) {
+                        if (reg.test(fs.readFileSync(filePath).toString())) {
                             gulp.src(filePath, {
                                 base: src
                             })
@@ -884,10 +881,12 @@ module.exports = function(gulp, $, utils) {
             ], {
                 base: proSrc
             })
+            .pipe($.plumber())
             .pipe($.imagemin(configs.imagemin))
             .pipe(gulp.dest(proDist)));
         // 处理html
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
+            .pipe($.plumber())
             .pipe($.data(tplData))
             .pipe($.template())
             .pipe(gulp.dest(proDist)));
