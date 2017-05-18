@@ -1174,7 +1174,7 @@ h6,
 .h5,
 .h6 {
   font-family: Microsoft Yahei, Helvetica, Arial, sans-serif;
-  font-weight: 500;
+  font-weight: bold;
   line-height: 1.2;
   /*color: #317EAC;*/
 }
@@ -1214,6 +1214,15 @@ h3,
 .h3 {
   margin-top: 20px;
   margin-bottom: 10px;
+  margin-left: -30px;
+}
+h1 .num,
+.h1 .num,
+h2 .num,
+.h2 .num,
+h3 .num,
+.h3 .num {
+  color: #2FA4E7;
 }
 h1 small,
 .h1 small,
@@ -1264,12 +1273,15 @@ h2,
 }
 h3,
 .h3 {
+  margin-top: 30px;
   font-size: 24px;
-  padding-left: 15px;
-  border-left: 3px solid;
+/*  padding-left: 15px;
+  border-left: 3px solid;*/
 }
 h4,
 .h4 {
+  margin-left: -15px;
+  margin-top: 30px;
   font-size: 18px;
 }
 h5,
@@ -6858,6 +6870,7 @@ button.close {
 }
 #main {
   margin-top: 62px;
+  margin-left: 30px;
 }
 #main img {
   max-width: 750px;
@@ -7032,12 +7045,13 @@ dt.name h4, h4.name {
 
 .list-level-1 {
   font-weight: bold;
+  font-family: arial;
   font-size: 16px;
 }
 
 .list-level-2 {
-  font-weight: bold;
   font-size: 14px;
+  font-family: arial;
 }
 
 .list-level-3 {
@@ -7065,3 +7079,7 @@ dt.name h4, h4.name {
 #toc::-webkit-scrollbar-thumb:hover {
     background: #7d7d7d;
 }
+
+
+
+

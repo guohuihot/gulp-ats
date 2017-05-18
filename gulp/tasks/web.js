@@ -755,7 +755,7 @@ module.exports = function(gulp, $, utils) {
 
                     var fileName = file.stem,
                         files = $.glob.sync(src + '/**/!(_*).{html,htm}'),
-                        reg = new RegExp("@@include\\('(\\S*)"+ fileName +".(html|htm)'\\)");
+                        reg = new RegExp("@@include\\((\'|\")(\\S*)"+ fileName +".(html|htm)(\'|\")\\)");
                     files.forEach(function(filePath) {
                         // 处理所有包括当前'_xxx.html'的html
                         if (reg.test(fs.readFileSync(filePath).toString())) {

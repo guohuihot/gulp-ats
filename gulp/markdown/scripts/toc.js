@@ -181,21 +181,31 @@
         $(this).addClass('list-level-1').find('span').html(function(i, v) {
             return (a + 1) + '. ' + v;
         })
-        $(this).nextUntil('[data-tag="' + (tag1) + '"]').filter('[data-tag="' + (tag1 + 1) + '"]').each(function(e, f) {
-          var tag2 = $(this).data('tag');
-          $(this).addClass('list-level-2').find('span').html(function(i, v) {
-              return (a + 1) + '.' + (e + 1) + '. ' + v;
-          })
+        $(this).nextUntil('[data-tag="' + (tag1) + '"]')
+            .filter('[data-tag="' + (tag1 + 1) + '"]').each(function(e, f) {
+                var tag2 = $(this).data('tag');
+                $(this).addClass('list-level-2').find('span').html(function(i, v) {
+                    return (a + 1) + '.' + (e + 1) + '. ' + v;
+                })
 
-          $(this).nextUntil('[data-tag="' + (tag2) + '"]').filter('[data-tag="' + (tag2 + 1) + '"]').each(function(g, h) {
-            $(this).addClass('list-level-3').find('span').html(function(i, v) {
-                return (a + 1) + '.' + (e + 1) + '.' + (g + 1) + '. ' + v;
-            })
-          });
-        }); 
-      });
+                $(this).nextUntil('[data-tag="' + (tag2) + '"]')
+                    .filter('[data-tag="' + (tag2 + 1) + '"]').each(function(g, h) {
+                        $(this).addClass('list-level-3').find('span').html(function(i, v) {
+                            return (a + 1) + '.' + (e + 1) + '.' + (g + 1) + '. ' + v;
+                        })
+                    });
+            });
+      })
 
       el.html(ul);
+
+      ul.find('[data-tag]').each(function() {
+            var $this = $(this);
+            $($this.attr('href') + ANCHOR_PREFIX).next().html(function(i, v) {
+                /((\d+\.)+)/.test($this.text())
+                return '<span class="num">' + RegExp.$1 + '</span> ' + v;
+            });
+      })
 
       calcHadingOffsets();
     });

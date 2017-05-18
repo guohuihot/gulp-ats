@@ -115,27 +115,65 @@ module.exports = function(gulp, $, utils) {
         argv.pEx && APS.push(argv.pEx);
 
         APS.forEach(function(p) {
-            imgs = imgs.concat(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}'));
+            imgs = imgs.concat($.glob.sync(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
         })
         imgs.forEach(function(file) {
             stream.add(gulp.src(file, {base: path.dirname(file)})
+                            .pipe($.changed(path.join(_p, 'docs/images')))
                             .pipe($.imagemin(configs.imagemin))
                             .pipe(gulp.dest(path.join(_p, 'docs/images'))))
         });
         
     })
 
-    gulp.task('tree', ['clean-markdown', 'copy-img'], function() {
+    var aTasks = ['clean-markdown']
+    // type存在时不处理图片
+    var _type = argv.type;
+    if (!_type) {
+        aTasks.push('copy-img');
+    };
+
+    gulp.task('tree', aTasks, function() {
         var _p = argv.p;
         var APS = [_p];
         var stream = $.mergeStream();
         argv.pEx && APS.push(argv.pEx);
+        // 要取的文件的对象
+        var oTypes = {
+            md: '/!(vendor)/**/doc/**/!(README).md',
+            // md: '/!(vendor)/**/doc/**/*.md',
+            twig: '/**/Macro/*.twig',
+            scss: '/**/{mixins,inherit}/*.scss',
+            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs)/*.js' 
+        }
 
         APS.forEach(function(p) {
-            files = files.concat($.glob.sync(path.join(p, '/!(vendor)/**/doc/**/!(README).md')))
-            files = files.concat($.glob.sync(path.join(p, '/**/Macro/*.twig')))
-            files = files.concat($.glob.sync(path.join(p, '/**/{mixins,inherit}/*.scss')))
-            files = files.concat($.glob.sync(path.join(p, '/'+ (argv.dirs ? '@(' + argv.dirs + ')' : '!(vendor|.git)') +'/**/src/**/!(static|seajs|_seajs)/*.js'), {ignore: path.join(p, '/**/vendor/**/*.js')}));
+            if (_type) {
+                // 只处理指定类型
+                _type.split(',').forEach(function(t) {
+                    if (oTypes[t]) {
+                        // 按类型
+                        files = files.concat($.glob.sync(path.join(p, oTypes[t])));
+                    } else if (path.extname(t)) {
+                        // 按网址
+                        files.push(t);
+                    } else {
+                        // 按目录
+                        files = files.concat($.glob.sync(path.join(t, '**/*.{md,twig,scss,js}')));
+                    }
+                });
+            } else {
+                // 处理所有目录
+                for (prop in oTypes) {
+                    if (oTypes.hasOwnProperty(prop)) {
+                        if (prop == 'js') {
+                            files = files.concat($.glob.sync(path.join(p, oTypes[prop]), {ignore: path.join(p, '/**/vendor/**/*.js')}));
+                        } else {
+                            files = files.concat($.glob.sync(path.join(p, oTypes[prop])));
+                        }
+                    }
+                }
+            }
         })
         // console.log(files);
         files.forEach(function(file) {
@@ -187,6 +225,9 @@ module.exports = function(gulp, $, utils) {
                         }
                         done();
                     })));
+            } else {
+                // 随便一个stream, 为了能继续向下执行
+                stream.add(gulp.src('./gulp/markdown/quicksearch.html'));
             }
         })
         return stream;
@@ -202,7 +243,7 @@ module.exports = function(gulp, $, utils) {
         });
         // 复制resources
         gulp.src('./gulp/markdown/*/**')
-            // .pipe($.changed(path.join(argv.p, 'docs')))
+            .pipe($.changed(path.join(_p, 'docs')))
             .pipe(gulp.dest(path.join(_p, 'docs')));
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
@@ -214,7 +255,7 @@ module.exports = function(gulp, $, utils) {
         // 整理顺序
         tree = objSort(tree);
         // 生成每个文件
-        files.push(path.join(argv.p, 'readme.md'));
+        files.push(path.join(argv.p, 'Resources/doc/readme.md'));
         files.forEach(function(file) {
             var basename = getBaseName(file),
                 renderer = new $.marked.Renderer();

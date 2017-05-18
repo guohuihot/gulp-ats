@@ -147,7 +147,12 @@ module.exports = {
         argv: {
             
             '-p': 'markdown文件目录',
-            '--dirs': '要处理的目录多个用|分割'
+            '--pEx': '默认从p目录里抓取内容，也可以额外指定一个目录一并抓取',
+            '--type': [
+                '按类型 --type=\'js,md,twig,css\'',
+                '按目录 --type=\'e:/a,e:/b\'',
+                '按地址 --type=\'e:/a.md,e:/b.js\'',
+            ].join('\n\t\t\t')
         }
     },
     
