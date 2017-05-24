@@ -1,8 +1,4 @@
-/*!
- * @name <%= name %>
- * @author <%= author %>
- * @date <%= date %>
- */
+{% include '_css_header.html' %}
 
 @import 'static/ats'; // 工具类, 每个文件都要导入
 // 导入全部font demo 图标

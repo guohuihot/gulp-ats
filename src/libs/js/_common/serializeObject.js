@@ -1,8 +1,4 @@
-/*!
- * @name <%= name %> - jquery 扩展
- * @author <%= author %>
- * @date <%= date %>
- */
+{% include '../_js_header.html' %}
     
 Array.prototype.intersect = function(b) {
     var flip = {}, res = [];

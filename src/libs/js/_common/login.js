@@ -1,8 +1,4 @@
-/*!
- * @name <%= name %>
- * @author <%= author %>
- * @date <%= date %>
- */
+{% include '../_js_header.html' %}
 
 define('login', ['$', 'template', 'uri2MVC', 'modal'], function(require){
     var $  = require('$'),

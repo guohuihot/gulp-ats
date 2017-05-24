@@ -1,8 +1,4 @@
-/*!
- * @name <%= name %>
- * @author <%= author %>
- * @date <%= date %>
- */
+{% include '../_js_header.html' %}
  
 define('uri2MVC', [], function(require, exports, module) {
     // 模块代码

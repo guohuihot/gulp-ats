@@ -1,5 +1,6 @@
-module.exports =  {
-		jshint: {
+module.exports = function($, utils) {
+    return {
+        jshint: {
             bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
             curly         : false, //循环或者条件语句必须使用花括号包围
             camelcase     : true, // 使用驼峰命名(camelCase)或全大写下划线命名(UPPER_CASE)
@@ -109,6 +110,46 @@ module.exports =  {
                 "syntaxTheme"           : "{string}",
                 "sort"                  : "{boolean|string}"*/
             }
-        }
+        },
+        swig: {
+            defaults: {
+                cache: false, 
+                locals: { 
+                    now: new Date()
+                }
+            },
+            setup: function(swig) {
+                // 自定义过滤器
+                var filters = {
+                    merge: function(input, second) {
+                        if (utils.type(input) == 'array') {
+                            var len = +second.length,
+                                j = 0,
+                                i = input.length;
 
-	}
+                            for ( ; j < len; j++ ) {
+                                input[ i++ ] = second[ j ];
+                            }
+
+                            input.length = i;
+                        } else if (utils.type(input) == 'object') {
+                            input = $.extend(input, second);
+                        }
+                        return input;
+                    },
+                    fontUnicode: function(input) {
+                        return input.charCodeAt(0).toString(16).toUpperCase();
+                    }
+                };
+
+                for (prop in filters) {
+                    if (filters.hasOwnProperty(prop)) {
+                        swig.setFilter(prop, filters[prop]);
+                    }
+                }
+                // date offset 设置时间偏移
+                swig.setDefaultTZOffset(-480);
+            }
+        }
+    }
+}

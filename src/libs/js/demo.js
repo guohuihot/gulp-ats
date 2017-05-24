@@ -1,8 +1,4 @@
-/**
- * @name <%= name %>
- * @author <%= author %>
- * @date <%= date %>
- */
+{% include '_js_header.html' %}
 
 define(function(require, exports, moudles) {
 	var $ = require('jquery');

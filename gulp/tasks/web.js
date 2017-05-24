@@ -1,7 +1,6 @@
-module.exports = function(gulp, $, utils) {
+module.exports = function(gulp, $, utils, configs) {
     // base
     var path  = require('path'),
-        configs   = require('../configs'),
         fs        = require('fs'),
         argv      = $.yargs
         .alias({
@@ -30,6 +29,9 @@ module.exports = function(gulp, $, utils) {
         _timer,
         _base,
         pExt;
+        
+    // 初始化swig
+    $.swig(configs.swig);
 
     var message = function (msg) {
             return $.notify(function(file) {
@@ -76,7 +78,6 @@ module.exports = function(gulp, $, utils) {
             return {
                 name   : path.basename(file.path).slice(0, -sExtLen),
                 author : config.author,
-                date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                 base   : path.join(pathRelative, config.libs)
                             .split(path.sep).join('/') + '/',
                 path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
@@ -167,10 +168,10 @@ module.exports = function(gulp, $, utils) {
             };
 
         stream.add(gulp.src([sourceUrl + 'css/images.scss'])
-            .pipe($.changed(src, {extension: cssPath}))
+            // .pipe($.changed(src, {extension: cssPath}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
-            .pipe($.template())
+            .pipe($.swig())
             .pipe($.rename(cssPath))
             .pipe(gulp.dest(src))
             .pipe(message()));
@@ -178,7 +179,7 @@ module.exports = function(gulp, $, utils) {
             .pipe($.changed(dist, {extension: 'images/' + fName + '.html'}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
-            .pipe($.template())
+            .pipe($.swig())
             .pipe($.rename(pathBase + 'images/' + fName + '.html'))
             .pipe(gulp.dest(dist))
             .pipe(message());
@@ -214,23 +215,25 @@ module.exports = function(gulp, $, utils) {
                 // console.log(glyphs, options);
 
                 var templateData = {
+                    data: {
                         cssData : glyphs,
                         fUrl    : '../fonts/',
                         path    : pathBase + 'fonts/' + fName + '.html',
                         rPath   : getRpath(dir),
                         sign    : sign.font,
                         fName   : fName
-                    };
+                    }
+                };
 
                 stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
                     .pipe($.changed(src))
-                    .pipe($.template(templateData))
+                    .pipe($.swig(templateData))
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(src))
                     .pipe(message()));
                 gulp.src([sourceUrl + 'html/fonts.html'])
                     .pipe($.changed(dist))
-                    .pipe($.template(templateData))
+                    .pipe($.swig(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     .pipe(gulp.dest(dist))
                     .pipe(message());
@@ -257,6 +260,13 @@ module.exports = function(gulp, $, utils) {
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
+            .pipe($.swig({
+                data: {
+                    name: path.basename(filePath).slice(0, -5),
+                    author: config.author
+                },
+                ext: '.css'
+            }))
             .pipe($.sass({
                 includePaths: scssPaths,
                 // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
@@ -268,11 +278,6 @@ module.exports = function(gulp, $, utils) {
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
             ))
-            .pipe($.template({
-                name: path.basename(filePath).slice(0, -5),
-                author: config.author,
-                date: $.moment().format('YYYY-MM-DD HH:mm:ss')
-            }))
             .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
@@ -301,12 +306,11 @@ module.exports = function(gulp, $, utils) {
                 return {
                     name   : path.basename(file.path).slice(0, -3),
                     author : config.author,
-                    date   : $.moment().format('YYYY-MM-DD HH:mm:ss'),
                     // base   : host,
                     rPath  : getRpath(dir),
                 }
             }))
-            .pipe($.template())
+            .pipe($.swig({ext: '.js'}))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             // .pipe($.uglify(configs.uglify))
             .pipe($.concat(pathRelative + '.js'))
@@ -326,9 +330,8 @@ module.exports = function(gulp, $, utils) {
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.uglify(configs.uglify))
-            // .pipe($.data(tplData))
-            // .pipe($.if(utils.hasProp(['template.js'], true), $.template()))
-        
+            .pipe($.data(tplData))
+            .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
         
         cb && cb();
 
@@ -696,7 +699,7 @@ module.exports = function(gulp, $, utils) {
                     
                     files.forEach(function(filePath) {
                         // 处理所有包括当前'_base'的scss
-                        if (fs.readFileSync(filePath).toString().search(reg) != -1) {
+                        if (reg.test(fs.readFileSync(filePath).toString())) {
                             scss(filePath);      
                         }
                     });
@@ -737,46 +740,57 @@ module.exports = function(gulp, $, utils) {
                 }
             } else if ({".html": 1, ".htm": 1}[file.extname]) {
                 var tag = path.basename(file.path)[0];
+                var _files = [];
+
                 if (tag != '_') {
-                    gulp.src(file.path, {
+                    _files.push(file.path);
+                } else {
+                    var fileName = file.stem;
+                    // var files = $.glob.sync(src + '/**/!(_*).{html,htm}');
+                    var files = $.glob.sync(src + '/**/!('+ fileName +').{html,htm}');
+                    var oFiles = {};
+
+                    var getFiles = function(fileName) {
+                        var reg = new RegExp("(extends|include|import)\\s+(\'|\")"+ fileName +".(html\'|htm\")");
+
+                        files.forEach(function(filePath) {
+                            var _fileName = path.basename(filePath, '.html');
+                            // 缓存内容
+                            oFiles[filePath] = oFiles[filePath] || fs.readFileSync(filePath).toString();
+                            // 文件包含指定的标识
+                            if (reg.test(oFiles[filePath])) {
+                                if (_fileName[0] != '_') {
+                                    _files.push(filePath);
+                                } else {
+                                    getFiles(_fileName);
+                                }
+                            };
+                        });
+                    }
+
+                    getFiles(fileName);
+
+                    // 清空缓存内容
+                    delete oFiles;
+                }
+
+                // console.log(_files);
+                // return false;
+                // 最后处理模板
+                _files.forEach(function(p) {
+                    gulp.src(p, {
                             base: src
                         })
-                        .pipe($.changed(dist))
+                        // .pipe($.changed(dist))
                         .pipe($.plumber())
-                        .pipe($.fileInclude())
                         .pipe($.data(tplData))
-                        // .pipe($.template())
+                        .pipe($.swig({ext: '.html'}))
                         .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                             to: 'gbk'
                         })))
                         .pipe(gulp.dest(dist))
                         .pipe(message('html处理ok'));
-                } else {
-
-                    var fileName = file.stem,
-                        files = $.glob.sync(src + '/**/!(_*).{html,htm}'),
-                        reg = new RegExp("@@include\\((\'|\")(\\S*)"+ fileName +".(html|htm)(\'|\")\\)");
-                    files.forEach(function(filePath) {
-                        // 处理所有包括当前'_xxx.html'的html
-                        if (reg.test(fs.readFileSync(filePath).toString())) {
-                            gulp.src(filePath, {
-                                base: src
-                            })
-                            // .pipe($.changed(dist))
-                            .pipe($.plumber())
-                            .pipe($.fileInclude())
-                            .pipe($.data(tplData))
-                            // .pipe($.template())
-                            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                                to: 'gbk'
-                            })))
-                            .pipe(gulp.dest(dist))
-                            .pipe(message('html处理ok'));    
-                        }
-                    });
-
-
-                }
+                });
             }/* else {
                 gulp.src(file.path, {
                         base: config.src
@@ -888,14 +902,17 @@ module.exports = function(gulp, $, utils) {
         stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
             .pipe($.plumber())
             .pipe($.data(tplData))
-            .pipe($.template())
+            .pipe($.swig())
             .pipe(gulp.dest(proDist)));
             // return false;
         // 处理正常的js
-        stream.add(buildCB(JS, $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*)/*.js')), cb));
-        // 处理其它
-        stream.add(gulp.src(proSrc + '/**/*.swf', {base: proSrc })
+        stream.add(buildCB(JS,  $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*|static*)/*.js')), cb));
+        // 处理其它 以及第三方js
+        stream.add(gulp.src(proSrc + '/**/static/*.*', {base: proSrc })
             .pipe(gulp.dest(proDist)));
+        
+        // stream.add(gulp.src(proSrc + '/**/*.swf', {base: proSrc })
+        //     .pipe(gulp.dest(proDist)));
 
         return stream;
     });

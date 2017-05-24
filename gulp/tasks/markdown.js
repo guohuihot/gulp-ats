@@ -1,7 +1,6 @@
-module.exports = function(gulp, $, utils) {
+module.exports = function(gulp, $, utils, configs) {
     var path = require('path'),
         fs = require('fs'),
-        configs = require('../configs'),
         argv = $.yargs
         .alias({
             path    : 'p',
@@ -159,7 +158,7 @@ module.exports = function(gulp, $, utils) {
                         files.push(t);
                     } else {
                         // 按目录
-                        files = files.concat($.glob.sync(path.join(t, '**/*.{md,twig,scss,js}')));
+                        files = files.concat($.glob.sync(path.join(t, '**/!(static|seajs|_seajs)/*.{md,twig,scss,js}')));
                     }
                 });
             } else {
@@ -248,8 +247,10 @@ module.exports = function(gulp, $, utils) {
         // 搜索文件
         gulp.src('./gulp/markdown/quicksearch.html')
             .pipe($.plumber())
-            .pipe($.template({
-                searchableDocuments: JSON.stringify(searchableDocuments)
+            .pipe($.swig({
+                data: {
+                    searchableDocuments: JSON.stringify(searchableDocuments)
+                }
             }))
             .pipe(gulp.dest(path.join(_p, 'docs')));
         // 整理顺序
@@ -276,7 +277,7 @@ module.exports = function(gulp, $, utils) {
                             if (contents) {
                                 cb1(undefined, {
                                     contents: contents,
-                                    update: $.moment().format('YYYY-MM-DD HH:mm:ss'),
+                                    update: new Date(),
                                     title: basename,
                                     tree: tree
                                 });
@@ -290,7 +291,7 @@ module.exports = function(gulp, $, utils) {
             gulp.src('./gulp/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))
-                .pipe($.template())
+                .pipe($.swig())
                 .pipe($.rename(dist))
                 .pipe(gulp.dest(_p));
         });

@@ -2,21 +2,21 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title><%= fName %></title>    
+    <title>{{fName}}</title>    
     <style type="text/css">
         @font-face {
-        font-family: "<%= fName %>";
+        font-family: "{{fName}}";
         font-weight: normal;
         font-style: normal;
-        src: url('<%= fName %>.eot');
-        src: url('<%= fName %>.eot?#iefix') format('embedded-opentype'),
-            url('<%= fName %>.woff') format('woff');/*,
-            url('<%= fName %>.ttf') format('truetype'),
-            url('<%= fName %>.svg#<%= fName %>') format('svg');*/
+        src: url('{{fName}}.eot');
+        src: url('{{fName}}.eot?#iefix') format('embedded-opentype'),
+            url('{{fName}}.woff') format('woff');/*,
+            url('{{fName}}.ttf') format('truetype'),
+            url('{{fName}}.svg#{{fName}}') format('svg');*/
     }
 
-    [class^="<%= sign %>-<%= fName %>-"], [class*=" <%= sign %>-<%= fName %>-"]:before {
-        font-family: "<%= fName %>";
+    [class^="{{sign}}-{{fName}}-"], [class*=" {{sign}}-{{fName}}-"]:before {
+        font-family: "{{fName}}";
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         font-style: normal;
@@ -27,12 +27,11 @@
         text-decoration: none;
         text-transform: none;
     }
-
-    <% _.each(cssData, function(data) { %>
-    .<%= sign %>-<%= fName %>-<%= data.name %>:before {
-        content: "\<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>";
+    {% for data in cssData %}
+    .{{sign}}-{{fName}}-{{data.name}}:before {
+        content: "\{{data.unicode[0]|fontUnicode}}";
     }
-    <% }); %>   
+    {% endfor %}
 
     * {
         margin: 0;
@@ -74,29 +73,29 @@
     </h2>
     <h3>css</h3>
 <pre>
- @import 'font-<%= fName %>'; //导入css 标识-文件名
+ @import 'font-{{fName}}'; //导入css 标识-文件名
 </pre> 
     <h3>html</h3>
 <pre>
- &lt;i class="font-<%= fName %>-xxx"&gt;&lt;/i&gt; // class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)
- &lt;i class="font-<%= fName %>"><span>&</span>#xEA01;&lt;/i&gt; // class 标识-合成后文件名 内容为单个文件名 兼容ie6,7
+ {{'<i class="font-demo-xxx"></i> // class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)'}}
+ {{'<i class="font-demo">&#xEA01;</i> // class 标识-合成后文件名 内容为单个文件名 兼容ie6,7'}}
 </pre> 
     <h3>详细代码</h3>点击下面文字直接复制到剪切板
 </div>
     <ul>
-    <% _.each(cssData, function(data) { %>
-    <li>
-        <i class="<%= sign %>-<%= fName %>-<%= data.name %>"></i>
-        <div class="class"><%= sign %>-<%= fName %>-<%= data.name %></div>
-        <div class="text"><span>&</span>#x<%= data.unicode[0].charCodeAt(0).toString(16).toUpperCase() %>;</div>
-    </li>
-    <% }); %>   
+        {% for data in cssData %}
+        <li>
+            <i class="{{sign}}-{{fName}}-{{data.name}}"></i>
+            <div class="class">{{sign}}-{{fName}}-{{data.name}}</div>
+            <div class="text"><span>&</span>#x{{data.unicode[0]|fontUnicode}};</div>
+        </li>
+        {% endfor %}
     </ul>
 </div>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
+    var BASE_URL = window.location.href.replace('{{path}}'.replace('./', ''), '') + '/';
 </script>
-<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '{{rPath}}js/seajs.js"><\/script>');</script>
 <script type="text/javascript">
 if (BASE_URL.indexOf('http') == 0) {
     seajs.use(['clipboard'], function() {

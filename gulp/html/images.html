@@ -2,25 +2,24 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title><%= fName %></title>    
+    <title>{{fName}}</title>    
     <style type="text/css">
-
-<% _.forEach(cssData, function(data, name) { %> 
-    .<%= sign %>-<%= fName %>-<%= name %>,
-<% }); %>
-    .a {
+{% for name, data in cssData -%}
+    {%- if loop.index > 1 %},{% endif %}
+    .{{sign}}-{{fName}}-{{name}}
+{%- endfor %} {
         display: inline-block;
         *zoom: 1;
         *display: inline;
-        background-image: url(<%= fName %>.png);
+        background-image: url({{fName}}.png);
     }
-<% _.forEach(cssData, function(data, name) { %>
-    .<%= sign %>-<%= fName %>-<%= name %> {
-        width: <%= data.width ? data.width + 'px' : 0 %>;
-        height: <%= data.height ? data.height + 'px' : 0 %>;
-        background-position: <%= data.offset_x ? data.offset_x + 'px' : 0 %> <%= data.offset_y ? data.offset_y + 'px' : 0 %>;
+{% for name, data in cssData %}
+    .{{sign}}-{{fName}}-{{name}} {
+        width: {{data.width}}px;
+        height: {{data.height}}px;
+        background-position: {{data.offset_x}}px {{data.offset_y}}px;
     }
-<% }); %>
+{% endfor %}
 
     * {
         margin: 0;
@@ -39,8 +38,8 @@
         text-align: center;
         font-family: arial;
         color: #fff;
-        height: <%= H + 58 %>px;
-        width: <%= W + 10 %>px;
+        height: {{H + 58}}px;
+        width: {{W + 10}}px;
         min-width: 80px;
         line-height: 1.5;
         background-color: #272822;
@@ -68,22 +67,15 @@
         height: 30px;
         margin-left: 10px;
         cursor: pointer;
-        background-color: #22D5BB;
         float: right;
     }
-    .bg i:nth-child(2) {
-        background-color: #E1F4D8;
+
+    {% set colors = ['#22D5BB', '#E1F4D8', '#8B9D37', '#FE842E', '#272822'] %}
+    {% for item in colors %}
+    .bg i:nth-child({{loop.index}}) {
+        background-color: {{item}};
     }
-    .bg i:nth-child(3) {
-        background-color: #8B9D37;
-    }
-    .bg i:nth-child(4) {
-        background-color: #FE842E;
-    }
-    .bg i:nth-child(5) {
-        background-color: #272822;
-    }
-    
+    {% endfor %}    
     </style>
 </head>
 <body>
@@ -96,17 +88,17 @@
 
         <h3>css</h3>
 <pre>
-@import 'img-<%= fName %>'; //导入css 标识-文件名
-@include img-<%= fName %>($img-<%= fName %>); //调用全部样式， 标识-文件名($标识-文件名);
+@import 'img-{{fName}}'; //导入css 标识-文件名
+@include img-{{fName}}($img-{{fName}}); //调用全部样式， 标识-文件名($标识-文件名);
 .img-demo-home {
-    width: nth($img-<%= fName %>, 1);
-    height: nth($img-<%= fName %>, 2);
-    background-position: nth($img-<%= fName %>, 3) nth($img-<%= fName %>, 4);
+    width: nth($img-{{fName}}, 1);
+    height: nth($img-{{fName}}, 2);
+    background-position: nth($img-{{fName}}, 3) nth($img-{{fName}}, 4);
 }
 </pre>
         <h3>html</h3>
 <pre>
-&lt;i class="img-demo-home"&gt;&lt;/i&gt; //class 标识+合成后文件名+单个文件名
+{{'<i class="img-demo-home"></i>; //class 标识+合成后文件名+单个文件名'}}
 </pre>
 
         <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i></i></span>详细代码</h3>
@@ -114,17 +106,18 @@
     </div>
 </div>
 <ul>
-<% _.forEach(cssData, function(data, name) { %>
-<li>
-    <i class="<%= sign %>-<%= fName %>-<%= name %>"></i>
-    <div class="class"><%= sign %>-<%= fName %>-<%= name %></div>
-</li>
-<% }); %>
+
+{% for name, data in cssData %}
+    <li>
+        <i class="{{sign}}-{{fName}}-{{name}}"></i>
+        <div class="class">{{sign}}-{{fName}}-{{name}}</div>
+    </li>
+{% endfor %}
 </ul>
 <script type="text/javascript">
-    var BASE_URL = window.location.href.replace('<%= path %>'.replace('./', ''), '') + '/';
+    var BASE_URL = window.location.href.replace('{{path}}'.replace('./', ''), '') + '/';
 </script>
-<script type="text/javascript">document.write('<script src="' + BASE_URL + '<%= rPath %>js/seajs.js"><\/script>');</script>
+<script type="text/javascript">document.write('<script src="' + BASE_URL + '{{rPath}}js/seajs.js"><\/script>');</script>
 
 <script type="text/javascript">
 if (BASE_URL.indexOf('http') == 0) {
