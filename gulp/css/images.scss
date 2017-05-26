@@ -2,7 +2,8 @@
 {% for name, data in cssData -%}
   {%- set tag = sign + '-' + fName + '-' + name -%}
   {%- set tags = tags|merge(['$' + tag]) -%}
-${{tag}}:({{ data.width ? data.width + 'px' : 0 }}, {{data.height ? data.height + 'px' : 0}}, {{data.offset_x ? data.offset_x + 'px' : 0}}, {{data.offset_y ? data.offset_y + 'px' : 0}}, {{tag}});
+
+${{tag}}:({{ data.width|cssSize }}, {{data.height|cssSize}}, {{data.offset_x|cssSize}}, {{data.offset_y|cssSize}}, {{tag}});
 {% endfor %}
 ${{sign}}-{{fName}}: ({{tags}});
 

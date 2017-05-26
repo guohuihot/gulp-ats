@@ -11,6 +11,7 @@ module.exports = function(gulp, $, utils, configs) {
             dev       : 'd',
             server    : 's',
             open      : 'o',
+            src      : 'src',
             ftp       : 'f',
             reverse   : 'r',
             mode      : 'm',
@@ -73,10 +74,9 @@ module.exports = function(gulp, $, utils, configs) {
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), src);
             var pathRelative1 = path.relative(src, file.path);
-            var sExtLen = path.extname(file.path).length;
             // console.log(config.distEx ? '/' : config.rPath);
             return {
-                name   : path.basename(file.path).slice(0, -sExtLen),
+                name   : path.basename(file.path, path.extname(file.path)),
                 author : config.author,
                 base   : path.join(pathRelative, config.libs)
                             .split(path.sep).join('/') + '/',
@@ -516,7 +516,6 @@ module.exports = function(gulp, $, utils, configs) {
                     };
                     break;
             }
-
             // console.log(config);
             config = $.extend({
                     author: 'author',
@@ -646,8 +645,6 @@ module.exports = function(gulp, $, utils, configs) {
             read: false,
             usePolling: true
         }, function(file) {
-
-            
             var dist = getDir(file.path);
             var src = getDir(file.path, 'src');
 
@@ -692,20 +689,45 @@ module.exports = function(gulp, $, utils, configs) {
                     }
                 }
             } else if (file.extname == '.scss') {
-                if (file.basename[0] === '_') {
-                    var fileName = file.stem.slice(1),
-                        files = $.glob.sync(src + '/**/css/!(_*).scss'),
-                        reg = new RegExp('(\'|\")\s*' + fileName + '\s*(\'|\")');
-                    
-                    files.forEach(function(filePath) {
-                        // 处理所有包括当前'_base'的scss
-                        if (reg.test(fs.readFileSync(filePath).toString())) {
-                            scss(filePath);      
-                        }
-                    });
+                var fileName = file.stem;
+                // 文件内容缓存
+                var oFileCache = {}; 
+                var _oFiles = {};
+                // 加入当前的文件
+                if (fileName[0] != '_') {
+                    _oFiles[file.path] = 1;
                 } else {
-                    scss(file.path);
+                    var files = $.glob.sync(src + '/**/css/**/!('+ fileName +').scss');
+                    var getFiles = function(fileName) {
+                        var reg = new RegExp('(\'|\")\\s*' + fileName.slice(1) + '\\s*(\'|\")');
+                        files.forEach(function(filePath) {
+                            var _fileName = path.basename(filePath, '.scss');
+                            // 处理所有包括当前'_base'的scss
+                            oFileCache[filePath] = oFileCache[filePath] || 
+                                                    fs.readFileSync(filePath).toString();
+                            if (reg.test(oFileCache[filePath])) {
+                                if (_fileName[0] != '_') {
+                                    _oFiles[filePath] = 1;
+                                } else{
+                                    getFiles(_fileName);
+                                }
+                            };
+                        });
+                    }
+                    getFiles(fileName);
+                    
+                    // 清空缓存内容
+                    delete oFileCache;
                 }
+
+                // console.log(_oFiles);
+                // return false;
+                for (p in _oFiles) {
+                    if (_oFiles.hasOwnProperty(p)) {
+                        scss(p);
+                    }
+                }
+
             } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
@@ -738,7 +760,7 @@ module.exports = function(gulp, $, utils, configs) {
                 } else {
                     concatJS(file.dirname);
                 }
-            } else if ({".html": 1, ".htm": 1}[file.extname]) {
+            } else if ({".html1": 1, ".htm1": 1}[file.extname]) {
                 var tag = path.basename(file.path)[0];
                 var _files = [];
 
@@ -791,6 +813,64 @@ module.exports = function(gulp, $, utils, configs) {
                         .pipe(gulp.dest(dist))
                         .pipe(message('html处理ok'));
                 });
+            } else if ({".html": 1, ".htm": 1}[file.extname]) {
+                var fileName = file.stem;
+                // 所有文件
+                var files = $.glob.sync(src + '/**/*.{html,htm}');
+                // 要处理的文件
+                var _oFiles = {}; 
+                // 文件内容缓存
+                var oFileCache = {}; 
+                // 加入当前的文件
+                if (fileName.slice(0, 1) != '_') {
+                    _oFiles[file.path] = 1;
+                };
+
+                var getFiles = function(fileName, ofilePath) {
+                    var reg = new RegExp("(extends|include|import)\\s+(\'|\")"+ fileName +".(html\'|htm\")");
+
+                    files.forEach(function(filePath) {
+                        var _fileName = path.basename(filePath, '.html');
+                        // 缓存内容
+                        oFileCache[filePath] = oFileCache[filePath] || 
+                                                fs.readFileSync(filePath).toString();
+                        if (reg.test(oFileCache[filePath])) {
+                            // 如果包含指定文件，加入要处理的列表
+                            if (_fileName.slice(0, 1) != '_') {
+                                _oFiles[filePath] = 1;
+                            };
+                            // 继续遍历，当前文件
+                            getFiles(_fileName, filePath);
+                            // 原来的文件又被包含，delete掉，直到顶级文件
+                            // delete _oFiles[ofilePath];
+                        }
+                    });
+                }
+
+                getFiles(fileName);
+
+                // 清空缓存内容
+                delete oFileCache;
+
+                // console.log(_oFiles);
+                // return false;
+                // 最后处理模板
+                for (p in _oFiles) {
+                    if (_oFiles.hasOwnProperty(p)) {
+                        gulp.src(p, {
+                                base: src
+                            })
+                            // .pipe($.changed(dist))
+                            .pipe($.plumber())
+                            .pipe($.data(tplData))
+                            .pipe($.swig({ext: '.html'}))
+                            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                                to: 'gbk'
+                            })))
+                            .pipe(gulp.dest(dist))
+                            .pipe(message('html处理ok'));
+                    }
+                }
             }/* else {
                 gulp.src(file.path, {
                         base: config.src

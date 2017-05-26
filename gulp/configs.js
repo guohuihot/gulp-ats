@@ -139,6 +139,9 @@ module.exports = function($, utils) {
                     },
                     fontUnicode: function(input) {
                         return input.charCodeAt(0).toString(16).toUpperCase();
+                    },
+                    cssSize: function(input) {
+                        return input ? input + 'px' : 0;
                     }
                 };
 

@@ -15,9 +15,9 @@
     }
 {% for name, data in cssData %}
     .{{sign}}-{{fName}}-{{name}} {
-        width: {{data.width}}px;
-        height: {{data.height}}px;
-        background-position: {{data.offset_x}}px {{data.offset_y}}px;
+        width: {{data.width|cssSize}};
+        height: {{data.height|cssSize}};
+        background-position: {{data.offset_x|cssSize}} {{data.offset_y|cssSize}};
     }
 {% endfor %}
 
@@ -38,8 +38,8 @@
         text-align: center;
         font-family: arial;
         color: #fff;
-        height: {{H + 58}}px;
-        width: {{W + 10}}px;
+        height: {{(H + 58)|cssSize}};
+        width: {{(W + 10)|cssSize}};
         min-width: 80px;
         line-height: 1.5;
         background-color: #272822;
