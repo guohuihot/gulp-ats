@@ -1,5 +1,18 @@
 # ats08
 **ats08** 全称08cms automatic tools(08cms 自动化工具) `本来想叫08ats，git仓库不支持数字开头`；
+简单说ats08是基于gulp开发的一个自动化工具，功能主要有以下：
+
+- sass生成css
+- js语法检查及压缩
+- 图片合成
+- 图片压缩
+- 字体合成
+- 自动刷新
+- ftp自动上传
+- html按模块写自动生成一个完整的html文件，基于swig模板引擎
+- markdown文件生成说明文档
+- 自动抓取js的说明信息生成js说明文档
+
 #### 安装
 1. **安装git**
 	- [git下载](http://git-scm.com/download/),根据自己的系统自己选择；
