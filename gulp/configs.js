@@ -115,7 +115,16 @@ module.exports = function($, utils) {
             defaults: {
                 cache: false, 
                 locals: { 
-                    now: new Date()
+                    now: new Date(),
+                    dump: function(varible) {
+                        var _varible;
+                        if (typeof varible == 'object') {
+                            _varible = JSON.stringify(varible);
+                        } else {
+                            _varible = varible;
+                        }
+                        return _varible;
+                    }
                 }
             },
             setup: function(swig) {
@@ -142,6 +151,22 @@ module.exports = function($, utils) {
                     },
                     cssSize: function(input) {
                         return input ? input + 'px' : 0;
+                    },
+                    length: function(input) {
+                        return utils.type(input) == 'object' ? Object.keys(input).length : input.length;
+                    },
+                    slice: function(input, start, length) {
+                        if (utils.type(input) == 'array' ) {
+                            var _input = [];
+                            _input = input.slice(start, length);
+                        } else if (utils.type(input) == 'object') {
+                            var _input = {};
+                            var arr = Object.keys(input).slice(start, length);
+                            arr.forEach(function(k) {
+                                _input[k] = input[k];
+                            });
+                        }
+                        return _input;
                     }
                 };
 

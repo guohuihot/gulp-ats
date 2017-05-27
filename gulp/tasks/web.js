@@ -201,7 +201,7 @@ module.exports = function(gulp, $, utils, configs) {
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
         var stream1 = gulp.src(dir + '/*.svg', {base: src })
-            .pipe($.changed(dist))
+            // .pipe($.changed(dist))
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
@@ -226,13 +226,13 @@ module.exports = function(gulp, $, utils, configs) {
                 };
 
                 stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
-                    .pipe($.changed(src))
+                    // .pipe($.changed(src))
                     .pipe($.swig(templateData))
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(src))
                     .pipe(message()));
                 gulp.src([sourceUrl + 'html/fonts.html'])
-                    .pipe($.changed(dist))
+                    // .pipe($.changed(dist))
                     .pipe($.swig(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     .pipe(gulp.dest(dist))
@@ -386,6 +386,16 @@ module.exports = function(gulp, $, utils, configs) {
         return _dir;
     }
     // 监听对象
+    /**
+     * 生成监听字串
+     * @param  {String} str   要监听的字串
+     * @param  {String} dir   要监听的相对目录
+     * @param  {String} noStr 要排序的字串，不需要监听的
+     * @return {String}       返回完整的字串
+     * @example
+     * getWatchDir('**\/*', 'dist', '*.html') // [ 'C:\\Users\\Administrator\\Desktop\\test/**\/*',  ]
+     *
+     */
     var getWatchDir = function(str, dir, noStr) {
         var dir = dir || 'src';
         var aWatchDir = [];
@@ -405,6 +415,9 @@ module.exports = function(gulp, $, utils, configs) {
             });
         } else {
             aWatchDir.push(config[dir] + str);
+            if (noStr) {
+                aWatchDirNo.push(path.join('!' + config[dir], noStr));
+            }
         }
 
         return aWatchDir.concat(aWatchDirNo);
@@ -600,7 +613,7 @@ module.exports = function(gulp, $, utils, configs) {
             ftp = $.ftp.create(config.ftp);
         } else {
             // 只刷新html
-            $.watch(getWatchDir('/**/*', 'dist', '/**/{fonts,images,src}/*.{html,htm}'), {read: false}, function(file) {
+            $.watch(getWatchDir('/**/*.{html,htm}', 'dist', '/**/{fonts,images,src}/*.{html,htm}'), {read: false}, function(file) {
 
                 var dist = getDir(file.path);
 
@@ -639,8 +652,6 @@ module.exports = function(gulp, $, utils, configs) {
             })
         }
         
-        // 直接复制
-        
         $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'), {
             read: false,
             usePolling: true
@@ -649,7 +660,7 @@ module.exports = function(gulp, $, utils, configs) {
             var src = getDir(file.path, 'src');
 
             if (file.event == 'unlink') {
-                var nFile        = file.extname == '.scss' ? file.path.slice(0, -5) + '.css' : file.path;
+                var nFile        = file.extname == '.scss' ? path.basename(file.path, '.scss') + '.css' : file.path;
                 var pathRelative = path.relative(src, nFile);
                 var uFile        = dist + '/' + pathRelative;
                 var delFile      = [uFile];
@@ -658,6 +669,14 @@ module.exports = function(gulp, $, utils, configs) {
                 if ({'.scss': 1, '.js': 1}[file.extname]) {
                     // 同时删除map文件
                     delFile.push(nFile + '.map');
+                } else if ({'.svg': 1}[file.extname]) {
+                    fonts(path.dirname(nFile));
+                } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
+                    var _dirname = path.dirname(nFile);
+                    // 如果是删除小图片，需要重新合并其它图片
+                    if (_dirname[0] == '_') {
+                        sprites(_dirname);
+                    }
                 }
 
                 $.del.sync(delFile, {

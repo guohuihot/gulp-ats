@@ -30,9 +30,9 @@
 	</div>
 	<div class="navbar-collapse collapse" id="topNavigation">
 		<ul class="nav navbar-nav">
-			{# {{ tree|json_encode|raw }} #}
-			{% for Adirs, dir1 in tree %}
-				{% if loop.index < 9 %}
+		{# {{ tree|json_encode|raw }} #}
+		{% for Adirs, dir1 in tree %}
+			{% if loop.index < 9 %}
 			<li class="dropdown {{loop.index}}">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">{{Adirs}}<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
@@ -41,23 +41,24 @@
 					{% endfor %}
 				</ul>
 			</li>
-				{% else %}
-					{% if loop.index == 9 %}
+			{% else %}
+				{% if loop.index == 9 %}
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">更多<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					{% endif %}
+				{% endif %}
+
 					<li><b style="padding-left: 5px">{{Adirs}}</b></li>
 					{% for dir in dir1 %}
 					<li><a href="{{dir}}.html#jsdoc">{{dir}}</a></li>
 					{% endfor %}
-				{% endif %}
-			{% endfor %}
-			
-			{% if loop.index >= 9 %}
+
+				{% if loop.last %}
 				</ul>
 			</li>
+				{% endif %}
 			{% endif %}
+		{% endfor %}
 		</ul>
 		<div class="col-sm-3 col-md-3">
             <form class="navbar-form" role="search">
