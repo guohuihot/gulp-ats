@@ -47,3 +47,109 @@
 - [bootstrap](http://www.bootcss.com/) 主要看下书写风格，ats的代码风格会参照着它的来设计的
 - [markdown](https://maxiang.io/) 语法简单自己熟悉
 
+#### 使用说明
+
+
+例：
+gulp build -p 'C:\Users\Administrator\Desktop\test' -a 'ahuing' -m 1
+显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)
+
+gulp 		查看任务列表
+	
+gulp init	查看(设置)当前配置
+	-p(--path)	项目地址
+			类型：string, 默认值：保留上次的值
+			可多个项目地址，用逗号隔开
+			前提是多个项目里的每个项目需要预先配配置好
+
+	-d(--dev)	启用开发模式
+			类型：bool, 默认值：true
+
+	-a(--author)	作者
+			类型：string, 默认值：保留上次的值
+
+	-m(--mode)	模式
+			类型：int, 默认值：保留上次的值
+			1 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts
+			11 - src/ 直接src为源目录(常用)，下面有js,css,images,fonts
+			2 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层
+			21 - src/libs libs为源目录，下面有js,css,images,fonts，比1模式多一层
+			4 - ats自身核心开发模式
+			c - 自定义，有时源代码目录和生成目标目录不是固定，
+			可以手动指定
+
+	--src		源代码目录，当 mode 为"c"时有效
+			类型：string,  默认值：保留上次的值
+			PS：与p的相对路径
+
+	--dist		源代码目录，当 mode 为"c"时有效
+			类型：string,  默认值：保留上次的值
+			PS：与p的相对路径
+
+	--scssPaths		scss源目录
+			类型：string,  默认值：保留上次的值
+			PS：需要绝对路径
+
+	--distEx	扩展生成目录，有时我们生成的目录不仅仅只dist目标，
+			可能还要将生成的文件复制到另一个目录，
+			这样就可以给ats再多指定一个生成目录
+			类型：string,  默认值：保留上次的值
+			PS：需要绝对路径
+
+	
+gulp build	初始化或同步一个项目
+	-p -d -a -m --src --dist --distEx	同init
+
+	--all	重建, 默认不重建，只同步
+
+	
+gulp watch	监控一个项目目录
+	-p -d -a -m --src --dist --distEx	同init
+
+	-s(--server)	创建一个web服务器(写静态页面时需要)
+			类型：bool, 默认值：false
+
+	-o(--open)	直接在浏览器打开，-s为真时有效
+			类型：bool, 默认值：false
+
+	-f(--ftp)	处理的文件后直接上传到远程ftp
+			类型：bool, 默认值：false
+
+	
+gulp add	新加一个分类到项目里
+	-n(--name)	分类名称
+			类型：string, 默认值：null
+			
+
+	
+gulp clean	清理文件	
+	-p	同build	清理后项目目录下src目录,谨慎使用！
+
+	
+gulp pack:patch	压缩文件并删除原文件
+	-p	项目地址
+
+	-n	打包名称
+
+	
+gulp markdown	markdown文件转html
+	-p	从p目录里抓取所有内容，并生成说明文档到当前目录下的docs中
+
+	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
+
+	--type	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
+			按类型 --type='js,md,twig,css'
+			按目录 --type='e:/a,e:/b'
+			按地址 --type='e:/a.md,e:/b.js'
+
+	
+gulp webdown	下载网页(扒皮)	
+	-h	网页地址
+
+	-n	页面名称
+
+	-l	内容图片的标志
+
+	-d	下载目录
+
+	
