@@ -1,0 +1,39 @@
+<div id="ats-toolsbar"></div>
+<script type="text/javascript">
+	(function(window, document) {
+        var aP = (location.href.match(/tps?:\/\/[^\/]+(.+)/) || [, ''])[1].split('/');
+        aP.shift();
+        var aAs = [
+        			'<a onclick="this.parentNode.style.display = \'none\'" title="关闭">x</a>', 
+        			'<a href="/">~</a>'
+        		];
+        aP.forEach(function(item, i) {
+        	var _item = aP.slice(0, i + 1).join('/');
+			aAs.push('<a href="/'+ _item +'">'+ item +'</a>');
+        });
+        document.querySelector('#ats-toolsbar').innerHTML = aAs.join(' / ');
+ 	})(window, document); 	
+</script>
+<style type="text/css">
+
+	#ats-toolsbar {
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		background-color: yellow;
+		padding-right: 10px;
+		font: bold 14px/1.6 arial;
+	}
+
+	#ats-toolsbar a {
+		text-decoration: none;
+	}
+	#ats-toolsbar [title] {
+		float: left;
+		margin-right: 10px;
+		padding: 0 8px;
+		cursor: pointer;
+		color: #fff;
+		background-color: #f00;
+	}
+</style>

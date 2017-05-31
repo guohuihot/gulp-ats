@@ -106,10 +106,10 @@ module.exports = function(gulp, $, utils, configs) {
 
         if (argv.f) {
             s.pipe(ftp.dest(config.ftp.remotePath))
-                .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
+                .pipe(utils.browserSync.stream())
                 .pipe(message())
         } else {
-            s.pipe($.if(argv.s, $.connect.reload(), $.livereload()))
+            s.pipe(utils.browserSync.stream())
                 .pipe(message());
         }
         
@@ -182,6 +182,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.swig())
             .pipe($.rename(pathBase + 'images/' + fName + '.html'))
             .pipe(gulp.dest(dist))
+            .pipe(utils.browserSync.stream())
             .pipe(message());
         stream.add(spriteData.img
             .pipe(gulp.dest(dist))
@@ -201,6 +202,8 @@ module.exports = function(gulp, $, utils, configs) {
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
         var stream1 = gulp.src(dir + '/*.svg', {base: src })
+            // 压缩
+            .pipe($.imagemin(configs.imagemin))
             // .pipe($.changed(dist))
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
@@ -236,6 +239,7 @@ module.exports = function(gulp, $, utils, configs) {
                     .pipe($.swig(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
                     .pipe(gulp.dest(dist))
+                    .pipe(utils.browserSync.stream())
                     .pipe(message());
                 cb && cb();
             })
@@ -580,51 +584,43 @@ module.exports = function(gulp, $, utils, configs) {
         config.info = utils.getInfo();
         cb();
     });
-    // connect
-    gulp.task('connect', function() {
-            $.connect.server({
-                root: config.path,
-                port: 8888,
-                // 静态服务器使用
-                livereload: true,
-                /*middleware: function(connect, opt) {
-                    return [function(req, res, next) {
-                        console.log(req);
-                        console.log('Hello from middleware');
-                        next();
-                      }]
-                }*/
-            });
-            if (argv.o) {
-
-                // var demoUrl = getRpath() + 'demo.html';
-                var demoUrl = path.join(path.relative(config.path, config.dist), 'demo.html');
-                require('child_process').exec('start http://localhost:8888/' + demoUrl);
-            }
-        });
     // watch
 
+    utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
+        // 自动刷新 静态服务器使用
+        if (argv.s) {
+            var toolsbar = fs.readFileSync(sourceUrl + 'html/toolsbar.html').toString();
+            
+            utils.browserSync.init({
+                notify: false,
+                server: config.path,
+                open: argv.o,
+                port: '8888',
+                directory: true,
+                index: 'demo.html',
+                logFileChanges: false, // 控制台文件提示
+                logLevel: 'silent', // debug | info
+                snippetOptions: {
+                    // blacklist: [sourceUrl + 'html/toolsbar.html'],
+                    rule: {
+                        match: /<\/body>/i,
+                        fn: function (snippet, match) {
+                            return snippet + toolsbar + match;
+                        }
+                    }
+                }
+            });
+        } else {
+            utils.browserSync.init();
+        };
+
         if (argv.f) {
             if (!config.ftp) {
                 console.log('请先在gulp/base.json里设置ftp相关配置!');
                 return false;
             }
             ftp = $.ftp.create(config.ftp);
-        } else {
-            // 只刷新html
-            $.watch(getWatchDir('/**/*.{html,htm}', 'dist', '/**/{fonts,images,src}/*.{html,htm}'), {read: false}, function(file) {
-
-                var dist = getDir(file.path);
-
-                gulp.src(file.path, {
-                        read: false
-                    })                
-                    // .pipe($.changed(config.dist))
-                    .pipe(gulp.dest(dist))
-                    .pipe($.if(argv.s, $.connect.reload(), $.livereload()))
-                    .pipe(message('livereload'));
-            });
         }
             
         // 扩展dist 直接将生成好的文件复制过去
@@ -647,7 +643,7 @@ module.exports = function(gulp, $, utils, configs) {
                         })
                         .pipe($.changed(distEx))
                         .pipe(gulp.dest(distEx))
-                        .pipe($.if(argv.s, $.connect.reload(), $.livereload()));
+                        .pipe(utils.browserSync.stream());
                 }
             })
         }
@@ -887,6 +883,7 @@ module.exports = function(gulp, $, utils, configs) {
                                 to: 'gbk'
                             })))
                             .pipe(gulp.dest(dist))
+                            .pipe(utils.browserSync.stream())
                             .pipe(message('html处理ok'));
                     }
                 }
@@ -899,19 +896,6 @@ module.exports = function(gulp, $, utils, configs) {
                     .pipe(message('直接复制'));
             }*/
         });
-        if (argv.s) {
-            gulp.start('connect');
-        } else {
-        // 动态使用
-            $.livereload.listen({
-                port: 35729, // Server port
-                // host: host, // Server host
-                basePath: config.distEx || config.path, // Path to prepend all given paths
-                start: true, // Automatically start
-                quiet: true//, // Disable console logging
-                //reloadPage: 'index.html' // Path to the browser's current page for a full page reload
-            });
-        };
     });
     // build
     gulp.task('build', [
@@ -1007,7 +991,7 @@ module.exports = function(gulp, $, utils, configs) {
         // 处理正常的js
         stream.add(buildCB(JS,  $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*|static*)/*.js')), cb));
         // 处理其它 以及第三方js
-        stream.add(gulp.src(proSrc + '/**/static/*.*', {base: proSrc })
+        stream.add(gulp.src([proSrc + '/**/static/*.*', '!' + proSrc + '/**/static/*.scss'], {base: proSrc })
             .pipe(gulp.dest(proDist)));
         
         // stream.add(gulp.src(proSrc + '/**/*.swf', {base: proSrc })

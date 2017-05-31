@@ -9,6 +9,11 @@
 @include img-demo($img-demo);
 // 导入插件modal css
 @import 'modal';
+
+body {
+	padding: 20px;
+}
+
 .demo {
 	// 单独引入某一个img css
 	@extend .img-demo-face1;
