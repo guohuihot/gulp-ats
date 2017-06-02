@@ -1,28 +1,28 @@
-// /**
-//  * @method 清除浮动 %clearfix 
-//  * @description 清除浮动
-//  * @example 调用
-//  * 
-//  * ```scss
-//  * div {
-//  *    @ extend %clearfix;
-//  * }
-//  * ```
-//  * 
-//  * ```css
-//  * 	div {
-// 	    *zoom: 1;
-// 	}
-// 	div:after {
-// 	    display: block;
-// 	    clear: both;
-// 
-// 	    height: 0;
-// 
-// 	    content: '\20';
-// 	}
-//  * ```
-//  */
+/**
+ * @method 清除浮动 %clearfix 
+ * @description 清除浮动
+ * @example 调用
+ * 
+ * ```scss
+ * div {
+ *    @ extend %clearfix;
+ * }
+ * ```
+ * 
+ * ```css
+ * 	div {
+	    *zoom: 1;
+	}
+	div:after {
+	    display: block;
+	    clear: both;
+
+	    height: 0;
+
+	    content: '\20';
+	}
+ * ```
+ */
 
 %clearfix {
     *zoom: 1;

@@ -167,6 +167,9 @@ module.exports = function($, utils) {
                             });
                         }
                         return _input;
+                    },
+                    U: function(input, start, length) {
+                        return input;
                     }
                 };
 
@@ -177,6 +180,7 @@ module.exports = function($, utils) {
                 }
                 // date offset 设置时间偏移
                 swig.setDefaultTZOffset(-480);
+
             }
         }
     }

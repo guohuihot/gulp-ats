@@ -24,14 +24,13 @@ module.exports = function(gulp, $, utils, configs) {
 
     var getBaseName = function(filePath) {
         var extname = path.extname(filePath),
-            basename = path.basename(filePath, extname).replace('.html', '');
+            basename = path.basename(filePath);
 
         if ({'.twig': 1, '.scss': 1, '.js': 1}[extname]) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
-                var eIndex = elem.indexOf('Bundle');
-                if (eIndex != -1) {
-                    basename = elem.slice(0, eIndex) + '-' + basename + extname;
+                if (/(\w+)Bundle/.test(elem)) {
+                    basename = RegExp.$1 + '-' + basename + extname;
                 }
             });
         }
@@ -143,7 +142,8 @@ module.exports = function(gulp, $, utils, configs) {
             // md: '/!(vendor)/**/doc/**/*.md',
             twig: '/**/Macro/*.twig',
             scss: '/**/{mixins,inherit}/*.scss',
-            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs)/*.js' 
+            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
+            // js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
         }
 
         APS.forEach(function(p) {
@@ -164,50 +164,54 @@ module.exports = function(gulp, $, utils, configs) {
             } else {
                 // 处理所有目录
                 for (prop in oTypes) {
-                    if (oTypes.hasOwnProperty(prop)) {
-                        if (prop == 'js') {
-                            files = files.concat($.glob.sync(path.join(p, oTypes[prop]), {ignore: path.join(p, '/**/vendor/**/*.js')}));
-                        } else {
-                            files = files.concat($.glob.sync(path.join(p, oTypes[prop])));
-                        }
-                    }
+                    files = files.concat($.glob.sync(path.join(p, oTypes[prop]), {ignore: path.join(p, '/**/vendor/**/*.js')}));
                 }
             }
         })
-        // console.log(files);
         files.forEach(function(file) {
             var ext = path.extname(file);
+            var basename = path.basename(file);
             if ({'.js': 1, '.twig': 1, '.scss': 1}[ext]) {
                 stream.add(gulp.src(file)
                     // .pipe($.changed(path.join(_p 'docs'), {extension: '.html'}))
                     .pipe($.plumber(function(err) {
-                        console.log('###########################################');
-                        console.log(err.plugin);
-                        console.log(err.message);
+                        console.log('\n');
                         console.log('文件内容错误：' + file);
-                        console.log('###########################################');
+                        console.log(err.message);
+                        console.log('\n');
                     }))
                     .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);
                         if (contents) {
                             var newContents = contents.match(/\/\*\*([\s\S]*?)\*\//g);
                             if (newContents) {
-                                newContents = newContents.join('\n');
-                                if (ext == '.scss') {
-                                    // console.log(newContents);
-                                    // scss简单过滤下
-                                    newContents = newContents.replace(/\/\//g, '');
-                                };
+                                newContents = newContents.join('\n').replace(/@(include|extend)/, '@ $1');
                                 file2.contents = new Buffer(newContents);
                             } else {
                                 file2.contents = new Buffer('a');
                             }
                         }
+                        // 重命名
+                        // file2.path = file2.path.replace(/\.scss$|\.twig$/, '.js')
                         this.push(file2);
                         done();
                     })))
-                    .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.rename({extname: '.js'})))
-                    // .pipe($.if(ext == '.twig', gulp.dest(argv.p + '/bbb')))
+                    .pipe($.if({
+                        '.js': 1,
+                        '.scss': 1
+                    }[ext], $.swig({
+                        data: {
+                            name: basename,
+                            author: argv.a
+                        }
+                    })))
+                    // 调试用
+                    /*.pipe($.through2.obj(function(file2, encoding, done) {
+                        var contents = String(file2.contents);
+                        console.log(contents);
+                        this.push(file2);
+                        done();
+                    }))*/
                     .pipe($.jsdocToMarkdown({
                         template: "{{>main}}"
                     }))
@@ -216,7 +220,6 @@ module.exports = function(gulp, $, utils, configs) {
                         if (contents) {
                             console.log(file);
                             var fileName = getBaseName(file);
-
                             markdownData[fileName] = file2.contents;
                             processTree(file, contents);
                         } else {
@@ -224,6 +227,8 @@ module.exports = function(gulp, $, utils, configs) {
                         }
                         done();
                     })));
+            } else if ({'.md': 1}[ext]) {
+                processTree(file, String(fs.readFileSync(file)));
             } else {
                 // 随便一个stream, 为了能继续向下执行
                 stream.add(gulp.src('./gulp/markdown/quicksearch.html'));
@@ -234,12 +239,6 @@ module.exports = function(gulp, $, utils, configs) {
     // markdown
     gulp.task('markdown', ['tree'], function() {
         var _p = argv.p;
-        // 处理树结构
-        files.forEach(function(file) {
-            if (path.extname(file) == '.md') {
-                processTree(file, String(fs.readFileSync(file)));
-            }
-        });
         // 复制resources
         gulp.src('./gulp/markdown/*/**')
             .pipe($.changed(path.join(_p, 'docs')))
@@ -258,13 +257,12 @@ module.exports = function(gulp, $, utils, configs) {
         // 生成每个文件
         files.push(path.join(argv.p, 'Resources/doc/readme.md'));
         files.forEach(function(file) {
-            var basename = getBaseName(file),
-                renderer = new $.marked.Renderer();
+            var basename = getBaseName(file);
 
             var dataFun = function(file1, cb1) {
                     gulp.src(file)
                         .pipe($.plumber())
-                        .pipe($.if(utils.hasProp(['.js', '.twig', 'scss']), $.rename({
+                        .pipe($.if(utils.hasProp(['.js', '.twig', '.scss']), $.rename({
                             extname: '.md'
                         })))
                         // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
@@ -272,12 +270,11 @@ module.exports = function(gulp, $, utils, configs) {
                             var contents;
 
                             file2.contents = markdownData[basename] || file2.contents;
-                            contents = String(file2.contents);
+                            contents = String(file2.contents).replace(/@ (include|extend)/, '@$1');
                             contents = $.marked(contents);
                             if (contents) {
                                 cb1(undefined, {
                                     contents: contents,
-                                    update: new Date(),
                                     title: basename,
                                     tree: tree
                                 });

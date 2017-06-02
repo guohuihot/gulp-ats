@@ -18,17 +18,13 @@ gulp.task('default', function() {
     var info = utils.getInfo();
     console.log(info);
     // 自动更新的readme
-    gulp.src('./readme.md')
-        .pipe($.through2.obj(function(file, encoding, done) {
-            var contents = [
-                String(file.contents),
-                '#### 使用说明',
-                info
-            ].join('\n');
-
-            file.contents = new Buffer(contents);
-            this.push(file);
-            done();
+    gulp.src('./readme.tpl')
+        .pipe($.swig({
+            data: {
+                title: '使用说明',
+                content: info
+            },
+            ext: '.md'
         }))
         .pipe(gulp.dest('./'))
 });

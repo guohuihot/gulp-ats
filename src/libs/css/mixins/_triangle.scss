@@ -1,28 +1,28 @@
-// /**
-//  * @method triangle 
-//  * @description 生成一个三角形图标
-//  * @param {string} $size - 三角的大小
-//  * @param {string} $color - 三角颜色
-//  * @param {string} $direction - 三角的方向 up, down, left, right
-//  * @example 调用
-//  * 
-//  * ```scss
-//  * i {
-//  *    @ include triangle(5px, #bbb, up); 
-//  * }
-//  * ```
-//  * 
-//  * ```css
-//  * i {
-//  *    width: 0;
-//       height: 0;
-//       border-width: 5px;
-//       border-style: solid;
-//       border-color: transparent;
-//       border-bottom-color: #bbb;
-//  * }
-//  * ```
-//  */
+/**
+ * @method triangle 
+ * @description 生成一个三角形图标
+ * @param {string} $size - 三角的大小
+ * @param {string} $color - 三角颜色
+ * @param {string} $direction - 三角的方向 up, down, left, right
+ * @example 调用
+ * 
+ * ```scss
+ * i {
+ *    @ include triangle(5px, #bbb, up); 
+ * }
+ * ```
+ * 
+ * ```css
+ * i {
+ *    width: 0;
+      height: 0;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent;
+      border-bottom-color: #bbb;
+ * }
+ * ```
+ */
 
 @mixin triangle ($size, $color, $direction) {
   height: 0;

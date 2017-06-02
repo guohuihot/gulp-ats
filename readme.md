@@ -4,12 +4,13 @@
 
 - sass生成css
 - js语法检查及压缩
-- 图片合成
 - 图片压缩
+- 图片合成
+- 字体压缩
 - 字体合成
 - 自动刷新
 - ftp自动上传
-- html按模块写自动生成一个完整的html文件，基于swig模板引擎
+- html按模块写,自动生成一个完整的html文件，基于swig模板引擎
 - markdown文件生成说明文档
 - 自动抓取js的说明信息生成js说明文档
 
@@ -51,7 +52,7 @@
 
 
 例：
-gulp build -p 'C:\Users\Administrator\Desktop\test' -a 'ahuing' -m 1
+gulp build -p &#39;C:\Users\Administrator\Desktop\test&#39; -a &#39;ahuing&#39; -m 1
 显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)
 
 gulp 		查看任务列表
@@ -78,11 +79,11 @@ gulp init	查看(设置)当前配置
 			c - 自定义，有时源代码目录和生成目标目录不是固定，
 			可以手动指定
 
-	--src		源代码目录，当 mode 为"c"时有效
+	--src		源代码目录，当 mode 为&quot;c&quot;时有效
 			类型：string,  默认值：保留上次的值
 			PS：与p的相对路径
 
-	--dist		源代码目录，当 mode 为"c"时有效
+	--dist		源代码目录，当 mode 为&quot;c&quot;时有效
 			类型：string,  默认值：保留上次的值
 			PS：与p的相对路径
 
@@ -138,9 +139,9 @@ gulp markdown	markdown文件转html
 	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
 
 	--type	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
-			按类型 --type='js,md,twig,css'
-			按目录 --type='e:/a,e:/b'
-			按地址 --type='e:/a.md,e:/b.js'
+			按类型 --type=&#39;js,md,twig,css&#39;
+			按目录 --type=&#39;e:/a,e:/b&#39;
+			按地址 --type=&#39;e:/a.md,e:/b.js&#39;
 
 	
 gulp webdown	下载网页(扒皮)	

@@ -278,6 +278,15 @@ module.exports = function(gulp, $, utils, configs) {
                 //Type: String Default: nested Values: nested, expanded, compact, compressed
                 // sourceMap: true
             }).on('error', $.sass.logError))
+            .pipe($.through2.obj(function(file1, encoding, done) {
+                var contents = String(file1.contents);
+                // sass去不掉，/** */, 手动去掉jsdoc的注释
+                var newContents = contents.replace(/\/\*\*([\s\S]*?)\*\//g, '');
+                // var newContents = contents;
+                file1.contents = new Buffer(newContents);
+                this.push(file1);
+                done();
+            }))
             .pipe($.if(argv.d,
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
@@ -612,7 +621,11 @@ module.exports = function(gulp, $, utils, configs) {
                 }
             });
         } else {
-            utils.browserSync.init();
+            utils.browserSync.init({
+                notify: false,
+                logFileChanges: false, // 控制台文件提示
+                logLevel: 'silent' // debug | info
+            });
         };
 
         if (argv.f) {

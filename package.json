@@ -4,7 +4,8 @@
   "devDependencies": {
     "browser-sync": "^2.18.12",
     "gulp": "^3.9.1",
-    "gulp-jimp": "^1.2.7"
+    "gulp-jimp": "^1.2.7",
+    "gulp-jsdoc3": "^0.2.1"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -14,7 +15,6 @@
   },
   "dependencies": {
     "async": "^1.5.0",
-    "gulp-swig": "^0.8.0",
     "cheerio": "^0.19.0",
     "concat-stream": "^1.5.1",
     "del": "^1.1.1",
@@ -40,6 +40,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.1.1",
     "gulp-sourcemaps": "^2.2.0",
+    "gulp-swig": "^0.8.0",
     "gulp-uglify": "^1.4.2",
     "gulp-watch": "^4.3.5",
     "gulp-wrap": "^0.11.0",
