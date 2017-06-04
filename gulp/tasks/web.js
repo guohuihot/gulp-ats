@@ -30,7 +30,8 @@ module.exports = function(gulp, $, utils, configs) {
         _timer,
         _base,
         pExt;
-        
+
+
     // 初始化swig
     $.swig(configs.swig);
 
@@ -97,7 +98,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.if(argv.d, sourcemaps(filePath)))
             .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
-                if (file.extname != '.map') {
+                if (path.extname(file.path) != '.map') {
                     file.contents = new Buffer(file.contents);
                     this.push(file);
                 }
@@ -324,8 +325,13 @@ module.exports = function(gulp, $, utils, configs) {
                 }
             }))
             .pipe($.swig({ext: '.js'}))
-            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            .pipe($.if(function(file1) {
+                return file1.contents.includes('require-babel');
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))
             // .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
         
         cb && cb();
@@ -345,6 +351,11 @@ module.exports = function(gulp, $, utils, configs) {
             // .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
+            .pipe($.if(function(file1) {
+                return file1.contents.includes('require-babel');
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))
         
         cb && cb();
 
@@ -463,11 +474,12 @@ module.exports = function(gulp, $, utils, configs) {
             }
         } else {
             rPath = config.dist != config.libs ?
-                            config.dist + config.libs + '/' : '';
+                            // config.dist + config.libs + '/' : '';
+                            path.join(config.libs, '/') : '';
             rPath = config.distEx ? '/' : rPath;
         }
 
-        return rPath;
+        return rPath.replace(/\\/g, '/');
     }
     // tasks start
 
@@ -552,7 +564,8 @@ module.exports = function(gulp, $, utils, configs) {
                     src: 'src', // 项目的src
                     mode: 1
                 },
-                config, {
+                config, 
+                {
                     path: argv.p,
                     author: argv.a,
                     dist: argv.dist,
@@ -597,6 +610,11 @@ module.exports = function(gulp, $, utils, configs) {
 
     utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
+        if (argv.debug) {
+            // $.watch(path.join(cwd, 'gulp/**/*'), $.restart)
+            $.watch('./gulp/**/*', $.restart)
+            // gulp.watch(['./gulp/**/*'], require('gulp-restart'));
+        };
         // 自动刷新 静态服务器使用
         if (argv.s) {
             var toolsbar = fs.readFileSync(sourceUrl + 'html/toolsbar.html').toString();

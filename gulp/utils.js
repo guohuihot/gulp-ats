@@ -46,27 +46,6 @@ var utils = {
             }
             return taskInfo;
         }, 
-        /**
-         * 检查数组中是否存在某个值
-         * @param  {string|number} needle 要检索的值
-         * @param  {array} array  要检查的数组
-         * @param  {boolean} bool   是否返回索引
-         * @return {boolean|number}        返回存在或者不存在或者索引值
-         */
-        inArray: function(needle, array, bool) {
-            if (typeof needle == "string" || typeof needle == "number") {
-                var len = array.length;
-                for (var i = 0; i < len; i++) {
-                    if (needle === array[i]) {
-                        if (bool) {
-                            return i;
-                        }
-                        return true;
-                    }
-                }
-                return -1;
-            }
-        },
         type: function( obj ) {
             if (Array.isArray(obj)) {
                 return 'array';

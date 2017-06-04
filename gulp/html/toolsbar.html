@@ -5,7 +5,7 @@
         aP.shift();
         var aAs = [
         			'<a onclick="this.parentNode.style.display = \'none\'" title="关闭">x</a>', 
-        			'<a href="/">~</a>'
+        			'<a href="/">根目录</a>'
         		];
         aP.forEach(function(item, i) {
         	var _item = aP.slice(0, i + 1).join('/');
@@ -19,7 +19,8 @@
 	#ats-toolsbar {
 		position: fixed;
 		left: 0;
-		bottom: 0;
+		top: 0;
+		z-index: 99999;
 		background-color: yellow;
 		padding-right: 10px;
 		font: bold 14px/1.6 arial;

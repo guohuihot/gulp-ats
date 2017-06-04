@@ -27,6 +27,7 @@
         list-style: none;
     }
     .container {
+        font-family: microsoft yahei;
         width: 1200px;
         margin: 20px auto;
     }
@@ -65,9 +66,15 @@
         display: inline-block;
         width: 30px;
         height: 30px;
+        border-radius: 50%;
         margin-left: 10px;
         cursor: pointer;
         float: right;
+        border: 2px solid #fff;
+    }
+
+    .bg i.act {
+        border-color: #f00;
     }
 
     {% set colors = ['#22D5BB', '#E1F4D8', '#8B9D37', '#FE842E', '#272822'] %}
@@ -81,27 +88,19 @@
 <body>
 <div class="container">
     <div class="row">
-        <h3>
-            <a class="index"> <i class="img-demo-face1"></i> 返回首页 </a> | <a class="font-demo-home" href="../">上一级</a>
-        </h3>
         <h2>调用方式</h2>
 
         <h3>css</h3>
-<pre>
+<pre class="text">
 @import 'img-{{fName}}'; //导入css 标识-文件名
 @include img-{{fName}}($img-{{fName}}); //调用全部样式， 标识-文件名($标识-文件名);
-.img-demo-home {
-    width: nth($img-{{fName}}, 1);
-    height: nth($img-{{fName}}, 2);
-    background-position: nth($img-{{fName}}, 3) nth($img-{{fName}}, 4);
-}
 </pre>
         <h3>html</h3>
 <pre>
 {{'<i class="img-demo-home"></i>; //class 标识+合成后文件名+单个文件名'}}
 </pre>
 
-        <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i></i></span>详细代码</h3>
+        <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i class="act"></i></span>详细代码</h3>
         点击下面文字直接复制到剪切板
     </div>
 </div>
@@ -134,6 +133,7 @@ if (BASE_URL.indexOf('http') == 0) {
                     e.preventDefault();
                 })
                 .on('click', '.bg i', function() {
+                    $(this).addClass('act').siblings('i').removeClass('act')
                     $('li').css({
                         backgroundColor: $(this).css('background-color'),
                     })

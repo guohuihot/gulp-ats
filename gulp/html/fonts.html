@@ -39,6 +39,7 @@
         list-style: none;
     }
     .container {
+        font-family: microsoft yahei;
         width: 1200px;
         margin: 20px auto;
     }
@@ -65,19 +66,18 @@
 <body>
 <div class="container">
 <div class="row">
-    <h3>
-        <a class="index"><i class="font-demo-home"></i>返回首页</a> | <a class="font-demo-home" href="../">上一级</a>
-    </h3>
     <h2>
         调用方式
     </h2>
     <h3>css</h3>
-<pre>
+<pre class="text">
  @import 'font-{{fName}}'; //导入css 标识-文件名
 </pre> 
     <h3>html</h3>
 <pre>
  {{'<i class="font-demo-xxx"></i> // class 标识-合成后文件名-单独文件名 不兼容ie6,7(推荐)'}}
+</pre> 
+<pre>
  {{'<i class="font-demo">&#xEA01;</i> // class 标识-合成后文件名 内容为单个文件名 兼容ie6,7'}}
 </pre> 
     <h3>详细代码</h3>点击下面文字直接复制到剪切板

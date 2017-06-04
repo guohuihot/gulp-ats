@@ -142,8 +142,8 @@ module.exports = function(gulp, $, utils, configs) {
             // md: '/!(vendor)/**/doc/**/*.md',
             twig: '/**/Macro/*.twig',
             scss: '/**/{mixins,inherit}/*.scss',
-            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
-            // js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
+            // js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
+            js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
         }
 
         APS.forEach(function(p) {
