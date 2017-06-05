@@ -115,7 +115,9 @@ module.exports = function($, utils) {
             defaults: {
                 cache: false, 
                 locals: { 
-                    now: new Date(),
+                    now: function() {
+                        return new Date();
+                    },
                     dump: function(varible) {
                         var _varible;
                         if (typeof varible == 'object') {

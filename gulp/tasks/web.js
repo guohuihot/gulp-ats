@@ -326,7 +326,7 @@ module.exports = function(gulp, $, utils, configs) {
             }))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
-                return file1.contents.includes('require-babel');
+                return /require-babel/.test(file1.contents);
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -352,7 +352,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
             .pipe($.if(function(file1) {
-                return file1.contents.includes('require-babel');
+                return /require-babel/.test(file1.contents);
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -873,7 +873,7 @@ module.exports = function(gulp, $, utils, configs) {
                 };
 
                 var getFiles = function(fileName, ofilePath) {
-                    var reg = new RegExp("(extends|include|import)\\s+(\'|\")"+ fileName +".(html\'|htm\")");
+                    var reg = new RegExp("(extends|include|import)\\s+(\'|\")\\S*"+ fileName +".(html\'|htm\")");
 
                     files.forEach(function(filePath) {
                         var _fileName = path.basename(filePath, '.html');
@@ -903,6 +903,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // 最后处理模板
                 for (p in _oFiles) {
                     if (_oFiles.hasOwnProperty(p)) {
+                        console.log(getDir(p), 111);
                         gulp.src(p, {
                                 base: src
                             })
@@ -915,7 +916,7 @@ module.exports = function(gulp, $, utils, configs) {
                             })))
                             .pipe(gulp.dest(dist))
                             .pipe(utils.browserSync.stream())
-                            .pipe(message('html处理ok'));
+                            .pipe(message());
                     }
                 }
             }/* else {

@@ -30,7 +30,7 @@ module.exports = function(gulp, $, utils, configs) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (/(\w+)Bundle/.test(elem)) {
-                    basename = RegExp.$1 + '-' + basename + extname;
+                    basename = RegExp.$1 + '-' + basename;
                 }
             });
         }
@@ -142,8 +142,8 @@ module.exports = function(gulp, $, utils, configs) {
             // md: '/!(vendor)/**/doc/**/*.md',
             twig: '/**/Macro/*.twig',
             scss: '/**/{mixins,inherit}/*.scss',
-            // js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
-            js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
+            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
+            // js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
         }
 
         APS.forEach(function(p) {
@@ -284,7 +284,7 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 dist;
 
-            dist = path.join('docs/', basename == 'readme' ? 'index.htm' : basename + '.html');
+            dist = path.join('docs/', /readme/.test(basename) ? 'index.htm' : basename + '.html');
             gulp.src('./gulp/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))
