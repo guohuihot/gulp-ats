@@ -109,7 +109,7 @@
 
 <footer>
 	<span class="copyright">
-	copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now|date('Y-m-d H:i:s')}} 更新
+	copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now()|date('Y-m-d H:i:s')}} 更新
 	</span>
 </footer>
 
@@ -119,6 +119,7 @@
 <script src="scripts/jqmodal.js"></script>
 <script src="scripts/toc.js"></script>
 <script src="scripts/fulltext-search-ui.js"></script>
+<script src="scripts/jquery.zeroclipboard.js"></script>
 
 <script>
 $( function () {
@@ -194,6 +195,17 @@ $( function () {
             _img.src = imgUrl;
 
 	})
+
+
+    $('body')
+    	.on('copy', '.btn-copy', function(e) {
+    		$('.btn-copy').text('复制');
+            e.clipboardData.clearData();
+            e.clipboardData.setData("text/plain", $(this).text('已复制').next().text());
+            e.preventDefault();
+        })
+    	.find('pre code')
+        .before('<span class="btn-copy">复制</span>')
 } );
 
 </script>

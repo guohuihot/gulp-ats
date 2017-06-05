@@ -25,7 +25,6 @@ module.exports = function(gulp, $, utils, configs) {
     var getBaseName = function(filePath) {
         var extname = path.extname(filePath),
             basename = path.basename(filePath);
-
         if ({'.twig': 1, '.scss': 1, '.js': 1}[extname]) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
@@ -33,6 +32,8 @@ module.exports = function(gulp, $, utils, configs) {
                     basename = RegExp.$1 + '-' + basename;
                 }
             });
+        } else if (extname == '.md') {
+            basename = basename.replace(/\.md$/, '');
         }
         return basename;
     }
@@ -110,8 +111,9 @@ module.exports = function(gulp, $, utils, configs) {
         var _p = argv.p;
         var APS = [_p];
         var imgs = [];
-        argv.pEx && APS.push(argv.pEx);
-
+        if (argv.pEx) {
+            APS = APS.concat(argv.pEx.split(','));
+        };
         APS.forEach(function(p) {
             imgs = imgs.concat($.glob.sync(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
         })
@@ -135,7 +137,9 @@ module.exports = function(gulp, $, utils, configs) {
         var _p = argv.p;
         var APS = [_p];
         var stream = $.mergeStream();
-        argv.pEx && APS.push(argv.pEx);
+        if (argv.pEx) {
+            APS = APS.concat(argv.pEx.split(','));
+        };
         // 要取的文件的对象
         var oTypes = {
             md: '/!(vendor)/**/doc/**/!(README).md',
@@ -180,7 +184,8 @@ module.exports = function(gulp, $, utils, configs) {
                         console.log(err.message);
                         console.log('\n');
                     }))
-                    .pipe($.if({'.twig': 1, '.scss': 1}[ext], $.through2.obj(function(file2, encoding, done) {
+                    // js先加进来，有问题再去掉
+                    .pipe($.if({'.twig': 1, '.scss': 1, '.js': 1}[ext], $.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);
                         if (contents) {
                             var newContents = contents.match(/\/\*\*([\s\S]*?)\*\//g);
@@ -229,6 +234,8 @@ module.exports = function(gulp, $, utils, configs) {
                     })));
             } else if ({'.md': 1}[ext]) {
                 processTree(file, String(fs.readFileSync(file)));
+                // 随便一个stream, 为了能继续向下执行
+                stream.add(gulp.src('./gulp/markdown/quicksearch.html'));
             } else {
                 // 随便一个stream, 为了能继续向下执行
                 stream.add(gulp.src('./gulp/markdown/quicksearch.html'));

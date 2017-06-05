@@ -172,6 +172,15 @@ module.exports = function($, utils) {
                     },
                     U: function(input, start, length) {
                         return input;
+                    },
+                    getAll: function(input, start, length) {
+                        return input;
+                    },
+                    getRow: function(input, start, length) {
+                        return input;
+                    },
+                    getOne: function(input, start, length) {
+                        return input;
                     }
                 };
 

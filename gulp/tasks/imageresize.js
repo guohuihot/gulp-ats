@@ -60,8 +60,8 @@ module.exports = function(gulp, $, utils) {
             // return false;
             if (_imgW > 300 && _imgH > 300) {
                 console.log(file, _imgW + ' * ' + _imgH);
-                // var savePath = path.join(_dist || _src, path.relative(_src, file));
-                var savePath = path.join(_dist || _src, path.basename(file));
+                var savePath = path.join(_dist || _src, path.relative(_src, file));
+                // var savePath = path.join(_dist || _src, path.basename(file));
                 $.mkdirp.sync(path.dirname(savePath));
                 /*_img
                     .draw(waterMarkImg, _imgW - waterMarkImgW, _imgH - waterMarkImgH) //在(10,10)处绘制Logo
@@ -69,7 +69,7 @@ module.exports = function(gulp, $, utils) {
                     .save(savePath, {
                         quality: 100 //保存图片到文件,图片质量为50
                     });*/
-                $.images(_img, 0, 0, _imgW, _imgH - waterMarkImgH).save(savePath, {
+                $.images(_img, 0, 0, _imgW, _imgH - 85).save(savePath, {
                         quality: 100 //保存图片到文件,图片质量为50
                     });;
 
@@ -78,4 +78,16 @@ module.exports = function(gulp, $, utils) {
 
     });
 
+    gulp.task('delete-thumb', function(){
+        var _src = argv.p;
+        var aFiles = $.glob.sync(path.join(_src, '**/*.{jpg,jpeg}'));
+        aFiles.forEach(function(path) {
+            if (/\S+_\d+_\d+/.test(path)) {
+                console.log(path);
+                $.del(path, {
+                    force: true
+                })
+            };
+        });
+    });
 };

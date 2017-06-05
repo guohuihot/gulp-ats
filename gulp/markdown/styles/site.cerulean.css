@@ -7081,5 +7081,16 @@ dt.name h4, h4.name {
 }
 
 
-
+.btn-copy {
+  float: right;
+  padding: 3px 5px;
+  cursor: pointer;
+  border-radius: 3px;
+  background-color: #666;
+  color: #fafafa;
+  margin-bottom: -25px;
+}
+code {
+  clear: both;
+}
 
