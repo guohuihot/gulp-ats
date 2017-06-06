@@ -70,27 +70,35 @@ module.exports = function(gulp, $, utils, configs) {
     }
 
     var sourcemaps = function(filePath) {
-            var dist = getDir(filePath);
-            var src = getDir(filePath, 'src');
-            // filePath 源文件path, 整个过程从生成文件目录找到src目录
-            // 相对对src目录
-            var fileRelative = path.join(path.relative(filePath, dist), path.relative(dist, filePath));
-            
-            // 一定要写入src目录
-            return $.sourcemaps.write('./', {
-                includeContent: false,
-                // 相对dist目录
-                sourceMappingURL: function(file) {
-                    var srcMapURL = path.basename(filePath) + '.map'
-                    return srcMapURL;
-                },
-                mapSources: function(sourcePath) {
-                    return fileRelative;
-                },
-                // 相对dist目录
-                sourceRoot: path.dirname(fileRelative),
-                // addComment: false,
-            });
+        // 如果是目录，合并js时
+        var isDir = !path.extname(filePath);
+        if (isDir) {
+            filePath += '/a.js';
+        };
+
+        var dist = getDir(filePath);
+        var src = getDir(filePath, 'src');
+        var distPath = path.join(dist, path.relative(src, filePath));    
+        // 从dist到src
+        var fileRelative = path.relative(distPath, filePath)      
+                                .split(path.sep).join('/');    
+
+        return $.sourcemaps.write('./', {
+            includeContent: false,
+            // 相对dist目录
+            sourceMappingURL: function(file) {
+                var srcMapURL = path.basename(file.path) + '.map'
+                return srcMapURL;
+            },
+            mapSources: function(sourcePath) {
+                return path.dirname(fileRelative) + '/' + path.basename(sourcePath)
+                        .replace(/\.css$/, '.scss');
+            },
+            debug: true,
+            // 相对dist目录
+            sourceRoot: path.dirname(fileRelative),
+            // addComment: false, // 不显示sourceMappingURL
+        });
     }
     // 复制时替换的数据
     var tplData = function(file) {
@@ -316,6 +324,9 @@ module.exports = function(gulp, $, utils, configs) {
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
             ))
+
+    .pipe($.sourcemaps.write({includeContent: false}))
+    .pipe($.sourcemaps.init({loadMaps: true}))
             .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
@@ -337,7 +348,8 @@ module.exports = function(gulp, $, utils, configs) {
         
         var stream = gulp.src(dir + '/*.js', {base: src })
             .pipe($.plumber())
-            .pipe($.if(argv.d, $.sourcemaps.init()))
+            // .pipe($.if(argv.d, $.sourcemaps.init()))
+            .pipe($.sourcemaps.init())
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
@@ -373,7 +385,6 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.sourcemaps.init())
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
-            // .pipe($.uglify(configs.uglify))
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
             .pipe($.if(function(file1) {
