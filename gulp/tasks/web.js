@@ -31,7 +31,6 @@ module.exports = function(gulp, $, utils, configs) {
         _base,
         pExt;
 
-
     // 初始化swig
     $.swig(configs.swig);
 
@@ -44,7 +43,7 @@ module.exports = function(gulp, $, utils, configs) {
             })
         };
 
-    var sourcemaps = function(filePath) {
+    var sourcemaps1 = function(filePath) {
             var dist = getDir(filePath);
             var src = getDir(filePath, 'src');
             // filePath 源文件path, 整个过程从生成文件目录找到src目录
@@ -55,7 +54,7 @@ module.exports = function(gulp, $, utils, configs) {
             
             // 一定要写入src目录
             return $.sourcemaps.write(src, {
-                includeContent: false,
+                includeContent: true,
                 // 相对dist目录
                 sourceMappingURL: function(file) {
                     var srcMapURL = path.join(relativePath, file.relative + '.map')
@@ -66,6 +65,30 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 // 相对dist目录
                 sourceRoot: relativePath.split(path.sep).join('/'),
+                // addComment: false,
+            });
+    }
+
+    var sourcemaps = function(filePath) {
+            var dist = getDir(filePath);
+            var src = getDir(filePath, 'src');
+            // filePath 源文件path, 整个过程从生成文件目录找到src目录
+            // 相对对src目录
+            var fileRelative = path.join(path.relative(filePath, dist), path.relative(dist, filePath));
+            
+            // 一定要写入src目录
+            return $.sourcemaps.write('./', {
+                includeContent: false,
+                // 相对dist目录
+                sourceMappingURL: function(file) {
+                    var srcMapURL = path.basename(filePath) + '.map'
+                    return srcMapURL;
+                },
+                mapSources: function(sourcePath) {
+                    return fileRelative;
+                },
+                // 相对dist目录
+                sourceRoot: path.dirname(fileRelative),
                 // addComment: false,
             });
     }
@@ -95,7 +118,8 @@ module.exports = function(gulp, $, utils, configs) {
         s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
-            .pipe($.if(argv.d, sourcemaps(filePath)))
+            // .pipe($.if(argv.d, sourcemaps(filePath)))
+            .pipe(sourcemaps(filePath))
             .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (path.extname(file.path) != '.map') {
@@ -260,11 +284,9 @@ module.exports = function(gulp, $, utils, configs) {
             })
         };
         scssPaths.push(config.tpl + config.libs + '/css/');
-        // console.log(scssPaths);
         var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
-            .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.swig({
                 data: {
                     name: path.basename(filePath).slice(0, -5),
@@ -272,6 +294,8 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 ext: '.css'
             }))
+            .pipe($.sourcemaps.init())
+            // .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: scssPaths,
                 // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
@@ -345,7 +369,8 @@ module.exports = function(gulp, $, utils, configs) {
         var stream = gulp.src(filePath, {base: src})
             .pipe($.changed(dist))
             .pipe($.plumber())
-            .pipe($.if(argv.d, $.sourcemaps.init(), $.uglify(configs.uglify)))
+            // .pipe($.if(argv.d, $.sourcemaps.init()))
+            .pipe($.sourcemaps.init())
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             // .pipe($.uglify(configs.uglify))
@@ -356,6 +381,8 @@ module.exports = function(gulp, $, utils, configs) {
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
+            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
+            .pipe($.uglify(configs.uglify))
         
         cb && cb();
 
