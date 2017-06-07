@@ -126,8 +126,7 @@ module.exports = function(gulp, $, utils, configs) {
         s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
-            // .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(sourcemaps(filePath))
+            .pipe($.if(argv.d, sourcemaps(filePath)))
             .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (path.extname(file.path) != '.map') {
@@ -285,16 +284,21 @@ module.exports = function(gulp, $, utils, configs) {
     var scss = function(filePath, cb) {
         var src = getDir(filePath, 'src');
 
-        var scssPaths = [path.dirname(filePath)];
+        // var scssPaths = [path.dirname(filePath)];
+        var scssPaths = [];
         if (config.scssPaths) {
             config.scssPaths.split(',').forEach(function(p) {
                 scssPaths.push(p);
             })
         };
+        
         scssPaths.push(config.tpl + config.libs + '/css/');
+
+        console.log(scssPaths);
         var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
+            .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.swig({
                 data: {
                     name: path.basename(filePath).slice(0, -5),
@@ -302,14 +306,12 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 ext: '.css'
             }))
-            .pipe($.sourcemaps.init())
-            // .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: scssPaths,
                 // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
                 outputStyle: 'nested',
-                //Type: String Default: nested Values: nested, expanded, compact, compressed
-                // sourceMap: true
+                //Type: String Default: nested Values: nested, expanded, compact - 属性在一行, compressed
+                // omitSourceMapUrl: true
             }).on('error', $.sass.logError))
             .pipe($.through2.obj(function(file1, encoding, done) {
                 var contents = String(file1.contents);
@@ -325,15 +327,14 @@ module.exports = function(gulp, $, utils, configs) {
                 $.csso()
             ))
 
-    .pipe($.sourcemaps.write({includeContent: false}))
-    .pipe($.sourcemaps.init({loadMaps: true}))
-            .pipe($.autoprefixer({
+            .pipe($.if(!argv.d, $.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
+                map: true
                 //-webkit-transform: rotate(45deg);
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true
-            }))
+            })))
 
         
         // cb && cb();
@@ -348,8 +349,7 @@ module.exports = function(gulp, $, utils, configs) {
         
         var stream = gulp.src(dir + '/*.js', {base: src })
             .pipe($.plumber())
-            // .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.sourcemaps.init())
+            .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
@@ -366,7 +366,6 @@ module.exports = function(gulp, $, utils, configs) {
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
-            // .pipe($.uglify(configs.uglify))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
         
@@ -381,19 +380,18 @@ module.exports = function(gulp, $, utils, configs) {
         var stream = gulp.src(filePath, {base: src})
             .pipe($.changed(dist))
             .pipe($.plumber())
-            // .pipe($.if(argv.d, $.sourcemaps.init()))
-            .pipe($.sourcemaps.init())
+            .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!config.isBuild, $.jshint.reporter()))
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
             .pipe($.if(function(file1) {
+                console.log(file1.path);
                 return /require-babel/.test(file1.contents);
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
-            // .pipe($.if(!argv.d, $.uglify(configs.uglify)))
-            .pipe($.uglify(configs.uglify))
+            .pipe($.if(!argv.d, $.uglify(configs.uglify)))
         
         cb && cb();
 
@@ -650,7 +648,7 @@ module.exports = function(gulp, $, utils, configs) {
     gulp.task('watch', ['init'], function() {
         if (argv.debug) {
             // $.watch(path.join(cwd, 'gulp/**/*'), $.restart)
-            $.watch('./gulp/**/*', $.restart)
+            $.watch(sourceUrl + '**/*', $.restart)
             // gulp.watch(['./gulp/**/*'], require('gulp-restart'));
         };
         // 自动刷新 静态服务器使用
