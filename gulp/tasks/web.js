@@ -346,8 +346,53 @@ module.exports = function(gulp, $, utils, configs) {
 
         var pathRelative = path.relative(src, dir).replace('_', ''),
             fName        = path.basename(dir).slice(1);
-        
-        var stream = gulp.src(dir + '/*.js', {base: src })
+        var aFiles = $.glob.sync(dir + '/*.js');
+        var dependsMap = {};
+        var filesMap = {};
+        var depends = []
+
+        aFiles.forEach(file => {
+            var basename = path.basename(file, '.js')
+            var sCon = fs.readFileSync(file);
+            if (/(\/\/|\*)\s*require-(\S+);/.test(sCon)) {
+                var depend = RegExp.$2.split(',');
+                depends = [...depends, ...depend];
+                dependsMap[basename] = depend;
+            } else {
+                dependsMap[basename] = [];
+            };
+        });
+        /*
+        { attrSearch: [ 'hasEvent', 'toggler' ],
+          console: [],
+          hasEvent: [],
+          intersect: [],
+          serializeObject: [ 'intersect', 'attrSearch' ],
+          toggler: [ 'hasEvent' ],
+          utils: [] }
+         */
+        for (k in dependsMap) {
+            if (depends.includes(k)) {
+                filesMap[k] = 2;
+            } else {
+                filesMap[k] = !!dependsMap[k].length * 1;
+            }
+            dependsMap[k].forEach(item => {
+                filesMap[item] = Math.max(filesMap[item] || 0, filesMap[k] + 1);
+            });
+        }
+        var files = Object.keys(filesMap)
+                        .sort((a, b) => filesMap[b] - filesMap[a])
+                        .map(function(file) {
+                            return path.join(dir, file + '.js');
+                        })
+
+        console.log(dependsMap);
+        console.log('======================');
+        console.log(filesMap);
+        return false;
+        // var stream = gulp.src(dir + '/*.js', {base: src })
+        var stream = gulp.src(files, {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
