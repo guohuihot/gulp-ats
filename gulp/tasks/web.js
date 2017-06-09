@@ -702,6 +702,14 @@ module.exports = function(gulp, $, utils, configs) {
                             base: dist
                         })
                         .pipe($.changed(distEx))
+                        .pipe($.through2.obj(function(file, encoding, done) {
+                            var relPath = path.relative(distEx, file.path);
+                            var newContents = file.contents
+                                                .toString().replace(/(sourceMappingURL=)/, relPath);
+                            file.contents = new Buffer(newContents);              
+                            this.push(file);
+                            done();
+                        }))
                         .pipe(gulp.dest(distEx))
                         .pipe(utils.browserSync.stream());
                 }
