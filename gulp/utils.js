@@ -46,6 +46,14 @@ var utils = {
             }
             return taskInfo;
         }, 
+        inArray: function(search, array) {
+            for (var i in array) {
+                if (array[i] == search) {
+                    return true;
+                }
+            }
+            return false;
+        },
         type: function( obj ) {
             if (Array.isArray(obj)) {
                 return 'array';
@@ -53,12 +61,12 @@ var utils = {
                 return typeof obj;
             }
         },
-        getDepends: function(str) {
-            var aDepends = [];
+        getRequires: function(str) {
+            var aRequires = [];
             if (/@require\(\[*(.+)\]*\)/.test(str)) {
-                aDepends = JSON.parse('[' + RegExp.$1.replace(/\'/g, '"') + ']');
+                aRequires = JSON.parse('[' + RegExp.$1.replace(/\'/g, '"') + ']');
             }
-            return aDepends;
+            return aRequires;
         }
     };
 

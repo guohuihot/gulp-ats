@@ -52,7 +52,6 @@ module.exports = function(gulp, $, utils, configs) {
 
         var dist = getDir(filePath);
         var src = getDir(filePath, 'src');
-        console.log(dist);
         var distPath = path.join(dist, path.relative(src, filePath));    
         // 从dist到src
         var fileRelative = path.relative(distPath, filePath)      
@@ -269,7 +268,6 @@ module.exports = function(gulp, $, utils, configs) {
         
         scssPaths.push(config.tpl + config.libs + '/css/');
 
-        console.log(scssPaths);
         var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
@@ -301,7 +299,6 @@ module.exports = function(gulp, $, utils, configs) {
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
             ))
-
             .pipe($.if(!argv.d, $.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
@@ -355,7 +352,7 @@ module.exports = function(gulp, $, utils, configs) {
             }))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
-                return /require-babel/.test(file1.contents);
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -379,8 +376,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
             .pipe($.if(function(file1) {
-                console.log(file1.path);
-                return /require-babel/.test(file1.contents);
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -417,7 +413,13 @@ module.exports = function(gulp, $, utils, configs) {
         return stream;
     }
 
-    // 处理dist
+    /**
+     * getDir
+     * @description 获取对应的目录，主要处理多目录监控里的目录
+     * @param  {String} file 文件路径
+     * @param  {String} [dir=dist]  要获取目录的标记， `dist` `src` `path` `distEx`
+     * @return {String}      对应的绝对目录
+     */
     var getDir = function(file, dir) {
         var dir = dir || 'dist';
         var _dir = config[dir]; 
@@ -427,7 +429,9 @@ module.exports = function(gulp, $, utils, configs) {
                 if (path.normalize(file).indexOf(p) == 0) {
                     if (_base.data[p]) {
                         var curConfig = _base.data[p];
-                        _dir = dir == 'distEx' ? curConfig[dir] : path.join(p, curConfig[dir]);
+                        _dir = dir == 'distEx' ? 
+                                        curConfig[dir] : 
+                                        (dir != 'path' && path.join(p, curConfig[dir]) || curConfig[dir]);
                     } else {
                         console.log('目录没有预先配置！' + p);
                         return false;
@@ -438,12 +442,11 @@ module.exports = function(gulp, $, utils, configs) {
 
         return _dir;
     }
-    // 监听对象
     /**
      * 生成监听字串
      * @param  {String} str   要监听的字串
      * @param  {String} dir   要监听的相对目录
-     * @param  {String} noStr 要排序的字串，不需要监听的
+     * @param  {String|Array} noStr 要排序的字串，不需要监听的
      * @return {String}       返回完整的字串
      * @example
      * getWatchDir('**\/*', 'dist', '*.html') // [ 'C:\\Users\\Administrator\\Desktop\\test/**\/*',  ]
@@ -460,6 +463,7 @@ module.exports = function(gulp, $, utils, configs) {
                     aWatchDir.push(path.join(curConfig.path, curConfig[dir], str));
                     if (noStr) {
                         aWatchDirNo.push(path.join('!' + curConfig.path, curConfig[dir], noStr));
+                        aWatchDirNo.push(path.join('!' + curConfig.path, curConfig[dir], '/src/**/*'));
                     }
                 } else {
                     console.log('目录没有预先配置！' + p);
@@ -652,7 +656,7 @@ module.exports = function(gulp, $, utils, configs) {
                 notify: false,
                 server: config.path,
                 open: argv.o,
-                port: '8888',
+                port: 8888,
                 directory: true,
                 index: 'demo.html',
                 logFileChanges: false, // 控制台文件提示
@@ -671,7 +675,12 @@ module.exports = function(gulp, $, utils, configs) {
             utils.browserSync.init({
                 notify: false,
                 logFileChanges: false, // 控制台文件提示
-                logLevel: 'silent' // debug | info
+                logLevel: 'silent', // debug | info
+            });
+            // 创建静态服务器，sourceMap 使用
+            $.connect.server({
+                root: config.path.split(','),
+                port: 8888
             });
         };
 
@@ -686,14 +695,15 @@ module.exports = function(gulp, $, utils, configs) {
         // 扩展dist 直接将生成好的文件复制过去
 
         if (config.multiple || config.distEx) {
-            $.watch(getWatchDir('/**/*', 'dist', '/src/**/*'), {
+            // console.log(getWatchDir('/**/*', 'dist', '/**/*.map'));
+            $.watch(getWatchDir('/**/*', 'dist', '/**/*.map'), {
                 read: false
             }, function(file) {
                 var dist = getDir(file.path);
                 var distEx = getDir(file.path, 'distEx');
 
+                var pathRelative = path.relative(dist, file.path);
                 if (file.event == 'unlink') {
-                    var pathRelative = path.relative(dist, file.path);
                     $.del([distEx + '/' + pathRelative], {
                         force: true
                     });
@@ -702,12 +712,15 @@ module.exports = function(gulp, $, utils, configs) {
                             base: dist
                         })
                         .pipe($.changed(distEx))
-                        .pipe($.through2.obj(function(file, encoding, done) {
-                            var relPath = path.relative(distEx, file.path);
-                            var newContents = file.contents
-                                                .toString().replace(/(sourceMappingURL=)/, relPath);
-                            file.contents = new Buffer(newContents);              
-                            this.push(file);
+                        .pipe($.through2.obj(function(file2, encoding, done) {
+                            // 处理sourcemap
+                            var relPath = 'http://localhost:8888/' + 
+                                            path.relative(getDir(file.path, 'path'), path.dirname(file.path))
+                                            .split(path.sep).join('/') + '/';
+                            var newContents = file2.contents
+                                                .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
+                            file2.contents = new Buffer(newContents);              
+                            this.push(file2);
                             done();
                         }))
                         .pipe(gulp.dest(distEx))
@@ -940,7 +953,6 @@ module.exports = function(gulp, $, utils, configs) {
                 // 最后处理模板
                 for (p in _oFiles) {
                     if (_oFiles.hasOwnProperty(p)) {
-                        console.log(getDir(p), 111);
                         gulp.src(p, {
                                 base: src
                             })
