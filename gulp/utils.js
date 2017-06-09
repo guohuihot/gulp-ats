@@ -52,6 +52,13 @@ var utils = {
             } else {
                 return typeof obj;
             }
+        },
+        getDepends: function(str) {
+            var aDepends = [];
+            if (/@require\(\[*(.+)\]*\)/.test(str)) {
+                aDepends = JSON.parse('[' + RegExp.$1.replace(/\'/g, '"') + ']');
+            }
+            return aDepends;
         }
     };
 
