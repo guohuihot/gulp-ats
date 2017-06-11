@@ -63,10 +63,17 @@ gulp init	查看(设置)当前配置
 			可多个项目地址，用逗号隔开
 			前提是多个项目里的每个项目需要预先配配置好
 
+	-a(--alias)	配置的别名，给配置起一个别名，下次直接用别名，如
+			gulp watch -p &#39;C:\Users\Administrator\Desktop\test\&#39; 
+			--src &#39;./src&#39; --dist &#39;./dist&#39; -a &#39;demo&#39; 
+			--distEx &#39;C:\Users\Administrator\Desktop\test\dist1\&#39;
+			下次可直接
+			gulp watch -a &#39;demo&#39;
+
 	-d(--dev)	启用开发模式
 			类型：bool, 默认值：true
 
-	-a(--author)	作者
+	--au(--author)	作者
 			类型：string, 默认值：保留上次的值
 
 	-m(--mode)	模式

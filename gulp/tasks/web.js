@@ -5,7 +5,8 @@ module.exports = function(gulp, $, utils, configs) {
         argv      = $.yargs
         .alias({
             path      : 'p',
-            author    : 'a',
+            author    : 'au',
+            alias     : 'a',
             custom    : 'c',
             libs      : 'l',
             dev       : 'd',
@@ -527,9 +528,9 @@ module.exports = function(gulp, $, utils, configs) {
         _base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
 
         if (_base.data) {
-            if (argv.p) {
+            if (argv.path || argv.alias) {
                 // 有路径时直接保存配置及时间戳
-                config = _base.data[argv.p] || {};
+                config = _base.data[argv.alias || argv.path] || {};
             } else {
                 // 没有时直接从_base里找最后一次配置
                 for (p in _base.data) {
@@ -600,8 +601,8 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 config, 
                 {
-                    path: argv.p,
-                    author: argv.a,
+                    path: argv.path,
+                    author: argv.author,
                     dist: argv.dist,
                     distEx: argv.distEx,
                     src: argv.src,
@@ -617,7 +618,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         // 设置时间下次直接用
         config.t = parseInt(new Date().getTime() / 1000);
-        _base.data[config.path] = config;
+        _base.data[argv.alias || config.path] = config;
         _base.saveSync();
 
         console.log('\n');
@@ -1007,7 +1008,7 @@ module.exports = function(gulp, $, utils, configs) {
         if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
             cb();
-        } else if (!argv.all) {
+        } else if (!argv.aliasl) {
             var stream = $.mergeStream();
             var atsFromData = $.glob.sync(atsFromSrc + '/**/*');
             var proSrcData = $.glob.sync(proSrc + '/**/*');
@@ -1126,8 +1127,8 @@ module.exports = function(gulp, $, utils, configs) {
     });
     // php copy
     gulp.task('php-copy', function(cb) {
-        argv.p = argv.p || 'E:/wwwroot/newcore';
-        var _path = argv.p.split(path.sep).join('/') + '/';
+        argv.path = argv.path || 'E:/wwwroot/newcore';
+        var _path = argv.path.split(path.sep).join('/') + '/';
         console.log('执行' + 'php ' + _path + 'app/console assets:install ' + _path + 'web');
         return require('child_process').exec('php ' + _path + 'app/console assets:install ' + _path + 'web');
     });
