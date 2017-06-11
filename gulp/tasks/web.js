@@ -287,6 +287,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // omitSourceMapUrl: true
             }).on('error', $.sass.logError))
             .pipe($.through2.obj(function(file1, encoding, done) {
+                // console.log(file1.sourceMap);
                 var contents = String(file1.contents);
                 // sass去不掉，/** */, 手动去掉jsdoc的注释
                 var newContents = contents.replace(/\/\*\*([\s\S]*?)\*\//g, '');
@@ -299,14 +300,14 @@ module.exports = function(gulp, $, utils, configs) {
                 $.csscomb(sourceUrl + 'css/csscomb.json'),
                 $.csso()
             ))
-            .pipe($.if(!argv.d, $.autoprefixer({
+            .pipe($.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
-                map: true
+                map: false,
                 //-webkit-transform: rotate(45deg);
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true
-            })))
+            }))
 
         
         // cb && cb();
@@ -643,6 +644,12 @@ module.exports = function(gulp, $, utils, configs) {
 
     utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
+        // delete
+        $.del([
+            path.join(config.path, 'src/**/*.map')
+        ], {
+            force: true
+        });
         if (argv.debug) {
             // $.watch(path.join(cwd, 'gulp/**/*'), $.restart)
             $.watch(sourceUrl + '**/*', $.restart)
