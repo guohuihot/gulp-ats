@@ -2,7 +2,7 @@
  * @module utils
  */
 var path = require('path');
-
+// 处理字符串 e\a\a\b.html => e/a/a/b.html
 String.prototype.normal = function() {
     return this.split(path.sep).join('/');
 }

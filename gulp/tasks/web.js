@@ -528,16 +528,26 @@ module.exports = function(gulp, $, utils, configs) {
         var customConfig;
 
         if (!fs.existsSync(SOURCEURL + 'base.json')) {
+            // 不存在时 创建一个空的文件 保证不报错
             fs.writeFileSync(SOURCEURL + 'base.json', '');
         }
 
         _base = $.jsonFilePlus.sync(SOURCEURL + 'base.json');
 
         if (_base.data) {
-            if (argv.path || argv.alias) {
+            if (argv.path) {
+                // 按路径找配置
                 // 有路径时直接保存配置及时间戳
                 config = _base.data[argv.alias || argv.path] || {};
+            } else if (argv.alias) {
+                // 按别名找配置
+                for (p in _base.data) {
+                    if (_base.data[p].alias == argv.alias) {
+                        config = _base.data[p];
+                    }
+                }
             } else {
+                // 按时间找配置
                 // 没有时直接从_base里找最后一次配置
                 for (p in _base.data) {
                     if (_base.data[p].t > (config.t || 0)) {
@@ -613,6 +623,7 @@ module.exports = function(gulp, $, utils, configs) {
                     distEx: argv.distEx,
                     src: argv.src,
                     scssPaths: argv.scssPaths,
+                    alias: argv.alias,
                     mode: argv.m
                 }, customConfig);
 
@@ -624,7 +635,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         // 设置时间下次直接用
         config.t = parseInt(new Date().getTime() / 1000);
-        _base.data[argv.alias || config.path] = config;
+        _base.data[config.path] = config;
         _base.saveSync();
 
         console.log('\n');
@@ -727,13 +738,16 @@ module.exports = function(gulp, $, utils, configs) {
                         })
                         .pipe($.changed(distEx))
                         .pipe($.through2.obj(function(file2, encoding, done) {
+                            var ext = path.extname(file.path);
                             // 处理sourcemap
-                            var relPath = 'http://localhost:8888/' + 
-                                            path.relative(getDir(file.path, 'path'), path.dirname(file.path))
-                                            .normal() + '/';
-                            var newContents = file2.contents
-                                                .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
-                            file2.contents = new Buffer(newContents);              
+                            if ({'.js': 1, '.css': 1}[ext]) {
+                                var relPath = 'http://localhost:8888/' + 
+                                                path.relative(getDir(file.path, 'path'), path.dirname(file.path))
+                                                .normal() + '/';
+                                var newContents = file2.contents
+                                                    .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
+                                file2.contents = new Buffer(newContents);   
+                            };           
                             this.push(file2);
                             done();
                         }))
@@ -1108,5 +1122,19 @@ module.exports = function(gulp, $, utils, configs) {
                     .pipe(gulp.dest(_dist));
             }
         });
+    });
+
+    gulp.task('sync-ats', function() {
+        var _dist = 'E:/wwwroot/ats08';
+        gulp.src([
+            'E:/nodejs/**/*', 
+            'E:/nodejs/.gitignore', 
+            '!E:/nodejs/{node_modules,.git}/**/*',
+            '!E:/nodejs/node_modules'
+            ], {
+                // base: _src
+            })
+            .pipe($.changed(_dist))
+            .pipe(gulp.dest(_dist));
     });
 };
