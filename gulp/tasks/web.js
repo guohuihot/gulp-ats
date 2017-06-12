@@ -5,7 +5,8 @@ module.exports = function(gulp, $, utils, configs) {
         argv      = $.yargs
         .alias({
             path      : 'p',
-            author    : 'a',
+            author    : 'au',
+            alias     : 'a',
             custom    : 'c',
             libs      : 'l',
             dev       : 'd',
@@ -17,8 +18,8 @@ module.exports = function(gulp, $, utils, configs) {
             mode      : 'm',
             tpl       : 't'
         }).argv,
-        cwd       = process.cwd() + '/',
-        sourceUrl = path.join(cwd, './gulp/'),
+        CWD       = process.cwd() + '/',
+        SOURCEURL = path.join(CWD, './gulp/'),
         
         sign      = {
         img       : 'img',
@@ -47,7 +48,8 @@ module.exports = function(gulp, $, utils, configs) {
         // 如果是目录，合并js时
         var isDir = !path.extname(filePath);
         if (isDir) {
-            filePath += '/a.js';
+            // filePath += '/a.js';
+            filePath = path.join(filePath, '../a.js');
         };
 
         var dist = getDir(filePath);
@@ -55,7 +57,7 @@ module.exports = function(gulp, $, utils, configs) {
         var distPath = path.join(dist, path.relative(src, filePath));    
         // 从dist到src
         var fileRelative = path.relative(distPath, filePath)      
-                                .split(path.sep).join('/');    
+                                .normal();    
 
         return $.sourcemaps.write('./', {
             includeContent: false,
@@ -65,12 +67,17 @@ module.exports = function(gulp, $, utils, configs) {
                 return srcMapURL;
             },
             mapSources: function(sourcePath) {
-                return path.dirname(fileRelative) + '/' + path.basename(sourcePath)
-                        .replace(/\.css$/, '.scss');
+                if (sourcePath.indexOf('src/libs/') >= 0) {
+                    // ..\..\..\..\..\..\nodejs\src\libs\css\mixins\clearfix.scss => css\mixins\clearfix.scss
+                    sourcePath = path.relative(path.join(sourcePath, '../../../'), sourcePath).normal(); 
+                }
+                // return path.join(path.dirname(fileRelative), '../', sourcePath)
+                //         .normal(); 
+                return sourcePath; 
             },
-            debug: true,
+            // debug: true,
             // 相对dist目录
-            sourceRoot: path.dirname(fileRelative),
+            sourceRoot: path.join(path.dirname(fileRelative), '../'),
             // addComment: false, // 不显示sourceMappingURL
         });
     }
@@ -85,9 +92,9 @@ module.exports = function(gulp, $, utils, configs) {
                 name   : path.basename(file.path, path.extname(file.path)),
                 author : config.author,
                 base   : path.join(pathRelative, config.libs)
-                            .split(path.sep).join('/') + '/',
+                            .normal() + '/',
                 path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
-                            .split(path.sep).join('/'),
+                            .normal(),
                 rPath  : getRpath(file.path) || '',
                 info   : config.info,
             }
@@ -128,7 +135,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         var stream = $.mergeStream();
         var pathBase = path.relative(src, dir + '/../../')
-                            .split(path.sep).join('/') + './';
+                            .normal() + './';
 
         var fName    = path.basename(dir).slice(1),
             cssPath  = path.join(pathBase, 'css/_' + sign.img + '-' + fName + '.scss');
@@ -173,7 +180,7 @@ module.exports = function(gulp, $, utils, configs) {
                 }));
             };
 
-        stream.add(gulp.src([sourceUrl + 'css/images.scss'])
+        stream.add(gulp.src([SOURCEURL + 'css/images.scss'])
             // .pipe($.changed(src, {extension: cssPath}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
@@ -181,7 +188,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.rename(cssPath))
             .pipe(gulp.dest(src))
             .pipe(message()));
-        gulp.src([sourceUrl + 'html/images.html'])
+        gulp.src([SOURCEURL + 'html/images.html'])
             .pipe($.changed(dist, {extension: 'images/' + fName + '.html'}))
             .pipe($.plumber())
             .pipe($.data(dataFun))
@@ -203,7 +210,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         var stream = $.mergeStream();
         var pathBase = path.relative(src, dir + '/../../')
-                            .split(path.sep).join('/') + '/',
+                            .normal() + '/',
             fName    = path.basename(dir).slice(1),
             cssPath  = path.join(pathBase, 'css/_' + sign.font + '-' + fName + '.scss');
 
@@ -234,13 +241,13 @@ module.exports = function(gulp, $, utils, configs) {
                     }
                 };
 
-                stream.add(gulp.src([sourceUrl + 'css/fonts.scss'])
+                stream.add(gulp.src([SOURCEURL + 'css/fonts.scss'])
                     // .pipe($.changed(src))
                     .pipe($.swig(templateData))
                     .pipe($.rename(cssPath))
                     .pipe(gulp.dest(src))
                     .pipe(message()));
-                gulp.src([sourceUrl + 'html/fonts.html'])
+                gulp.src([SOURCEURL + 'html/fonts.html'])
                     // .pipe($.changed(dist))
                     .pipe($.swig(templateData))
                     .pipe($.rename(pathBase + 'fonts/' + fName + '.html'))
@@ -272,21 +279,22 @@ module.exports = function(gulp, $, utils, configs) {
             // .pipe($.changed(config.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
+            .pipe($.sass({
+                includePaths: scssPaths,
+                // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
+                outputStyle: 'expanded',
+                //Type: String Default: nested Values: nested, expanded, compact - 属性在一行, compressed
+                // sourceMap: true
+            }).on('error', $.sass.logError))
             .pipe($.swig({
                 data: {
-                    name: path.basename(filePath).slice(0, -5),
+                    name: path.basename(filePath, path.extname(filePath)),
                     author: config.author
                 },
                 ext: '.css'
             }))
-            .pipe($.sass({
-                includePaths: scssPaths,
-                // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
-                outputStyle: 'nested',
-                //Type: String Default: nested Values: nested, expanded, compact - 属性在一行, compressed
-                // omitSourceMapUrl: true
-            }).on('error', $.sass.logError))
-            .pipe($.through2.obj(function(file1, encoding, done) {
+            .pipe($.if(!argv.d, $.through2.obj(function(file1, encoding, done) {
+                // console.log(file1.sourceMap);
                 var contents = String(file1.contents);
                 // sass去不掉，/** */, 手动去掉jsdoc的注释
                 var newContents = contents.replace(/\/\*\*([\s\S]*?)\*\//g, '');
@@ -294,15 +302,15 @@ module.exports = function(gulp, $, utils, configs) {
                 file1.contents = new Buffer(newContents);
                 this.push(file1);
                 done();
-            }))
-            .pipe($.if(argv.d,
-                $.csscomb(sourceUrl + 'css/csscomb.json'),
+            })))
+            .pipe($.if(!argv.d,
+                // $.csscomb(SOURCEURL + 'css/csscomb.json'),
                 $.csso()
             ))
             .pipe($.if(!argv.d, $.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
-                map: true
+                map: false,
                 //-webkit-transform: rotate(45deg);
                 //        transform: rotate(45deg);
                 //remove:true //是否去掉不必要的前缀 默认：true
@@ -519,16 +527,16 @@ module.exports = function(gulp, $, utils, configs) {
     gulp.task('init', function(cb) {
         var customConfig;
 
-        if (!fs.existsSync(sourceUrl + 'base.json')) {
-            fs.writeFileSync(sourceUrl + 'base.json', '');
+        if (!fs.existsSync(SOURCEURL + 'base.json')) {
+            fs.writeFileSync(SOURCEURL + 'base.json', '');
         }
 
-        _base = $.jsonFilePlus.sync(sourceUrl + 'base.json');
+        _base = $.jsonFilePlus.sync(SOURCEURL + 'base.json');
 
         if (_base.data) {
-            if (argv.p) {
+            if (argv.path || argv.alias) {
                 // 有路径时直接保存配置及时间戳
-                config = _base.data[argv.p] || {};
+                config = _base.data[argv.alias || argv.path] || {};
             } else {
                 // 没有时直接从_base里找最后一次配置
                 for (p in _base.data) {
@@ -572,7 +580,7 @@ module.exports = function(gulp, $, utils, configs) {
                     break;
                 case 4:
                     customConfig = {
-                        path   : cwd,
+                        path   : CWD,
                         libs   : 'libs',
                         tpl    : './src/',
                         dist   : 'test/',
@@ -599,8 +607,8 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 config, 
                 {
-                    path: argv.p,
-                    author: argv.a,
+                    path: argv.path,
+                    author: argv.author,
                     dist: argv.dist,
                     distEx: argv.distEx,
                     src: argv.src,
@@ -616,7 +624,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         // 设置时间下次直接用
         config.t = parseInt(new Date().getTime() / 1000);
-        _base.data[config.path] = config;
+        _base.data[argv.alias || config.path] = config;
         _base.saveSync();
 
         console.log('\n');
@@ -643,18 +651,24 @@ module.exports = function(gulp, $, utils, configs) {
 
     utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
+        // delete
+        $.del([
+            path.join(config.path, 'src/**/*.map')
+        ], {
+            force: true
+        });
         if (argv.debug) {
-            // $.watch(path.join(cwd, 'gulp/**/*'), $.restart)
-            $.watch(sourceUrl + '**/*', $.restart)
+            // $.watch(path.join(CWD, 'gulp/**/*'), $.restart)
+            $.watch(SOURCEURL + '**/*', $.restart)
             // gulp.watch(['./gulp/**/*'], require('gulp-restart'));
         };
         // 自动刷新 静态服务器使用
         if (argv.s) {
-            var toolsbar = fs.readFileSync(sourceUrl + 'html/toolsbar.html').toString();
+            var toolsbar = fs.readFileSync(SOURCEURL + 'html/toolsbar.html').toString();
             
             utils.browserSync.init({
                 notify: false,
-                server: config.path,
+                server: [config.path, CWD + 'src/libs/css'],
                 open: argv.o,
                 port: 8888,
                 directory: true,
@@ -662,7 +676,7 @@ module.exports = function(gulp, $, utils, configs) {
                 logFileChanges: false, // 控制台文件提示
                 logLevel: 'silent', // debug | info
                 snippetOptions: {
-                    // blacklist: [sourceUrl + 'html/toolsbar.html'],
+                    // blacklist: [SOURCEURL + 'html/toolsbar.html'],
                     rule: {
                         match: /<\/body>/i,
                         fn: function (snippet, match) {
@@ -679,7 +693,7 @@ module.exports = function(gulp, $, utils, configs) {
             });
             // 创建静态服务器，sourceMap 使用
             $.connect.server({
-                root: config.path.split(','),
+                root: config.path.split(',').concat([CWD + 'src/libs/css']),
                 port: 8888
             });
         };
@@ -716,7 +730,7 @@ module.exports = function(gulp, $, utils, configs) {
                             // 处理sourcemap
                             var relPath = 'http://localhost:8888/' + 
                                             path.relative(getDir(file.path, 'path'), path.dirname(file.path))
-                                            .split(path.sep).join('/') + '/';
+                                            .normal() + '/';
                             var newContents = file2.contents
                                                 .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
                             file2.contents = new Buffer(newContents);              
@@ -856,59 +870,6 @@ module.exports = function(gulp, $, utils, configs) {
                 } else {
                     concatJS(file.dirname);
                 }
-            } else if ({".html1": 1, ".htm1": 1}[file.extname]) {
-                var tag = path.basename(file.path)[0];
-                var _files = [];
-
-                if (tag != '_') {
-                    _files.push(file.path);
-                } else {
-                    var fileName = file.stem;
-                    // var files = $.glob.sync(src + '/**/!(_*).{html,htm}');
-                    var files = $.glob.sync(src + '/**/!('+ fileName +').{html,htm}');
-                    var oFiles = {};
-
-                    var getFiles = function(fileName) {
-                        var reg = new RegExp("(extends|include|import)\\s+(\'|\")"+ fileName +".(html\'|htm\")");
-
-                        files.forEach(function(filePath) {
-                            var _fileName = path.basename(filePath, '.html');
-                            // 缓存内容
-                            oFiles[filePath] = oFiles[filePath] || fs.readFileSync(filePath).toString();
-                            // 文件包含指定的标识
-                            if (reg.test(oFiles[filePath])) {
-                                if (_fileName[0] != '_') {
-                                    _files.push(filePath);
-                                } else {
-                                    getFiles(_fileName);
-                                }
-                            };
-                        });
-                    }
-
-                    getFiles(fileName);
-
-                    // 清空缓存内容
-                    delete oFiles;
-                }
-
-                // console.log(_files);
-                // return false;
-                // 最后处理模板
-                _files.forEach(function(p) {
-                    gulp.src(p, {
-                            base: src
-                        })
-                        // .pipe($.changed(dist))
-                        .pipe($.plumber())
-                        .pipe($.data(tplData))
-                        .pipe($.swig({ext: '.html'}))
-                        .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                            to: 'gbk'
-                        })))
-                        .pipe(gulp.dest(dist))
-                        .pipe(message('html处理ok'));
-                });
             } else if ({".html": 1, ".htm": 1}[file.extname]) {
                 var fileName = file.stem;
                 // 所有文件
@@ -1100,9 +1061,9 @@ module.exports = function(gulp, $, utils, configs) {
     gulp.task('add', ['init'], function() {
         // return false;
         return gulp.src([
-                cwd + 'src/libs/**/{static,common,plugin,units,demo}',
-                cwd + 'src/libs/**/{demo,s}.*'
-            ], {base: cwd + 'src/libs/'})
+                CWD + 'src/libs/**/{static,common,plugin,units,demo}',
+                CWD + 'src/libs/**/{demo,s}.*'
+            ], {base: CWD + 'src/libs/'})
             .pipe(gulp.dest(config.src + '/' + argv.n));
     })
     // clean
@@ -1119,8 +1080,8 @@ module.exports = function(gulp, $, utils, configs) {
     });
     // php copy
     gulp.task('php-copy', function(cb) {
-        argv.p = argv.p || 'E:/wwwroot/newcore';
-        var _path = argv.p.split(path.sep).join('/') + '/';
+        argv.path = argv.path || 'E:/wwwroot/newcore';
+        var _path = argv.path.normal() + '/';
         console.log('执行' + 'php ' + _path + 'app/console assets:install ' + _path + 'web');
         return require('child_process').exec('php ' + _path + 'app/console assets:install ' + _path + 'web');
     });

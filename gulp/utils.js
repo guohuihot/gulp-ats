@@ -2,6 +2,11 @@
  * @module utils
  */
 var path = require('path');
+
+String.prototype.normal = function() {
+    return this.split(path.sep).join('/');
+}
+
 var utils = {
         /**
          * 配合$.if使用，含有"文件名or扩展名"
