@@ -116,6 +116,9 @@ gulp watch	监控一个项目目录
 	-f(--ftp)	处理的文件后直接上传到远程ftp
 			类型：bool, 默认值：false
 
+	其它	Js支持es6写法，具体使用在内容里加 // @require(&#39;babel&#39;)
+			注意要写在注释里，不然会被解析
+
 	
 gulp add	新加一个分类到项目里
 	-n(--name)	分类名称
