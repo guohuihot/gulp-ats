@@ -18,7 +18,8 @@ module.exports = {
                 '前提是多个项目里的每个项目需要预先配配置好'
             ].join('\n\t\t\t'),
             '-a(--alias)': [
-                '配置的别名，给配置起一个别名，下次直接用别名，如',
+                '可配置别名',
+                '给配置起一个别名，下次直接用别名，如',
                 'gulp watch -p \'C:\\Users\\Administrator\\Desktop\\test\\\' ',
                 '--src \'./src\' --dist \'./dist\' -a \'demo\' ',
                 '--distEx \'C:\\Users\\Administrator\\Desktop\\test\\dist1\\\'',
@@ -71,7 +72,12 @@ module.exports = {
                 '这样就可以给ats再多指定一个生成目录',
                 '类型：string,  默认值：保留上次的值',
                 'PS：需要绝对路径',
-            ].join('\n\t\t\t')
+            ].join('\n\t\t\t'),
+            '其它': [
+                'Js支持es6写法，具体使用在内容里加 // @require(\'babel\')',
+                '注意要写在注释里，不然会被解析'
+             ].join('\n\t\t\t')
+
         }
     },
     

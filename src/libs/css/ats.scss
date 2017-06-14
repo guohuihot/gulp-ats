@@ -1,5 +1,4 @@
-{% include '_css_header.html' %}
-
+@import 'header';
 @import 'static/reset'; // 重置，仅通用类文件引入，一般一个网站只导入一次
 @import 'static/ats'; // 工具类, 每个文件都要导入
 @import 'static/base'; // // 通用类，仅通用类文件引入，一般一个网站只导入一次

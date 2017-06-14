@@ -14,7 +14,7 @@
     "quotes": "single",
     "remove-empty-rulesets": true,
     "space-after-colon": " ",
-    "space-after-combinator": " ",
+    "space-after-combinator": "\n",
     "space-after-opening-brace": "\n",
     "space-after-selector-delimiter": "\n",
     "space-before-closing-brace": "\n",

@@ -63,7 +63,8 @@ gulp init	查看(设置)当前配置
 			可多个项目地址，用逗号隔开
 			前提是多个项目里的每个项目需要预先配配置好
 
-	-a(--alias)	配置的别名，给配置起一个别名，下次直接用别名，如
+	-a(--alias)	可配置别名
+			给配置起一个别名，下次直接用别名，如
 			gulp watch -p &#39;C:\Users\Administrator\Desktop\test\&#39; 
 			--src &#39;./src&#39; --dist &#39;./dist&#39; -a &#39;demo&#39; 
 			--distEx &#39;C:\Users\Administrator\Desktop\test\dist1\&#39;
@@ -103,6 +104,9 @@ gulp init	查看(设置)当前配置
 			这样就可以给ats再多指定一个生成目录
 			类型：string,  默认值：保留上次的值
 			PS：需要绝对路径
+
+	其它	Js支持es6写法，具体使用在内容里加 // @require(&#39;babel&#39;)
+			注意要写在注释里，不然会被解析
 
 	
 gulp build	初始化或同步一个项目
