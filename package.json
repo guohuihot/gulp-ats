@@ -14,7 +14,8 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "start": "npm install -g cnpm --registry=https://registry.npm.taobao.org && cnpm isntall"
+    "start": "npm install -g cnpm --registry=https://registry.npm.taobao.org && cnpm isntall",
+    "alias": "alias w='gulp watch' & g='gulp' & m='gulp markdown' & b='gulp build' & ..='cd ..'"
   },
   "dependencies": {
     "async": "^1.5.0",
