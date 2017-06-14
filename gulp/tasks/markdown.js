@@ -106,6 +106,8 @@ module.exports = function(gulp, $, utils, configs) {
         }, cb);
     })
 
+    var _type = argv.type;
+    
     gulp.task('copy-img', function() {
         var stream = $.mergeStream();
         var _p = argv.p;
@@ -115,25 +117,24 @@ module.exports = function(gulp, $, utils, configs) {
             APS = APS.concat(argv.pEx.split(','));
         };
         APS.forEach(function(p) {
-            imgs = imgs.concat($.glob.sync(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
+            if (_type) {
+                _type.split(',').forEach(function(t) {
+                    imgs = imgs.concat($.glob.sync(path.join(t, '**/*.{png,gif,jpg,jpeg}')));
+                })
+            } else {
+                imgs = imgs.concat($.glob.sync(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
+            }
         })
         imgs.forEach(function(file) {
             stream.add(gulp.src(file, {base: path.dirname(file)})
                             .pipe($.changed(path.join(_p, 'docs/images')))
-                            .pipe($.imagemin(configs.imagemin))
+                            // .pipe($.imagemin(configs.imagemin))
                             .pipe(gulp.dest(path.join(_p, 'docs/images'))))
         });
         
     })
 
-    var aTasks = ['clean-markdown']
-    // type存在时不处理图片
-    var _type = argv.type;
-    if (!_type) {
-        aTasks.push('copy-img');
-    };
-
-    gulp.task('tree', aTasks, function() {
+    gulp.task('tree', ['clean-markdown', 'copy-img'], function() {
         var _p = argv.p;
         var APS = [_p];
         var stream = $.mergeStream();
@@ -162,7 +163,7 @@ module.exports = function(gulp, $, utils, configs) {
                         files.push(t);
                     } else {
                         // 按目录
-                        files = files.concat($.glob.sync(path.join(t, '**/!(static|seajs|_seajs)/*.{md,twig,scss,js}')));
+                        files = files.concat($.glob.sync(path.join(t, '{**,!(static|seajs|_seajs)}/*.{md,twig,scss,js}')));
                     }
                 });
             } else {
