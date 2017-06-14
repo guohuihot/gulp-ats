@@ -156,7 +156,7 @@ module.exports = function(gulp, $, utils, configs) {
                 spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
                     if (!jsonArr[0] || !jsonArr[0].contents) {
-                        console.error('错误：' + file);
+                        console.error('错误：' + file.path);
                         cb1()
                         return;
                     };
@@ -676,7 +676,6 @@ module.exports = function(gulp, $, utils, configs) {
         // 自动刷新 静态服务器使用
         if (argv.s) {
             var toolsbar = fs.readFileSync(SOURCEURL + 'html/toolsbar.html').toString();
-            
             utils.browserSync.init({
                 notify: false,
                 server: [config.path, CWD + 'src/libs/css'],
@@ -716,7 +715,6 @@ module.exports = function(gulp, $, utils, configs) {
             }
             ftp = $.ftp.create(config.ftp);
         }
-            
         // 扩展dist 直接将生成好的文件复制过去
 
         if (config.multiple || config.distEx) {
