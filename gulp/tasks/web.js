@@ -662,12 +662,6 @@ module.exports = function(gulp, $, utils, configs) {
 
     utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
-        // delete
-        $.del([
-            path.join(config.path, 'src/**/*.map')
-        ], {
-            force: true
-        });
         if (argv.debug) {
             // $.watch(path.join(CWD, 'gulp/**/*'), $.restart)
             $.watch(SOURCEURL + '**/*', $.restart)
