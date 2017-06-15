@@ -72,6 +72,30 @@ var utils = {
                 aRequires = JSON.parse('[' + RegExp.$1.replace(/\'/g, '"') + ']');
             }
             return aRequires;
+        },
+        /**
+         * @method getImgSize
+         * @description  获取图片的显示大小
+         * @param {Object} img 对象
+         * @param {Number} maxW 允许的最大宽度
+         * @param {Number} maxH 允许的最大高度
+         */
+        getImgSize: function(img, maxW, maxH) {
+            var nH, nW, _W, _H;
+
+            nW = _W = img.width;
+            nH = _H = img.height;
+
+            if (_W > 0 && _H > 0) {
+                if (_W / _H >= maxW / maxH && _W > maxW) {
+                    nW = maxW;
+                    nH = parseInt(_H * maxW / _W);
+                } else if (_H > maxH) {
+                    nH = maxH;
+                    nW = parseInt(_W * maxH / _H);
+                }
+            }
+            return [nW, nH];
         }
     };
 

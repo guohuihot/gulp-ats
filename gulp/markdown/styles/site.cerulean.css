@@ -7083,7 +7083,8 @@ dt.name h4, h4.name {
 
 .btn-copy {
   float: right;
-  padding: 3px 5px;
+  padding: 0 5px;
+  line-height: 1.5;
   cursor: pointer;
   border-radius: 3px;
   background-color: #666;
@@ -7094,3 +7095,8 @@ code {
   clear: both;
 }
 
+
+code.coffeescript {
+  background-color: inherit;
+  color: inherit;
+}

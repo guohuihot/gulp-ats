@@ -153,11 +153,25 @@ $( function () {
     $('pre').each(function(index, el) {
     	$code = $(this).find('code');
     	$code.attr('class', function(i, c) {
+    		if (c) {
+    			$(this).before('<span class="btn-copy">复制</span>')
+    		};
     		return c && c.replace('xml', 'html');
     	})
+    	
     });
+
+
+    $('body')
+    	.on('copy', '.btn-copy', function(e) {
+    		$('.btn-copy').text('复制');
+            e.clipboardData.clearData();
+            e.clipboardData.setData("text/plain", $(this).text('已复制').next().text());
+            e.preventDefault();
+        })
     // 高亮
 	hljs.initHighlightingOnLoad();
+
 	// 图片预览
 	
 	var getImgSize = function(img, maxW, maxH) {
@@ -197,15 +211,6 @@ $( function () {
 	})
 
 
-    $('body')
-    	.on('copy', '.btn-copy', function(e) {
-    		$('.btn-copy').text('复制');
-            e.clipboardData.clearData();
-            e.clipboardData.setData("text/plain", $(this).text('已复制').next().text());
-            e.preventDefault();
-        })
-    	.find('pre code')
-        .before('<span class="btn-copy">复制</span>')
 } );
 
 </script>

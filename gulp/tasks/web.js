@@ -16,7 +16,7 @@ module.exports = function(gulp, $, utils, configs) {
             ftp       : 'f',
             reverse   : 'r',
             mode      : 'm',
-            tpl       : 't'
+            type      : 't'
         }).argv,
         CWD       = process.cwd() + '/',
         SOURCEURL = path.join(CWD, './gulp/'),
@@ -153,10 +153,29 @@ module.exports = function(gulp, $, utils, configs) {
 
             // console.log(spriteData.css);
         var dataFun = function(file, cb1) {
-                spriteData.css.pipe($.concatStream(function(jsonArr) {
+                spriteData.css.pipe($.through2.obj(function(file, encoding, cb) {
+                    var dataJSON = JSON.parse(file.contents.toString()),
+                        maxH = 0,
+                        maxW = 0;
+                    for (item in dataJSON) {
+                        maxH = Math.max(dataJSON[item].height, maxH);
+                        maxW = Math.max(dataJSON[item].width, maxW);
+                    }
+                    cb1(undefined, {
+                        cssData : dataJSON,
+                        fUrl    : '../images/' + fName + '.png',
+                        path    : pathBase + 'images/' + fName + '.html',
+                        rPath   : getRpath(dir),
+                        fName   : fName,
+                        sign    : sign.img,
+                        W       : maxW,
+                        H       : maxH,
+                    });
+                }));
+                /*spriteData.css.pipe($.concatStream(function(jsonArr) {
                     // console.log(jsonArr, 2222);
                     if (!jsonArr[0] || !jsonArr[0].contents) {
-                        console.error('错误：' + file.path);
+                        console.error('错误：没有sprites内容');
                         cb1()
                         return;
                     };
@@ -177,7 +196,7 @@ module.exports = function(gulp, $, utils, configs) {
                         W       : maxW,
                         H       : maxH,
                     });
-                }));
+                }));*/
             };
 
         stream.add(gulp.src([SOURCEURL + 'css/images.scss'])
@@ -376,7 +395,8 @@ module.exports = function(gulp, $, utils, configs) {
         var dist = getDir(filePath);
 
         var stream = gulp.src(filePath, {base: src})
-            .pipe($.changed(dist))
+            // build时全部生成
+            .pipe($.if(!config.isBuild,$.changed(dist)))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
@@ -1023,7 +1043,7 @@ module.exports = function(gulp, $, utils, configs) {
         var proSrc = config.src;
         var proDist = config.dist;
         var stream = $.mergeStream();
-
+        
         stream.add(gulp.src('./src/libs/demo.html'));
         // 处理img
         stream.add(gulp.src([
