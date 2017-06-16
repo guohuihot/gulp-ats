@@ -2,22 +2,7 @@ module.exports = function(gulp, $, utils, configs) {
     // base
     var path  = require('path'),
         fs        = require('fs'),
-        argv      = $.yargs
-        .alias({
-            path      : 'p',
-            author    : 'au',
-            alias     : 'a',
-            custom    : 'c',
-            libs      : 'l',
-            dev       : 'd',
-            server    : 's',
-            open      : 'o',
-            src      : 'src',
-            ftp       : 'f',
-            reverse   : 'r',
-            mode      : 'm',
-            type      : 't'
-        }).argv,
+        argv      = $.yargs.argv,
         CWD       = process.cwd() + '/',
         SOURCEURL = path.join(CWD, './gulp/'),
         
@@ -26,22 +11,24 @@ module.exports = function(gulp, $, utils, configs) {
         font      : 'font'
         },
         ftp       = {},
-        oInit = require('../lib/init')($, argv);
+        isBuild = false,
+        oInit = require('../lib/init')($, argv),
+        multiple = oInit.multiple, // 多目录
+        cfgs = oInit.configs; // 处理后的配置（可能是多个目录）
 
-        console.log(oInit);
-return false;
+
     console.log('\n');
     console.log('当前配置:\n');
     console.log(oInit.config);
     console.log('\n');
+
     // 初始化swig
     $.swig(configs.swig);
 
     var message = function (msg) {
             return $.notify(function(file) {
-                // console.log(path.extname(file.path));
-                if (!config.isBuild) {
-                    return  file.path + ' ' + msg + ' ok !';
+                if (!isBuild) {
+                    return  file.path + ' ' + (msg || '') + ' ok !';
                 };
             })
         };
@@ -53,9 +40,9 @@ return false;
             // filePath += '/a.js';
             filePath = path.join(filePath, '../a.js');
         };
-
-        var dist = getDir(filePath);
-        var src = getDir(filePath, 'src');
+        var cfg = getCfgProp(filePath);
+        var dist = cfg.dist;
+        var src = cfg.src;
         var distPath = path.join(dist, path.relative(src, filePath));    
         // 从dist到src
         var fileRelative = path.relative(distPath, filePath)      
@@ -85,32 +72,33 @@ return false;
     }
     // 复制时替换的数据
     var tplData = function(file) {
-            var src = getDir(file.path, 'src');
+            var cfg = getCfgProp(file.path)
+            var src = cfg.src;
             // src文件到src = dist文件到dist
             var pathRelative = path.relative(path.dirname(file.path), src);
             var pathRelative1 = path.relative(src, file.path);
             // console.log(config.distEx ? '/' : config.rPath);
             return {
                 name   : path.basename(file.path, path.extname(file.path)),
-                author : config.author,
-                base   : path.join(pathRelative, config.libs)
+                author : cfg.author,
+                base   : path.join(pathRelative, cfg.libs)
                             .normal() + '/',
-                path   : path.join(config.mode == 4 ? 'test/' : '', pathRelative1)
+                path   : path.join(cfg.mode == 4 ? 'test/' : '', pathRelative1)
                             .normal(),
                 rPath  : getRpath(file.path) || '',
-                info   : utils.getInfo(),
+                info   : require('../lib/tasks-info'),
             }
         }
     // gulpMiddleWare
     var gulpMiddleWare = function(stream, filePath) {
-        var dist = getDir(filePath);
+        var cfg = getCfgProp(filePath);
         var s;
 
         s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(gulp.dest(dist))
+            .pipe(gulp.dest(cfg.dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (path.extname(file.path) != '.map') {
                     file.contents = new Buffer(file.contents);
@@ -132,8 +120,9 @@ return false;
     }
 
     var sprites = function(dir, cb) {
-        var src = getDir(dir, 'src');
-        var dist = getDir(dir);
+        var cfg = getCfgProp(dir);
+        var src = cfg.src;
+        var dist = cfg.dist;
 
         var stream = $.mergeStream();
         var pathBase = path.relative(src, dir + '/../../')
@@ -204,8 +193,9 @@ return false;
     }
 
     var fonts = function(dir, cb) {
-        var src = getDir(dir, 'src');
-        var dist = getDir(dir);
+        var cfg = getCfgProp(dir);
+        var src = cfg.src;
+        var dist = cfg.dist;
 
         var stream = $.mergeStream();
         var pathBase = path.relative(src, dir + '/../../')
@@ -262,25 +252,26 @@ return false;
     }
     // scss
     var scss = function(filePath, cb) {
-        var src = getDir(filePath, 'src');
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
 
         // var scssPaths = [path.dirname(filePath)];
         var scssPaths = [];
-        if (config.scssPaths) {
-            config.scssPaths.split(',').forEach(function(p) {
+        if (cfg.scssPaths) {
+            cfg.scssPaths.split(',').forEach(function(p) {
                 scssPaths.push(p);
             })
         };
         
-        scssPaths.push(config.tpl + config.libs + '/css/');
+        scssPaths.push(cfg.tpl + cfg.libs + '/css/');
 
         var stream = gulp.src(filePath, {base: src})
-            // .pipe($.changed(config.dist, {extension: '.css'}))
+            // .pipe($.changed(cfg.dist, {extension: '.css'}))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: scssPaths,
-                // includePaths: [path.dirname(filePath), config.tpl + config.libs + '/css/'],
+                // includePaths: [path.dirname(filePath), cfg.tpl + cfg.libs + '/css/'],
                 outputStyle: 'expanded',
                 //Type: String Default: nested Values: nested, expanded, compact - 属性在一行, compressed
                 // sourceMap: true
@@ -288,7 +279,7 @@ return false;
             .pipe($.swig({
                 data: {
                     name: path.basename(filePath, path.extname(filePath)),
-                    author: config.author
+                    author: cfg.author
                 },
                 ext: '.css'
             }))
@@ -321,7 +312,8 @@ return false;
     }
     // concatjs
     var concatJS = function(dir, cb) {
-        var src = getDir(dir, 'src');
+        var cfg = getCfgProp(dir);
+        var src = cfg.src;
 
         var pathRelative = path.relative(src, dir).replace('_', ''),
             fName        = path.basename(dir).slice(1);
@@ -347,12 +339,12 @@ return false;
         // var stream = gulp.src(files, {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
-            // .pipe($.if(!config.isBuild, $.jshint.reporter()))
+            // .pipe($.if(!isBuild, $.jshint(configs.jshint)))
+            // .pipe($.if(!isBuild, $.jshint.reporter()))
             .pipe($.data(function(file) {
                 return {
                     name   : path.basename(file.path).slice(0, -3),
-                    author : config.author,
+                    author : cfg.author,
                     // base   : host,
                     rPath  : getRpath(dir),
                 }
@@ -371,16 +363,17 @@ return false;
     }
     // js
     var JS = function(filePath, cb) {
-        var src = getDir(filePath, 'src');
-        var dist = getDir(filePath);
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
+        var dist = cfg.dist;
 
         var stream = gulp.src(filePath, {base: src})
             // build时全部生成
-            .pipe($.if(!config.isBuild,$.changed(dist)))
+            .pipe($.if(!isBuild,$.changed(dist)))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.if(!config.isBuild, $.jshint(configs.jshint)))
-            // .pipe($.if(!config.isBuild, $.jshint.reporter()))
+            // .pipe($.if(!isBuild, $.jshint(configs.jshint)))
+            // .pipe($.if(!isBuild, $.jshint.reporter()))
             .pipe($.data(tplData))
             .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
             .pipe($.if(function(file1) {
@@ -396,8 +389,9 @@ return false;
     }
     // html
     var html = function(filePath) {
-        var src = getDir(filePath, 'src');
-        var dist = getDir(filePath);
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
+        var dist = cfg.dist;
 
         gulp.src(filePath, {
                 base: src
@@ -415,8 +409,9 @@ return false;
     }
     // image
     var image = function(filePath) {
-        var src = getDir(filePath, 'src');
-        var dist = getDir(filePath);
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
+        var dist = cfg.dist;
 
         gulp.src(filePath, {
                 base: src
@@ -427,33 +422,27 @@ return false;
             .pipe(message('复制并压缩'));
     }
     /**
-     * getDir
-     * @description 获取对应的目录，主要处理多目录监控里的目录
-     * @param  {String} file 文件路径
-     * @param  {String} [dir=dist]  要获取目录的标记， `dist` `src` `path` `distEx`
-     * @return {String}      对应的绝对目录
+     * getCfgProp
+     * @description 获取对应配置的属性，主要处理多目录监控里的目录
+     * @param  {String} file 文件路径或目录
+     * @param  {String} [dir=dist]  要获取配置的key， `dist` `src` `path` `distEx` `mode`
+     * @return {String}      返回配置对应value
      */
-    var getDir = function(file, dir) {
-        var dir = dir || 'dist';
-        var _dir = config[dir]; 
+    var getCfgProp = function(file, dir) {
+        var prop; 
 
-        if (config.multiple) {
-            config.path.split(',').forEach(function(p) {
-                if (path.normalize(file).indexOf(p) == 0) {
-                    if (_base.data[p]) {
-                        var curConfig = _base.data[p];
-                        _dir = dir == 'distEx' ? 
-                                        curConfig[dir] : 
-                                        (dir != 'path' && path.join(p, curConfig[dir]) || curConfig[dir]);
-                    } else {
-                        console.log('目录没有预先配置！' + p);
-                        return false;
-                    }
+        for (p in cfgs) {
+            // 当前文件的path 与其配置里相同时
+            if (path.normalize(file).indexOf(p) == 0) {
+                if (dir) {
+                    prop = cfgs[p][dir];
+                } else {
+                    prop = cfgs[p]
                 }
-            });
+            }
         }
 
-        return _dir;
+        return prop;
     }
     /**
      * 生成监听字串
@@ -469,24 +458,13 @@ return false;
         var dir = dir || 'src';
         var aWatchDir = [];
         var aWatchDirNo = [];
-        if (config.multiple) {
-            config.path.split(',').forEach(function(p) {
-                if (_base.data[p]) {
-                    var curConfig = _base.data[p];
-                    aWatchDir.push(path.join(curConfig.path, curConfig[dir], str));
-                    if (noStr) {
-                        aWatchDirNo.push(path.join('!' + curConfig.path, curConfig[dir], noStr));
-                        aWatchDirNo.push(path.join('!' + curConfig.path, curConfig[dir], '/src/**/*'));
-                    }
-                } else {
-                    console.log('目录没有预先配置！' + p);
-                    return false;
-                };
-            });
-        } else {
-            aWatchDir.push(config[dir] + str);
+        for (p in cfgs) {
+            var curConfig = cfgs[p];
+            aWatchDir.push(path.join(curConfig[dir], str));
             if (noStr) {
-                aWatchDirNo.push(path.join('!' + config[dir], noStr));
+                aWatchDirNo.push(path.join('!' + curConfig[dir], noStr));
+                // 排除掉src
+                aWatchDirNo.push(path.join('!' + curConfig[dir], '/src/**/*'));
             }
         }
 
@@ -495,55 +473,30 @@ return false;
     // 转化后dist目录，相对目录
     var getRpath = function(file) {
         var rPath;
-        var _getRpath = function(p) {
+        for (p in cfgs) {
+            // 当前文件路径 和 p 这相等
+            if (path.normalize(file).indexOf(p) == 0) {
+                var curConfig = cfgs[p];
+                rPath = curConfig.dist != curConfig.libs ?
+                    curConfig.dist + curConfig.libs + '/' : '';
 
-                if (path.normalize(file).indexOf(p) == 0) {
-                    if (_base.data[p]) {
-                        var curConfig = _base.data[p];
-                        rPath = config.dist != config.libs ?
-                            config.dist + config.libs + '/' : '';
-
-                        rPath = curConfig.distEx ? '/' : rPath;
-                    } else {
-                        console.log('目录没有预先配置！' + p);
-                        return false;
-                    }
-                }
-
-            };
-
-        if (config.multiple) {
-            if (file) {
-                config.path.split(',').forEach(_getRpath);
-            } else {
-                _getRpath(config.path.split(',')[0]);
+                rPath = curConfig.distEx ? '/' : rPath;
             }
-        } else {
-            rPath = config.dist != config.libs ?
-                            // config.dist + config.libs + '/' : '';
-                            path.join(config.libs, '/') : '';
-            rPath = config.distEx ? '/' : rPath;
         }
 
-        return rPath.replace(/\\/g, '/');
+        return rPath.normal();
     }
     // watch
 
     utils.browserSync = $.browserSync.create();
-    gulp.task('watch', ['init'], function() {
+    gulp.task('watch', function() {
 
-
-        if (argv.debug) {
-            // $.watch(path.join(CWD, 'gulp/**/*'), $.restart)
-            $.watch(SOURCEURL + '**/*', $.restart)
-            // gulp.watch(['./gulp/**/*'], require('gulp-restart'));
-        };
         // 自动刷新 静态服务器使用
         if (argv.s) {
             var toolsbar = fs.readFileSync(SOURCEURL + 'html/toolsbar.html').toString();
             utils.browserSync.init({
                 notify: false,
-                server: [config.path, CWD + 'src/libs/css'],
+                server: Object.keys(cfgs).concat([CWD + 'src/libs/css']),
                 open: argv.o,
                 port: 8888,
                 directory: true,
@@ -568,44 +521,41 @@ return false;
             });
             // 创建静态服务器，sourceMap 使用
             $.connect.server({
-                root: config.path.split(',').concat([CWD + 'src/libs/css']),
+                root: Object.keys(cfgs).concat([CWD + 'src/libs/css']),
                 port: 8888
             });
         };
 
         if (argv.f) {
             if (!config.ftp) {
-                console.log('请先在gulp/base.json里设置ftp相关配置!');
+                console.log('请先设置ftp相关配置!');
                 return false;
             }
             ftp = $.ftp.create(config.ftp);
         }
         // 扩展dist 直接将生成好的文件复制过去
-
-        if (config.multiple || config.distEx) {
-            // console.log(getWatchDir('/**/*', 'dist', '/**/*.map'));
-            $.watch(getWatchDir('/**/*', 'dist', '/**/*.map'), {
+        var aDist = getWatchDir('/**/*', 'dist', '/**/*.map');
+        if (aDist.length) {
+            $.watch(aDist, {
                 read: false
             }, function(file) {
-                var dist = getDir(file.path);
-                var distEx = getDir(file.path, 'distEx');
+                var cfg = getCfgProp(file.path)
 
-                var pathRelative = path.relative(dist, file.path);
+                var pathRelative = path.relative(cfg.dist, file.path);
                 if (file.event == 'unlink') {
-                    $.del([distEx + '/' + pathRelative], {
+                    $.del([cfg.distEx + '/' + pathRelative], {
                         force: true
                     });
                 } else {
                     gulp.src(file.path, {
-                            base: dist
+                            base: cfg.dist
                         })
-                        .pipe($.changed(distEx))
+                        .pipe($.changed(cfg.distEx))
                         .pipe($.through2.obj(function(file2, encoding, done) {
-                            var ext = path.extname(file.path);
                             // 处理sourcemap
-                            if ({'.js': 1, '.css': 1}[ext]) {
+                            if (/\.(js|css)$/.test(file.path)) {
                                 var relPath = 'http://localhost:8888/' + 
-                                                path.relative(getDir(file.path, 'path'), path.dirname(file.path))
+                                                path.relative(cfg.path, path.dirname(file.path))
                                                 .normal() + '/';
                                 var newContents = file2.contents
                                                     .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
@@ -614,18 +564,19 @@ return false;
                             this.push(file2);
                             done();
                         }))
-                        .pipe(gulp.dest(distEx))
+                        .pipe(gulp.dest(cfg.distEx))
                         .pipe(utils.browserSync.stream());
                 }
             })
         }
-        
+        // 监控src
         $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'), {
             read: false,
             usePolling: true
         }, function(file) {
-            var dist = getDir(file.path);
-            var src = getDir(file.path, 'src');
+            var cfg = getCfgProp(file.path);
+            var dist = cfg.dist;
+            var src = cfg.src;
 
             if (file.event == 'unlink') {
                 var nFile        = file.extname == '.scss' ? path.basename(file.path, '.scss') + '.css' : file.path;
@@ -798,13 +749,13 @@ return false;
         'pack'
     ]);
     // 复制核心到项目
-    gulp.task('copy', ['init'], function (cb) {
+    gulp.task('copy', function (cb) {
         var atsSrc = config.tpl;
         var proSrc = config.src;
         var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
 
         // 只重建核心
-        config.isBuild = true;
+        isBuild = true;
 
         if (config.mode == 4) {
             // 如果是核心开发，不复制直接处理代码
@@ -907,7 +858,7 @@ return false;
         }
     });
     // add
-    gulp.task('add', ['init'], function() {
+    gulp.task('add', function() {
         // return false;
         return gulp.src([
                 CWD + 'src/libs/**/{static,common,plugin,units,demo}',
@@ -916,40 +867,32 @@ return false;
             .pipe(gulp.dest(config.src + '/' + argv.n));
     })
     // clean
-    gulp.task('clean', ['init'], function(cb) {
+    gulp.task('clean', function(cb) {
         // console.log(config.path);
         // return false;
-        $.del([
-            config.path + '/**',
-            '!' + config.path,
-            '!' + config.path + '/src/**'
-        ], {
-            force: true
-        }, cb);
+        for (p in cfgs) {
+            $.del([
+                p + '/**',
+                '!' + p,
+                '!' + p + '/src/**'
+            ], {
+                force: true
+            }, cb);
+        }
     });
 
-    gulp.task('sync', ['init'], function() {
-        if (!_base.data) {
-            console.log('没有配置');
-            return;
-        }
-        var aPaths = config.path.split(',');
-        aPaths.forEach(function(p) {
-            var _data = _base.data
-            var _cfg = _data[p];
-            var _src = path.join(p, _cfg.dist, './**/*');
+    gulp.task('sync', function() {
+        for (p in cfgs) {
+            var _cfg = cfgs[p];
+            var _src = path.join(_cfg.dist, './**/*');
             var _dist = _cfg.distEx;
 
-            // console.log(_src, _dist);
-            // return false;
             if (_dist) {
-                gulp.src(_src, {
-                        // base: _src
-                    })
+                gulp.src(_src)
                     .pipe($.changed(_dist))
                     .pipe(gulp.dest(_dist));
             }
-        });
+        }
     });
 
     gulp.task('sync-ats', function() {

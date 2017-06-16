@@ -8,6 +8,23 @@ var gulp         = require('gulp'),
     debugMoudle  = [], //调试用，数组里放要排除的模块，如：['web']
     gulpTasks    = require('fs').readdirSync('./bin/');
 
+// yargs配置
+$.yargs.alias({
+        path      : 'p',
+        author    : 'au',
+        alias     : 'a',
+        custom    : 'c',
+        libs      : 'l',
+        dev       : 'd',
+        server    : 's',
+        open      : 'o',
+        src      : 'src',
+        ftp       : 'f',
+        reverse   : 'r',
+        mode      : 'm',
+        type      : 't'
+    })
+
 gulpTasks.forEach(function(gulpTask) {
     if (!utils.inArray(gulpTask.replace(/\.js$/, ''), debugMoudle)) {
         require('./bin/' + gulpTask)(gulp, $, utils, configs);
@@ -15,7 +32,7 @@ gulpTasks.forEach(function(gulpTask) {
 });
 
 gulp.task('default', function() {
-    var info = utils.getInfo();
+    var info = require('./lib/tasks-info');
     console.log(info);
     // 自动更新的readme
     gulp.src('./tpl/readme.md')
