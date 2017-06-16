@@ -2,8 +2,8 @@ module.exports = function(gulp, $, utils, configs) {
     var path  = require('path'),
         argv = $.yargs
         .alias({
-            dist : 'd',
-            src  : 's'
+            dist : 'dd',
+            src  : 'ss'
         }).argv;
 
     // imageresize

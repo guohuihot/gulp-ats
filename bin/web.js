@@ -4,7 +4,7 @@ module.exports = function(gulp, $, utils, configs) {
         fs        = require('fs'),
         argv      = $.yargs.argv,
         CWD       = process.cwd() + '/',
-        SOURCEURL = path.join(CWD, './gulp/'),
+        SOURCEURL = path.join(CWD, './tpl/'),
         
         sign      = {
         img       : 'img',
@@ -91,17 +91,16 @@ module.exports = function(gulp, $, utils, configs) {
         }
     // gulpMiddleWare
     var gulpMiddleWare = function(stream, filePath) {
-        var cfg = getCfgProp(filePath);
+        var dist = getCfgProp(filePath, 'dist');
         var s;
 
         s = stream.pipe($.if(argv.charset == 'gbk', $.convertEncoding({
                 to: 'gbk'
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
-            .pipe(gulp.dest(cfg.dist))
+            .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (path.extname(file.path) != '.map') {
-                    file.contents = new Buffer(file.contents);
                     this.push(file);
                 }
                 done();
@@ -294,7 +293,7 @@ module.exports = function(gulp, $, utils, configs) {
                 done();
             })))
             .pipe($.if(!argv.d,
-                // $.csscomb(SOURCEURL + 'css/csscomb.json'),
+                // $.csscomb('../lib/csscomb.json'),
                 $.csso()
             ))
             .pipe($.if(!argv.d, $.autoprefixer({
@@ -535,7 +534,8 @@ module.exports = function(gulp, $, utils, configs) {
         }
         // 扩展dist 直接将生成好的文件复制过去
         var aDist = getWatchDir('/**/*', 'dist', '/**/*.map');
-        if (aDist.length) {
+
+        if (multiple || oInit.config.distEx) {
             $.watch(aDist, {
                 read: false
             }, function(file) {
@@ -735,9 +735,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // return false;
                 // 最后处理模板
                 for (p in _oFiles) {
-                    if (_oFiles.hasOwnProperty(p)) {
-                        html(p);
-                    }
+                    html(p);
                 }
             }
         });
