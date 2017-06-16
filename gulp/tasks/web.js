@@ -39,7 +39,7 @@ module.exports = function(gulp, $, utils, configs) {
             return $.notify(function(file) {
                 // console.log(path.extname(file.path));
                 if (!config.isBuild) {
-                    return msg || file.path + ' ok !';
+                    return  file.path + ' ' + msg + ' ok !';
                 };
             })
         };
@@ -172,31 +172,7 @@ module.exports = function(gulp, $, utils, configs) {
                         H       : maxH,
                     });
                 }));
-                /*spriteData.css.pipe($.concatStream(function(jsonArr) {
-                    // console.log(jsonArr, 2222);
-                    if (!jsonArr[0] || !jsonArr[0].contents) {
-                        console.error('错误：没有sprites内容');
-                        cb1()
-                        return;
-                    };
-                    var dataJSON = JSON.parse(jsonArr[0].contents),
-                        maxH = 0,
-                        maxW = 0;
-                    for (item in dataJSON) {
-                        maxH = Math.max(dataJSON[item].height, maxH);
-                        maxW = Math.max(dataJSON[item].width, maxW);
-                    }
-                    cb1(undefined, {
-                        cssData : dataJSON,
-                        fUrl    : '../images/' + fName + '.png',
-                        path    : pathBase + 'images/' + fName + '.html',
-                        rPath   : getRpath(dir),
-                        fName   : fName,
-                        sign    : sign.img,
-                        W       : maxW,
-                        H       : maxH,
-                    });
-                }));*/
+
             };
 
         stream.add(gulp.src([SOURCEURL + 'css/images.scss'])
@@ -207,6 +183,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.rename(cssPath))
             .pipe(gulp.dest(src))
             .pipe(message()));
+
         gulp.src([SOURCEURL + 'html/images.html'])
             .pipe($.changed(dist, {extension: 'images/' + fName + '.html'}))
             .pipe($.plumber())
@@ -216,6 +193,7 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe(gulp.dest(dist))
             .pipe(utils.browserSync.stream())
             .pipe(message());
+
         stream.add(spriteData.img
             .pipe(gulp.dest(dist))
             .pipe(message('sprites img 生成')));
@@ -414,33 +392,38 @@ module.exports = function(gulp, $, utils, configs) {
 
         return gulpMiddleWare(stream, filePath);
     }
+    // html
+    var html = function(filePath) {
+        var src = getDir(filePath, 'src');
+        var dist = getDir(filePath);
 
-    var buildCB = function(fun, files, cb0, isLast) {
-        var stream = $.mergeStream();
-        stream.add(gulp.src('./src/libs/demo.html'));
-        
-        files.forEach(function(file) {
-            stream.add(fun(file, function() {
-                if (config.isBuild && isLast) {
-                    if (config.distEx) {
-                        gulp.src([
-                                config.dist + '/**/*',
-                                '!' + config.dist + '/src/**/*'
-                            ])
-                            .pipe($.changed(config.distEx))
-                            .pipe(gulp.dest(config.distEx));
-                    }
-                    gulp.src('./package.json', {
-                            read: false
-                        })
-                        .pipe($.notify('build ok'));
-                }
-            }));
-        });
-
-        return stream;
+        gulp.src(filePath, {
+                base: src
+            })
+            // .pipe($.changed(dist))
+            .pipe($.plumber())
+            .pipe($.data(tplData))
+            .pipe($.swig({ext: '.html'}))
+            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
+                to: 'gbk'
+            })))
+            .pipe(gulp.dest(dist))
+            .pipe(utils.browserSync.stream())
+            .pipe(message());
     }
+    // image
+    var image = function(filePath) {
+        var src = getDir(filePath, 'src');
+        var dist = getDir(filePath);
 
+        gulp.src(filePath, {
+                base: src
+            })                    
+            .pipe($.changed(dist))
+            .pipe($.imagemin(configs.imagemin))
+            .pipe(gulp.dest(dist))
+            .pipe(message('复制并压缩'));
+    }
     /**
      * getDir
      * @description 获取对应的目录，主要处理多目录监控里的目录
@@ -682,12 +665,8 @@ module.exports = function(gulp, $, utils, configs) {
 
     utils.browserSync = $.browserSync.create();
     gulp.task('watch', ['init'], function() {
-        // delete
-        $.del([
-            path.join(config.path, 'src/**/*.map')
-        ], {
-            force: true
-        });
+
+
         if (argv.debug) {
             // $.watch(path.join(CWD, 'gulp/**/*'), $.restart)
             $.watch(SOURCEURL + '**/*', $.restart)
@@ -873,13 +852,7 @@ module.exports = function(gulp, $, utils, configs) {
             } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
-                    gulp.src(file.path, {
-                            base: src
-                        })                    
-                        .pipe($.changed(dist))
-                        .pipe($.imagemin(configs.imagemin))
-                        .pipe(gulp.dest(dist))
-                        .pipe(message('复制并压缩'));
+                    image(file.path);
                 } else {
                     sprites(file.dirname);
                 }
@@ -946,40 +919,17 @@ module.exports = function(gulp, $, utils, configs) {
                 // 最后处理模板
                 for (p in _oFiles) {
                     if (_oFiles.hasOwnProperty(p)) {
-                        gulp.src(p, {
-                                base: src
-                            })
-                            // .pipe($.changed(dist))
-                            .pipe($.plumber())
-                            .pipe($.data(tplData))
-                            .pipe($.swig({ext: '.html'}))
-                            .pipe($.if(argv.charset == 'gbk', $.convertEncoding({
-                                to: 'gbk'
-                            })))
-                            .pipe(gulp.dest(dist))
-                            .pipe(utils.browserSync.stream())
-                            .pipe(message());
+                        html(p);
                     }
                 }
-            }/* else {
-                gulp.src(file.path, {
-                        base: config.src
-                    })
-                    .pipe($.changed(dist))
-                    .pipe(gulp.dest(dist))
-                    .pipe(message('直接复制'));
-            }*/
+            }
         });
     });
     // build
     gulp.task('build', [
         'init',
         'copy',
-        'pack',
-        'concat',
-        'sprites',
-        'fonts',
-        'scss'
+        'pack'
     ]);
     // 复制核心到项目
     gulp.task('copy', ['init'], function (cb) {
@@ -1043,52 +993,52 @@ module.exports = function(gulp, $, utils, configs) {
         var proSrc = config.src;
         var proDist = config.dist;
         var stream = $.mergeStream();
-        
-        stream.add(gulp.src('./src/libs/demo.html'));
-        // 处理img
-        stream.add(gulp.src([
-                proSrc + '/**/images/*/**.{png,gif,jpg,jpeg}',
-                '!' + proSrc + '/**/images/_*/**.{png,gif,jpg,jpeg}',
-            ], {
-                base: proSrc
-            })
-            .pipe($.plumber())
-            .pipe($.imagemin(configs.imagemin))
-            .pipe(gulp.dest(proDist)));
-        // 处理html
-        stream.add(gulp.src(proSrc + '/**/demo*.html', {base: proSrc })
-            .pipe($.plumber())
-            .pipe($.data(tplData))
-            .pipe($.swig())
-            .pipe(gulp.dest(proDist)));
-            // return false;
-        // 处理正常的js
-        stream.add(buildCB(JS,  $.glob.sync(proSrc + '/**/js/*.js').concat($.glob.sync(proSrc + '/**/js/!(_*|static*)/*.js')), cb));
-        // 处理其它 以及第三方js
-        stream.add(gulp.src([proSrc + '/**/static/*.*', '!' + proSrc + '/**/static/*.scss'], {base: proSrc })
-            .pipe(gulp.dest(proDist)));
-        
-        // stream.add(gulp.src(proSrc + '/**/*.swf', {base: proSrc })
-        //     .pipe(gulp.dest(proDist)));
+        var oFiles = {};
 
-        return stream;
+        var files = $.glob.sync(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}')[0]);
+        files.forEach(function(file) {
+            var fileName = path.basename(file);
+            var dirName = path.dirname(file);
+            var dirNameBase = path.basename(dirName);
+            
+            var process = function(reg, task1, task) {
+                var oReg = new RegExp('\\.('+ reg +')$');
+                if (oReg.test(file)) {
+                    if (dirNameBase[0] != '_') {
+                        oFiles[dirName] = {
+                            task: task1
+                        };
+                    } else if (task) {
+                        oFiles[file] = {
+                            task: task
+                        };
+                    }
+                };
+            }
+
+            process('scss', 'Scss');
+            process('html|htm', 'html');
+            process('svg', 'image', 'fonts');
+            process('scss', 'Scss');
+            process('png|jpg|jpeg|gif', 'image', 'sprites');
+            process('js', 'JS', 'concatJS');
+
+        });
+        // 先处理
+        for (prop in oFiles) {
+            var file = oFiles[prop];
+            if (/fonts|sprites/.test(file.task)) {
+                console.log(global[file.task]);
+                stream.add((file.task)(prop));
+            };
+        }
+        for (prop in oFiles) {
+            var file = oFiles[prop];
+            if (!/fonts|sprites/.test(file.task)) {
+                (file.task)(prop);
+            };
+        }
     });
-    // concatjs 异步处理
-    gulp.task('concat', ['pack'], function(cb) {
-        return buildCB(concatJS, $.glob.sync(config.src + '/**/js/_*/'), cb);
-    });
-    // sprites 异步处理
-    gulp.task('sprites', ['concat'], function(cb) {
-        return buildCB(sprites, $.glob.sync(config.src + '/**/images/_*/'), cb);
-    });
-    // fonts 异步处理
-    gulp.task('fonts', ['sprites'], function(cb) {
-        return buildCB(fonts, $.glob.sync(config.src + '/**/fonts/_*/'), cb);
-    })
-    // scss 单独出来，异步处理
-    gulp.task('scss', ['fonts'], function(cb) {
-        return buildCB(scss, $.glob.sync(config.src + '/**/css/*.scss'), cb);
-    })
     // add
     gulp.task('add', ['init'], function() {
         // return false;
@@ -1109,13 +1059,6 @@ module.exports = function(gulp, $, utils, configs) {
         ], {
             force: true
         }, cb);
-    });
-    // php copy
-    gulp.task('php-copy', function(cb) {
-        argv.path = argv.path || 'E:/wwwroot/newcore';
-        var _path = argv.path.normal() + '/';
-        console.log('执行' + 'php ' + _path + 'app/console assets:install ' + _path + 'web');
-        return require('child_process').exec('php ' + _path + 'app/console assets:install ' + _path + 'web');
     });
 
     gulp.task('sync', ['init'], function() {

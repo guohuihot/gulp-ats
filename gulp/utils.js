@@ -37,8 +37,8 @@ var utils = {
             taskInfo += [
                 '\n',
                 '例：',
-                'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\' -a \'ahuing\' -m 1',
-                '显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)',
+                'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\'',
+                '显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)',
                 '\n'
             ].join('\n');
 

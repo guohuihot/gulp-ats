@@ -52,8 +52,8 @@
 
 
 例：
-gulp build -p &#39;C:\Users\Administrator\Desktop\test&#39; -a &#39;ahuing&#39; -m 1
-显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)
+gulp build -p &#39;C:\Users\Administrator\Desktop\test&#39;
+显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)
 
 gulp 		查看任务列表
 	
