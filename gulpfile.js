@@ -18,10 +18,11 @@ $.yargs.alias({
         dev       : 'd',
         server    : 's',
         open      : 'o',
-        src      : 'src',
+        src       : 'src',
         ftp       : 'f',
         reverse   : 'r',
         mode      : 'm',
+        all       : 'al',
         type      : 't'
     })
 

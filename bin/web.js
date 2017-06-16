@@ -424,17 +424,17 @@ module.exports = function(gulp, $, utils, configs) {
      * getCfgProp
      * @description 获取对应配置的属性，主要处理多目录监控里的目录
      * @param  {String} file 文件路径或目录
-     * @param  {String} [dir=dist]  要获取配置的key， `dist` `src` `path` `distEx` `mode`
+     * @param  {String} [key=dist]  要获取配置的key， `dist` `src` `path` `distEx` `mode`
      * @return {String}      返回配置对应value
      */
-    var getCfgProp = function(file, dir) {
+    var getCfgProp = function(file, key) {
         var prop; 
 
         for (p in cfgs) {
             // 当前文件的path 与其配置里相同时
             if (path.normalize(file).indexOf(p) == 0) {
-                if (dir) {
-                    prop = cfgs[p][dir];
+                if (key) {
+                    prop = cfgs[p][key];
                 } else {
                     prop = cfgs[p]
                 }
@@ -521,6 +521,7 @@ module.exports = function(gulp, $, utils, configs) {
             // 创建静态服务器，sourceMap 使用
             $.connect.server({
                 root: Object.keys(cfgs).concat([CWD + 'src/libs/css']),
+                // index: 'a.html',
                 port: 8888
             });
         };
@@ -742,118 +743,135 @@ module.exports = function(gulp, $, utils, configs) {
     });
     // build
     gulp.task('build', [
-        'init',
         'copy',
         'pack'
     ]);
     // 复制核心到项目
     gulp.task('copy', function (cb) {
-        var atsSrc = config.tpl;
-        var proSrc = config.src;
-        var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
+        var stream = $.mergeStream();
+        var _copy = function(config) {
+            var atsSrc = config.tpl;  // e:/nodejs/src/libs/
+            var proSrc = config.src; // e:/src/
+            var atsFromSrc = path.join(atsSrc, (argv.m == 2 || atsSrc, argv.m == 21) ? config.libs : '');
 
-        // 只重建核心
-        isBuild = true;
+            // 只重建核心
+            isBuild = true;
 
-        if (config.mode == 4) {
-            // 如果是核心开发，不复制直接处理代码
-            cb();
-        } else if (!argv.all) {
-            var stream = $.mergeStream();
-            var atsFromData = $.glob.sync(atsFromSrc + '/**/*');
-            var proSrcData = $.glob.sync(proSrc + '/**/*');
-            stream.add(gulp.src('./src/libs/demo.html'));
-            // console.log(proSrcData);
-            atsFromData.forEach(function(from) {
-                proSrcData.forEach(function(pro) {
-                    if (path.relative(config.tpl, from) == path.relative(proSrc, pro)) {
-                        stream.add(gulp.src(from, {
-                                base: atsSrc
-                            })
-                            .pipe($.changed(proSrc))
-                            .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
-                                suffix: '_demo'
-                            })))
-                            .pipe(gulp.dest(proSrc)));
-                    };
+            if (config.mode == 4) {
+                // 如果是核心开发，不复制直接处理代码
+                cb();
+            } else if (!argv.all) {
+                // 项目录里与核心目录比较，存在的文件再同步 （如果项目已经删除，则不同步）
+                var atsFromData = $.glob.sync(atsFromSrc + '/**/*'); // ['e:/nodejs/src/libs/js/a.js']
+                var proSrcData = $.glob.sync(proSrc + '/**/*'); // ['e:/src/js/a.js']
+                stream.add(gulp.src('./src/libs/demo.html'));
+                // console.log(proSrcData);
+                atsFromData.forEach(function(from) {
+                    proSrcData.forEach(function(pro) {
+                        // 项目录里与核心目录比较，存在的文件再同步
+                        if (path.relative(config.tpl, from) == path.relative(proSrc, pro)) {
+                            stream.add(gulp.src(from, {
+                                    base: atsSrc
+                                })
+                                .pipe($.changed(proSrc))
+                                .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
+                                    suffix: '_demo'
+                                })))
+                                .pipe(gulp.dest(proSrc)));
+                        };
+                    });
                 });
-            });
 
-            return stream;
-        } else {
-            // 内容字串
-            var sss = (argv.m == 11 || argv.m == 21) ? [
-                path.join(atsFromSrc, '/css/**/*'),
-                path.join(atsFromSrc, '/images/**/*'),
-                path.join(atsFromSrc, '/fonts/**/*'),
-                path.join(atsFromSrc, '/pic/**/*'),
-                path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
-                path.join(atsFromSrc, '/**/*.html'),
-            ] : [
-                atsFromSrc + '/**/*',
-            ];
-            // 复制核心代码
-            return gulp.src(sss, {
-                    base: atsSrc
-                })
-                .pipe($.changed(proSrc))
-                .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
-                    suffix: '_demo'
-                })))
-                .pipe(gulp.dest(proSrc));
+            } else if (argv.all) {
+                // 强制覆盖核心文件
+                // 内容字串
+                var sss = (argv.m == 11 || argv.m == 21) ? [
+                    path.join(atsFromSrc, '/css/**/*'),
+                    path.join(atsFromSrc, '/images/**/*'),
+                    path.join(atsFromSrc, '/fonts/**/*'),
+                    path.join(atsFromSrc, '/pic/**/*'),
+                    path.join(atsFromSrc, '/**/{jquery,duang,demo}.js'),
+                    path.join(atsFromSrc, '/**/*.html'),
+                ] : [
+                    atsFromSrc + '/**/*',
+                ];
+                // 复制核心代码
+                stream.add(gulp.src(sss, {
+                        base: atsSrc
+                    })
+                    .pipe($.changed(proSrc))
+                    .pipe($.if(utils.hasProp(['_variables.scss', '_utilities.scss', 'ats.scss']), $.rename({
+                        suffix: '_demo'
+                    })))
+                    .pipe(gulp.dest(proSrc)));
+            }
         }
+
+        for (p in cfgs) {
+            _copy(cfgs[p])
+        }
+
+        return stream;
     });
     // 打包项目文件
     gulp.task('pack', ['copy'], function(cb) {
-        var proSrc = config.src;
-        var proDist = config.dist;
-        var stream = $.mergeStream();
-        var oFiles = {};
+        var _pack = function(config) {
+            var proSrc = config.src;
+            var proDist = config.dist;
+            var stream = $.mergeStream();
+            var oFiles = {};
 
-        var files = $.glob.sync(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}')[0]);
-        files.forEach(function(file) {
-            var fileName = path.basename(file);
-            var dirName = path.dirname(file);
-            var dirNameBase = path.basename(dirName);
-            
-            var process = function(reg, task1, task) {
-                var oReg = new RegExp('\\.('+ reg +')$');
-                if (oReg.test(file)) {
-                    if (dirNameBase[0] != '_') {
-                        oFiles[dirName] = {
-                            task: task1
-                        };
-                    } else if (task) {
-                        oFiles[file] = {
-                            task: task
-                        };
-                    }
+            var files = $.glob.sync(path.join(proSrc, '/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'));
+
+            files.forEach(function(file) {
+                var fileName = path.basename(file);
+                var dirName = path.dirname(file);
+                var dirNameBase = path.basename(dirName);
+                
+                var process = function(reg, task1, task) {
+                    var oReg = new RegExp('\\.('+ reg +')$');
+                    if (oReg.test(file)) {
+                        if (dirNameBase[0] != '_') {
+                            oFiles[dirName] = {
+                                task: task1
+                            };
+                        } else if (task) {
+                            oFiles[file] = {
+                                task: task
+                            };
+                        }
+                    };
+                }
+
+                process('scss', 'Scss');
+                process('html|htm', 'html');
+                process('svg', 'image', 'fonts');
+                process('scss', 'Scss');
+                process('png,jpg,jpeg,gif', 'image', 'sprites');
+                process('js', 'JS', 'concatJS');
+
+            });
+            console.log(oFiles);
+            return false;
+            // 先处理
+            for (prop in oFiles) {
+                var file = oFiles[prop];
+                if (/fonts|sprites/.test(file.task)) {
+                    stream.add((file.task)(prop));
                 };
             }
-
-            process('scss', 'Scss');
-            process('html|htm', 'html');
-            process('svg', 'image', 'fonts');
-            process('scss', 'Scss');
-            process('png|jpg|jpeg|gif', 'image', 'sprites');
-            process('js', 'JS', 'concatJS');
-
-        });
-        console.log(oFiles);
-        return false;
-        // 先处理
-        for (prop in oFiles) {
-            var file = oFiles[prop];
-            if (/fonts|sprites/.test(file.task)) {
-                stream.add((file.task)(prop));
-            };
+            for (prop in oFiles) {
+                var file = oFiles[prop];
+                if (!/fonts|sprites/.test(file.task)) {
+                    (file.task)(prop);
+                };
+            }
         }
-        for (prop in oFiles) {
-            var file = oFiles[prop];
-            if (!/fonts|sprites/.test(file.task)) {
-                (file.task)(prop);
-            };
+
+        for (p in cfgs) {
+            _pack(cfgs[p])
         }
+
     });
     // add
     gulp.task('add', function() {
