@@ -1,6 +1,5 @@
-module.exports = function(gulp, $, utils) {
-    var configs = require('../configs'),
-        path  = require('path'),
+module.exports = function(gulp, $, utils, configs) {
+    var path  = require('path'),
         argv = $.yargs
         .alias({
             dist : 'd',
