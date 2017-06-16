@@ -5,13 +5,13 @@
                         }),
         utils        = require('./gulp/utils'),
         configs      = require('./gulp/configs')($, utils),
-        debugMoudle  = [], //调试用，只加载数组里的模块，如：['web']
-        gulpTasks    = debugMoudle.length &&
-                            debugMoudle ||
-                            require('fs').readdirSync('./gulp/tasks/');
+        debugMoudle  = ['web'], //调试用，数组里放要排除的模块，如：['web']
+        gulpTasks    = require('fs').readdirSync('./gulp/tasks/');
 
 gulpTasks.forEach(function(gulpTask) {
-    require('./gulp/tasks/' + gulpTask)(gulp, $, utils, configs);
+    if (!utils.inArray(gulpTask.replace(/\.js$/, ''), debugMoudle)) {
+        require('./gulp/tasks/' + gulpTask)(gulp, $, utils, configs);
+    };
 });
 
 gulp.task('default', function() {
