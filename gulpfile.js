@@ -5,7 +5,7 @@
                         }),
         utils        = require('./gulp/utils'),
         configs      = require('./gulp/configs')($, utils),
-        debugMoudle  = ['web'], //调试用，数组里放要排除的模块，如：['web']
+        debugMoudle  = [], //调试用，数组里放要排除的模块，如：['web']
         gulpTasks    = require('fs').readdirSync('./gulp/tasks/');
 
 gulpTasks.forEach(function(gulpTask) {
