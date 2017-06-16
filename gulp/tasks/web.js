@@ -363,6 +363,7 @@ module.exports = function(gulp, $, utils, configs) {
        
         console.log(depends);
         return false;*/
+        
         var stream = gulp.src(dir + '/*.js', {base: src })
         // var stream = gulp.src(files, {base: src })
             .pipe($.plumber())
@@ -393,7 +394,6 @@ module.exports = function(gulp, $, utils, configs) {
     var JS = function(filePath, cb) {
         var src = getDir(filePath, 'src');
         var dist = getDir(filePath);
-
         var stream = gulp.src(filePath, {base: src})
             // build时全部生成
             .pipe($.if(!config.isBuild,$.changed(dist)))

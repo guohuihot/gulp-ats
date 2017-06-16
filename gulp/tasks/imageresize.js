@@ -3,7 +3,7 @@ module.exports = function(gulp, $, utils) {
         path  = require('path'),
         argv = $.yargs
         .alias({
-            dist : 'd',
+            dist : 'dd',
             src  : 's'
         }).argv;
 
