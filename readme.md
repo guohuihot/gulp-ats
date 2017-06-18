@@ -52,8 +52,8 @@
 
 
 例：
-gulp build -p &#39;C:\Users\Administrator\Desktop\test&#39; -a &#39;ahuing&#39; -m 1
-显示帮助信息(参数一个字母一个中线，大于一个字母两个中线)
+gulp build -p 'C:\Users\Administrator\Desktop\test'
+显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)
 
 gulp 		查看任务列表
 	
@@ -65,11 +65,11 @@ gulp init	查看(设置)当前配置
 
 	-a(--alias)	可配置别名
 			给配置起一个别名，下次直接用别名，如
-			gulp watch -p &#39;C:\Users\Administrator\Desktop\test\&#39; 
-			--src &#39;./src&#39; --dist &#39;./dist&#39; -a &#39;demo&#39; 
-			--distEx &#39;C:\Users\Administrator\Desktop\test\dist1\&#39;
+			gulp watch -p 'C:\Users\Administrator\Desktop\test\' 
+			--src './src' --dist './dist' -a 'demo' 
+			--distEx 'C:\Users\Administrator\Desktop\test\dist1\'
 			下次可直接
-			gulp watch -a &#39;demo&#39;
+			gulp watch -a 'demo'
 
 	-d(--dev)	启用开发模式
 			类型：bool, 默认值：true
@@ -87,11 +87,11 @@ gulp init	查看(设置)当前配置
 			c - 自定义，有时源代码目录和生成目标目录不是固定，
 			可以手动指定
 
-	--src		源代码目录，当 mode 为&quot;c&quot;时有效
+	--src		源代码目录，当 mode 为"c"时有效
 			类型：string,  默认值：保留上次的值
 			PS：与p的相对路径
 
-	--dist		源代码目录，当 mode 为&quot;c&quot;时有效
+	--dist		源代码目录，当 mode 为"c"时有效
 			类型：string,  默认值：保留上次的值
 			PS：与p的相对路径
 
@@ -105,7 +105,7 @@ gulp init	查看(设置)当前配置
 			类型：string,  默认值：保留上次的值
 			PS：需要绝对路径
 
-	其它	Js支持es6写法，具体使用在内容里加 // @require(&#39;babel&#39;)
+	其它	Js支持es6写法，具体使用在内容里加 // @require('babel')
 			注意要写在注释里，不然会被解析
 
 	
@@ -150,9 +150,9 @@ gulp markdown	markdown文件转html
 	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
 
 	--type	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
-			按类型 --type=&#39;js,md,twig,css&#39;
-			按目录 --type=&#39;e:/a,e:/b&#39;
-			按地址 --type=&#39;e:/a.md,e:/b.js&#39;
+			按类型 --type='js,md,twig,css'
+			按目录 --type='e:/a,e:/b'
+			按地址 --type='e:/a.md,e:/b.js'
 
 	
 gulp webdown	下载网页(扒皮)	
