@@ -45,5 +45,5 @@ if (!base[task]) {
     fs.writeJSONSync(basePath, base, {spaces: 2});
 };
 // 执行任务文件, 只加载包含当前任务的文件
-require('./bin/' + base[task])(gulp, $, utils, configs);
+base[task] && require('./bin/' + base[task])(gulp, $, utils, configs);
 

@@ -34,7 +34,8 @@ module.exports = function(gulp, $, utils, configs) {
 
     var message = function (msg) {
             return $.notify(function(file) {
-                if (!isBuild) {
+                // 不是整站打包 或者 新建项目
+                if (!isBuild || argv.all) {
                     return  file.path + ' ' + (msg || '') + ' ok !';
                 };
             })
@@ -124,8 +125,8 @@ module.exports = function(gulp, $, utils, configs) {
         
         return s;
     }
-
-    var sprites = function(dir, cb) {
+    var oTasks = {};
+    oTasks.sprites = function(dir, cb) {
         var cfg = getCfgProp(dir);
         var src = cfg.src;
         var dist = cfg.dist;
@@ -198,7 +199,7 @@ module.exports = function(gulp, $, utils, configs) {
         return stream;
     }
 
-    var fonts = function(dir, cb) {
+    oTasks.fonts = function(dir, cb) {
         var cfg = getCfgProp(dir);
         var src = cfg.src;
         var dist = cfg.dist;
@@ -257,7 +258,7 @@ module.exports = function(gulp, $, utils, configs) {
         return stream;
     }
     // scss
-    var scss = function(filePath, cb) {
+    oTasks.scss = function(filePath, cb) {
         var cfg = getCfgProp(filePath);
         var src = cfg.src;
 
@@ -317,7 +318,7 @@ module.exports = function(gulp, $, utils, configs) {
         return gulpMiddleWare(stream, filePath);
     }
     // concatjs
-    var concatJS = function(dir, cb) {
+    oTasks.concatJS = function(dir, cb) {
         var cfg = getCfgProp(dir);
         var src = cfg.src;
 
@@ -364,42 +365,46 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
         
-        cb && cb();
+        // cb && cb();
         return gulpMiddleWare(stream, dir);
     }
+
     // js
-    var JS = function(filePath, cb) {
+    oTasks.JS = function(filePath, cb) {
         var cfg = getCfgProp(filePath);
         var src = cfg.src;
         var dist = cfg.dist;
 
         var stream = gulp.src(filePath, {base: src})
             // build时全部生成
-            .pipe($.if(!isBuild,$.changed(dist)))
+            .pipe($.if(!isBuild, $.changed(dist)))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             // .pipe($.if(!isBuild, $.jshint(configs.jshint)))
             // .pipe($.if(!isBuild, $.jshint.reporter()))
             .pipe($.data(tplData))
-            .pipe($.if(utils.hasProp(['template.js'], true), $.swig({ext: '.js'})))
+            .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
                 return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
+            // .pipe($.through2.obj(function(file2, encoding, done) {
+            //     console.log(file2.contents.toString());
+            // }))
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
         
-        cb && cb();
+        // cb && cb();
 
         return gulpMiddleWare(stream, filePath);
     }
     // html
-    var html = function(filePath) {
+    oTasks.html = function(filePath) {
         var cfg = getCfgProp(filePath);
         var src = cfg.src;
         var dist = cfg.dist;
 
-        gulp.src(filePath, {
+        return gulp.src(filePath, {
                 base: src
             })
             // .pipe($.changed(dist))
@@ -414,12 +419,12 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe(message());
     }
     // image
-    var image = function(filePath) {
+    oTasks.image = function(filePath) {
         var cfg = getCfgProp(filePath);
         var src = cfg.src;
         var dist = cfg.dist;
 
-        gulp.src(filePath, {
+        return gulp.src(filePath, {
                 base: src
             })                    
             .pipe($.changed(dist))
@@ -432,7 +437,7 @@ module.exports = function(gulp, $, utils, configs) {
      * @description 获取对应配置的属性，主要处理多目录监控里的目录
      * @param  {String} file 文件路径或目录
      * @param  {String} [key=dist]  要获取配置的key， `dist` `src` `path` `distEx` `mode`
-     * @return {String}      返回配置对应value
+     * @return {String}      返回配置对应value, key为空时返回整个配置
      */
     var getCfgProp = function(file, key) {
         var prop; 
@@ -454,7 +459,7 @@ module.exports = function(gulp, $, utils, configs) {
      * 生成监听字串
      * @param  {String} str   要监听的字串
      * @param  {String} dir   要监听的相对目录
-     * @param  {String|Array} noStr 要排序的字串，不需要监听的
+     * @param  {String} noStr 要排除的字串，不需要监听的
      * @return {String}       返回完整的字串
      * @example
      * getWatchDir('**\/*', 'dist', '*.html') // [ 'C:\\Users\\Administrator\\Desktop\\test/**\/*',  ]
@@ -551,9 +556,10 @@ module.exports = function(gulp, $, utils, configs) {
 
                 var pathRelative = path.relative(cfg.dist, file.path);
                 if (file.event == 'unlink') {
-                    $.del([cfg.distEx + '/' + pathRelative], {
+                    fs.removeSync(cfg.distEx + '/' + pathRelative);
+                    /*$.del([cfg.distEx + '/' + pathRelative], {
                         force: true
-                    });
+                    });*/
                 } else {
                     gulp.src(file.path, {
                             base: cfg.dist
@@ -597,12 +603,12 @@ module.exports = function(gulp, $, utils, configs) {
                     // 同时删除map文件
                     delFile.push(nFile + '.map');
                 } else if ({'.svg': 1}[file.extname]) {
-                    fonts(path.dirname(nFile));
+                    oTasks.fonts(path.dirname(nFile));
                 } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
                     var _dirname = path.dirname(nFile);
                     // 如果是删除小图片，需要重新合并其它图片
                     if (_dirname[0] == '_') {
-                        sprites(_dirname);
+                        oTasks.sprites(_dirname);
                     }
                 }
 
@@ -621,18 +627,20 @@ module.exports = function(gulp, $, utils, configs) {
 
                     fDirname = fDirname.replace('_', '');
                     if (!aFiles.length) {
-                        $.del.sync([fDirname + '.*', oDirname + '.js.map'], {
+                        fs.removeGlobSync([fDirname + '.*', oDirname + '.js.map']);
+                        /*$.del.sync([fDirname + '.*', oDirname + '.js.map'], {
                             force: true
-                        })
-                        fs.removeSync(delFile)
+                        })*/
+ 
                     }
                 } else {
                     // 删除文件夹
                     var aFiles = $.glob.sync(fDirname + '/**/*');
                     if (!aFiles.length) {
-                        $.del.sync([fDirname], {
+                        fs.removeSync(fDirname)
+                        /*$.del.sync([fDirname], {
                             force: true
-                        })
+                        })*/
                     }
                 }
             } else if (file.extname == '.scss') {
@@ -671,35 +679,30 @@ module.exports = function(gulp, $, utils, configs) {
                 // return false;
                 for (p in _oFiles) {
                     if (_oFiles.hasOwnProperty(p)) {
-                        scss(p);
+                        oTasks.scss(p);
                     }
                 }
 
             } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
-                    image(file.path);
+                    oTasks.image(file.path);
                 } else {
-                    sprites(file.dirname);
+                    oTasks.sprites(file.dirname);
                 }
             } else if (file.extname == '.svg') {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
-                    gulp.src(file.path, {
-                            base: src
-                        })                    
-                        .pipe($.changed(dist))
-                        .pipe(gulp.dest(dist))
-                        .pipe(message('复制'));
+                    oTasks.image(file.path);
                 } else {
-                    fonts(file.dirname);
+                    oTasks.fonts(file.dirname);
                 }
             } else if (file.extname == '.js') {
                 var tag = path.basename(file.dirname)[0];
                 if (tag != '_') {
-                    JS(file.path);
+                    oTasks.JS(file.path);
                 } else {
-                    concatJS(file.dirname);
+                    oTasks.concatJS(file.dirname);
                 }
             } else if ({".html": 1, ".htm": 1}[file.extname]) {
                 var fileName = file.stem;
@@ -744,7 +747,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // return false;
                 // 最后处理模板
                 for (p in _oFiles) {
-                    html(p);
+                    oTasks.html(p);
                 }
             }
         });
@@ -752,8 +755,11 @@ module.exports = function(gulp, $, utils, configs) {
     // build
     gulp.task('build', [
         'copy',
-        'pack'
-    ]);
+        'pack:sprites-font-js-html',
+        'pack:scss'
+    ], function() {
+        console.log('Build ok!');
+    });
     // 复制核心到项目
     gulp.task('copy', function (cb) {
         var stream = $.mergeStream();
@@ -821,58 +827,68 @@ module.exports = function(gulp, $, utils, configs) {
 
         return stream;
     });
-    // 打包项目文件
-    gulp.task('pack', ['copy'], function(cb) {
+    // 打包
+    gulp.task('pack:sprites-font-js-html', ['copy'], function(cb) {
+        var stream = $.mergeStream();
         var _pack = function(config) {
             var proSrc = config.src;
             var proDist = config.dist;
-            var stream = $.mergeStream();
             var oFiles = {};
+            oTasks.copy = function(file) {
+                return gulp.src(file, {
+                    base: proSrc
+                })
+                .pipe($.changed(proSrc))
+                .pipe(gulp.dest(proDist))
+            }
 
-            var files = $.glob.sync(path.join(proSrc, '/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'));
-
+            var files = $.glob.sync(path.join(proSrc, '/**/*.{gif,jpg,jpeg,png,svg,html,htm,js}'));
+            // 先整理
             files.forEach(function(file) {
                 var fileName = path.basename(file);
                 var dirName = path.dirname(file);
                 var dirNameBase = path.basename(dirName);
-                
-                var process = function(reg, task1, task) {
-                    var oReg = new RegExp('\\.('+ reg +')$');
-                    if (oReg.test(file)) {
-                        if (dirNameBase[0] != '_') {
-                            oFiles[dirName] = {
-                                task: task1
-                            };
-                        } else if (task) {
-                            oFiles[file] = {
-                                task: task
-                            };
-                        }
-                    };
+
+                if (dirNameBase == 'static') {
+                        oFiles[file] = 'copy';
+                } else if (/\.svg$/.test(file)) {
+                    if (dirNameBase[0] != '_') {
+                    // 单个文件
+                        oFiles[file] = 'image';
+                    } else if (!utils.inArray(dirName, oFiles.fonts)) {
+                    // 合并
+                        oFiles[dirName] = 'fonts';
+                    }
+                } else if (/\.(gif|jpg|jpeg|png)$/.test(file)) {
+                    if (dirNameBase[0] != '_') {
+                    // 单个文件
+                        oFiles[file] = 'image';
+                    } else if (!utils.inArray(dirName, oFiles.sprites)) {
+                    // 合并
+                        oFiles[dirName] = 'sprites';
+                    }
+                } else if (/\.js$/.test(file)) {
+
+                    if (dirNameBase[0] != '_') {
+                    // 单个文件
+                        oFiles[file] = 'JS';
+                    } else if (!utils.inArray(dirName, oFiles.concatJS)) {
+                    // 合并
+                        oFiles[dirName] = 'concatJS';
+                    }
+                } else if (/\.(html|htm)$/.test(file)) {
+                    if (fileName[0] != '_') {
+                    // 单个文件
+                        oFiles[file] = 'html';
+                    }
                 }
-
-                process('scss', 'Scss');
-                process('html|htm', 'html');
-                process('svg', 'image', 'fonts');
-                process('scss', 'Scss');
-                process('png,jpg,jpeg,gif', 'image', 'sprites');
-                process('js', 'JS', 'concatJS');
-
             });
-            console.log(oFiles);
-            return false;
-            // 先处理
-            for (prop in oFiles) {
-                var file = oFiles[prop];
-                if (/fonts|sprites/.test(file.task)) {
-                    stream.add((file.task)(prop));
-                };
-            }
-            for (prop in oFiles) {
-                var file = oFiles[prop];
-                if (!/fonts|sprites/.test(file.task)) {
-                    (file.task)(prop);
-                };
+            // 再处理
+            for (p in oFiles) {
+                var res = (oTasks[oFiles[p]])(p);
+                // if (/fonts|sprites|copy/.test(oFiles[p])) {
+                    stream.add(res);
+                // };
             }
         }
 
@@ -880,6 +896,31 @@ module.exports = function(gulp, $, utils, configs) {
             _pack(cfgs[p])
         }
 
+        return stream;
+    });
+    // 打包scss
+    gulp.task('pack:scss', ['pack:sprites-font-js-html'], function(cb) {
+        var stream = $.mergeStream();
+        var _pack = function(config) {
+            var proSrc = config.src;
+
+            var files = $.glob.sync(path.join(proSrc, '/**/*.scss'));
+
+            files.forEach(function(file) {
+                var fileName = path.basename(file);
+                
+                if (fileName[0] != '_') {
+                // 单个文件
+                    stream.add(oTasks.scss(file));
+                }
+            });
+        }
+
+        for (p in cfgs) {
+            _pack(cfgs[p])
+        }
+
+        return stream;
     });
     // add
     gulp.task('add', function() {

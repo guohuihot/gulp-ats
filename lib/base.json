@@ -82,7 +82,7 @@
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
-    "author": "author",
+    "author": "ahuing",
     "distEx": "",
     "libs": "",
     "tpl": "./src/libs/",
@@ -90,7 +90,7 @@
     "src": "src",
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
-    "t": 1497724069,
+    "t": 1497812716,
     "scssPaths": ""
   },
   "E:\\wwwroot\\newhouse": {
@@ -116,5 +116,7 @@
     "t": 1496991569
   },
   "watch": "web.js",
-  "default": "default.js"
+  "default": "default.js",
+  "init": "init.js",
+  "build": "web.js"
 }
