@@ -22,6 +22,8 @@ module.exports = function(gulp, $, utils, configs) {
     console.log(oInit.config);
     console.log('\n');
 
+    // 默认项
+    argv.d = argv.d === 0 ? false : true;
     // 初始化swig
     $.swig(configs.swig);
     // 扩展fs方法

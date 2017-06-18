@@ -1,6 +1,6 @@
 module.exports = function(gulp, $, utils, configs) {
     var path = require('path'),
-        fs = require('fs'),
+        fs = require('fs-extra'),
         argv = $.yargs.argv,
         files = [],
         tree = {},
