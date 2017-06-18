@@ -1,7 +1,11 @@
-module.exports = function(gulp, $, utils, configs) {
-    var path  = require('path'),
-        fs  = require('fs'),
-        argv = $.yargs.argv;
+module.exports = function(gulp, $, utils) {
+    var configs = require('../configs'),
+        path  = require('path'),
+        argv = $.yargs
+        .alias({
+            dist : 'd',
+            src  : 's'
+        }).argv;
 
     // imageresize
     gulp.task('imageresize', function(){
@@ -29,49 +33,41 @@ module.exports = function(gulp, $, utils, configs) {
         var _src = argv.p;
         var _dist = argv.d;
 
-    $.mkdirp.sync(_dist);
-
-    if (!fs.existsSync(_dist + '/records.json')) {
-        // 不存在时 创建一个空的文件 保证不报错
-        fs.writeFileSync(_dist + '/records.json', '');
-    }
-
-    var base = $.jsonFilePlus.sync(_dist + '/records.json');
-    base.data = base.data || {};
         var aFiles = $.glob.sync(path.join(_src, '**/*.{jpg,jpeg,png}'));
+        
+        $.mkdirp.sync(_dist);
 
         aFiles.forEach(function(file) {
-            try {
-                var _img = $.images(file); //加载图像文件
-            } catch (err) {
-                console.warn(file, err);
-                base.data[file] = 0;
-            }
+            var _img = $.images(file); //加载图像文件
             var _imgW = _img.width();
             var _imgH = _img.height();
             // console.log(path.relative(_src, file));
             // return false;
-            // console.log(file, _imgW + ' * ' + _imgH);
+            console.log(file, _imgW + ' * ' + _imgH);
             var savePath = path.join(_dist || _src, path.relative(_src, file));
             // var savePath = path.join(_dist || _src, path.basename(file));
+            $.mkdirp.sync(path.dirname(savePath));
 
-            // var aImgSize = utils.getImgSize({width: _imgW, height: _imgH}, 1024, 768);
-            // console.log(aImgSize);
-            // return false;
-            if (_imgW > 900) {
-                $.mkdirp.sync(path.dirname(savePath));
-                console.log(file, _imgW + ' * ' + _imgH);
-                base.data[file] = 1;
+            var aImgSize = utils.getImgSize({width: _imgW, height: _imgH}, 1024, 768);
+            console.log(aImgSize);
+            return false;
+            if (_imgW > 1000) {
                 _img
-                    .resize(900) //等比缩放图像到1000像素宽
+                    .resize(1000) //等比缩放图像到1000像素宽
                     .save(savePath, {
-                        quality: 80 //保存图片到文件,图片质量为50
+                        quality: 100 //保存图片到文件,图片质量为50
+                    });
+
+            } else if (_imgH > 800) {
+                _img
+                    .resize(0, 800) //等比缩放图像到1000像素宽
+                    .save(savePath, {
+                        quality: 100 //保存图片到文件,图片质量为50
                     });
 
             }
         });
 
-    base.saveSync();
     });
 
     gulp.task('remove-watermark', function(){

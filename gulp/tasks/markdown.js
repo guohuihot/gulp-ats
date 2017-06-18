@@ -1,7 +1,20 @@
 module.exports = function(gulp, $, utils, configs) {
     var path = require('path'),
         fs = require('fs'),
-        argv = $.yargs.argv,
+        argv = $.yargs
+        .alias({
+            path    : 'p',
+            author  : 'a',
+            custom  : 'c',
+            libs    : 'l',
+            dev     : 'd',
+            server  : 's',
+            open    : 'o',
+            ftp     : 'f',
+            reverse : 'r',
+            mode    : 'm',
+            tpl     : 't'
+        }).argv,
         files = [],
         tree = {},
         // 存储搜索数据

@@ -28,6 +28,29 @@ var utils = {
                 return reverse ? !result : result;
             }
         },
+        getInfo: function() {
+            // 处理demo
+            var tasks = require('./tasks'),
+                taskInfo = '',
+                params;
+
+            taskInfo += [
+                '\n',
+                '例：',
+                'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\'',
+                '显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)',
+                '\n'
+            ].join('\n');
+
+            for (var i in tasks) {
+                params = '';
+                for (var j in tasks[i]['argv']) {
+                    params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
+                }
+                taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
+            }
+            return taskInfo;
+        }, 
         inArray: function(search, array) {
             for (var i in array) {
                 if (array[i] == search) {
@@ -73,18 +96,6 @@ var utils = {
                 }
             }
             return [nW, nH];
-        },
-        getTasks: function(str) {
-            var reg = new RegExp('gulp.task\\([\'\"]\\s?(\\S+)\\s?[\'\"]', 'g');
-            var arr = reg.exec(str);
-            var tasks = [];
-
-            while (arr) {
-                tasks.push(arr[1]);
-                arr = reg.exec(str);
-            }
-
-            return tasks;
         }
     };
 

@@ -1,4 +1,4 @@
-var tasks = {
+module.exports = {
     
     '\t': {
         
@@ -186,25 +186,3 @@ var tasks = {
         }
     }
 }
-
-// 处理demo
-var taskInfo = '',
-    params;
-
-taskInfo += [
-    '\n',
-    '例：',
-    'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\'',
-    '显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)',
-    '\n'
-].join('\n');
-
-for (var i in tasks) {
-    params = '';
-    for (var j in tasks[i]['argv']) {
-        params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
-    }
-    taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
-}
-
-module.exports = taskInfo;
