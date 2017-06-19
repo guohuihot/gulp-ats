@@ -1,7 +1,7 @@
 var gulp         = require('gulp'),
     $            = require('gulp-load-plugins')({
                         pattern      : ['*'],
-                        replaceString: /^(gulp|node|vinyl)(-|\.)/,
+                        replaceString: /^(gulp|node)(-|\.)/,
                     }),
     utils        = require('./lib/utils'),
     configs      = require('./lib/configs')($, utils),

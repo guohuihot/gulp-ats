@@ -276,10 +276,11 @@ module.exports = function(gulp, $, utils, configs) {
 
         var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(cfg.dist, {extension: '.css'}))
-            .pipe($.plumber())
+            // .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: scssPaths,
+                indentWidth: 4,
                 // includePaths: [path.dirname(filePath), cfg.tpl + cfg.libs + '/css/'],
                 outputStyle: 'expanded',
                 //Type: String Default: nested Values: nested, expanded, compact - 属性在一行, compressed
@@ -292,13 +293,16 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 ext: '.css'
             }))
-            .pipe($.if(!argv.d, $.through2.obj(function(file1, encoding, done) {
+            .pipe($.if(argv.d, $.through2.obj(function(file1, encoding, done) {
                 // console.log(file1.sourceMap);
                 var contents = String(file1.contents);
                 // sass去不掉，/** */, 手动去掉jsdoc的注释
                 var newContents = contents.replace(/\/\*\*([\s\S]*?)\*\//g, '');
                 // var newContents = contents;
                 file1.contents = new Buffer(newContents);
+                if (file1.sourceMap) {
+                    $.vinylSourcemapsApply(file1, file1.sourceMap);
+                }
                 this.push(file1);
                 done();
             })))
