@@ -13,8 +13,9 @@ module.exports = function(gulp, $, utils, configs) {
         ftp       = {},
         isBuild = false,
         oInit = require('../lib/init')($, argv),
-        multiple = oInit.multiple, // 多目录
-        cfgs = oInit.configs; // 处理后的配置（可能是多个目录）
+        isMultiple = oInit.isMultiple, // 多目录
+        cfgs = oInit.configs,
+        oTasks = {};
 
 
     console.log('\n');
@@ -127,7 +128,6 @@ module.exports = function(gulp, $, utils, configs) {
         
         return s;
     }
-    var oTasks = {};
     oTasks.sprites = function(dir, cb) {
         var cfg = getCfgProp(dir);
         var src = cfg.src;
@@ -293,6 +293,7 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 ext: '.css'
             }))
+            .pipe($.sourcemaps.write({includeContent: false}))
             .pipe($.if(argv.d, $.through2.obj(function(file1, encoding, done) {
                 // console.log(file1.sourceMap);
                 var contents = String(file1.contents);
@@ -310,6 +311,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // $.csscomb('../lib/csscomb.json'),
                 $.csso()
             ))
+            .pipe($.sourcemaps.write({includeContent: false}))
             .pipe($.if(!argv.d, $.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
@@ -554,7 +556,7 @@ module.exports = function(gulp, $, utils, configs) {
         // 扩展dist 直接将生成好的文件复制过去
         var aDist = getWatchDir('/**/*', 'dist', '/**/*.map');
 
-        if (multiple || oInit.config.distEx) {
+        if (isMultiple || oInit.config.distEx) {
             $.watch(aDist, {
                 read: false
             }, function(file) {
