@@ -276,7 +276,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         var stream = gulp.src(filePath, {base: src})
             // .pipe($.changed(cfg.dist, {extension: '.css'}))
-            // .pipe($.plumber())
+            .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.sass({
                 includePaths: scssPaths,
@@ -293,17 +293,16 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 ext: '.css'
             }))
-            .pipe($.sourcemaps.write({includeContent: false}))
-            .pipe($.if(argv.d, $.through2.obj(function(file1, encoding, done) {
+            .pipe($.if(!argv.d, $.through2.obj(function(file1, encoding, done) {
                 // console.log(file1.sourceMap);
                 var contents = String(file1.contents);
                 // sass去不掉，/** */, 手动去掉jsdoc的注释
                 var newContents = contents.replace(/\/\*\*([\s\S]*?)\*\//g, '');
                 // var newContents = contents;
                 file1.contents = new Buffer(newContents);
-                if (file1.sourceMap) {
+                /*if (file1.sourceMap) {
                     $.vinylSourcemapsApply(file1, file1.sourceMap);
-                }
+                }*/
                 this.push(file1);
                 done();
             })))
@@ -311,7 +310,6 @@ module.exports = function(gulp, $, utils, configs) {
                 // $.csscomb('../lib/csscomb.json'),
                 $.csso()
             ))
-            .pipe($.sourcemaps.write({includeContent: false}))
             .pipe($.if(!argv.d, $.autoprefixer({
                 browsers: ['ff >= 3','Chrome >= 20','Safari >= 4','ie >= 8'],
                 cascade: true, // 是否美化属性值 默认：true 像这样：
@@ -330,8 +328,8 @@ module.exports = function(gulp, $, utils, configs) {
         var cfg = getCfgProp(dir);
         var src = cfg.src;
 
-        var pathRelative = path.relative(src, dir).replace('_', ''),
-            fName        = path.basename(dir).slice(1);
+        var pathRelative = path.relative(src, dir).replace('_', '');
+            // fName        = path.basename(dir).slice(1);
 /*        var aFiles = $.glob.sync(dir + '/*.js');
         var dependsMap = {};
         var filesMap = {};
@@ -354,8 +352,8 @@ module.exports = function(gulp, $, utils, configs) {
         // var stream = gulp.src(files, {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.if(!isBuild, $.jshint(configs.jshint)))
-            // .pipe($.if(!isBuild, $.jshint.reporter()))
+            // .pipe($.jshint(configs.jshint))
+            // .pipe($.jshint.reporter())
             .pipe($.data(function(file) {
                 return {
                     name   : path.basename(file.path).slice(0, -3),
@@ -385,11 +383,11 @@ module.exports = function(gulp, $, utils, configs) {
 
         var stream = gulp.src(filePath, {base: src})
             // build时全部生成
-            .pipe($.if(!isBuild, $.changed(dist)))
+            .pipe($.changed(dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.if(!isBuild, $.jshint(configs.jshint)))
-            // .pipe($.if(!isBuild, $.jshint.reporter()))
+            // .pipe($.jshint(configs.jshint))
+            // .pipe($.jshint.reporter())
             .pipe($.data(tplData))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
@@ -553,7 +551,7 @@ module.exports = function(gulp, $, utils, configs) {
             }
             ftp = $.ftp.create(config.ftp);
         }
-        // 扩展dist 直接将生成好的文件复制过去
+        // 扩展dist 直接将生成好的文件复制过去, 排除map
         var aDist = getWatchDir('/**/*', 'dist', '/**/*.map');
 
         if (isMultiple || oInit.config.distEx) {
@@ -596,27 +594,37 @@ module.exports = function(gulp, $, utils, configs) {
             read: false,
             usePolling: true
         }, function(file) {
-            var cfg = getCfgProp(file.path);
-            var dist = cfg.dist;
-            var src = cfg.src;
+            var cfg         = getCfgProp(file.path);
+            var dist        = cfg.dist;
+            var src         = cfg.src;
+            var ext         = file.extname;
+            // _common
+            var baseDirname = path.basename(file.dirname);
+            var isDir = baseDirname[0] == '_' ;
 
             if (file.event == 'unlink') {
-                var nFile        = file.extname == '.scss' ? path.basename(file.path, '.scss') + '.css' : file.path;
-                var pathRelative = path.relative(src, nFile);
-                var uFile        = dist + '/' + pathRelative;
-                var delFile      = [uFile];
-                var tag          = path.basename(file.dirname)[0];
+                // src/js/a.js
+                var srcFile   = ext == '.scss' ? 
+                                    path.basename(file.path, ext) + '.css' : 
+                                    file.path;
+                // 相对src的filepath  js/a.js                 
+                var srcToFile = path.relative(src, srcFile);
+                // 目标文件路径 dist/js/a.js
+                var distFile  = path.join(dist, srcToFile); 
+                var delFile   = [distFile];
 
-                if ({'.scss': 1, '.js': 1}[file.extname]) {
+                if (/\.(scss|js)$/.test(ext)) {
                     // 同时删除map文件
-                    delFile.push(nFile + '.map');
-                } else if ({'.svg': 1}[file.extname]) {
-                    oTasks.fonts(path.dirname(nFile));
-                } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
-                    var _dirname = path.dirname(nFile);
+                    delFile.push(distFile + '.map');
+                } else if (ext == '.svg') {
                     // 如果是删除小图片，需要重新合并其它图片
-                    if (_dirname[0] == '_') {
-                        oTasks.sprites(_dirname);
+                    if (isDir) {
+                        oTasks.fonts(file.dirname);
+                    }
+                } else if (/\.(png|gif|jpg|jpeg)$/.test(ext)) {
+                    // 如果是删除小图片，需要重新合并其它图片
+                    if (isDir) {
+                        oTasks.sprites(file.dirname);
                     }
                 }
 
@@ -624,138 +632,115 @@ module.exports = function(gulp, $, utils, configs) {
                     force: true
                 });*/
                 fs.removeSync(delFile)
-                // 目标目录
-                var fDirname = path.dirname(uFile);
+                // dist目录 dist/js/_common
+                // dist目录 dist/images/_common
+                var fDirname = path.dirname(distFile);
 
-                if (tag == '_') {
-                    // 删除合并文件夹
-                    var aFiles = $.glob.sync(file.dirname + '/**/*');
-                    // 原目录
-                    var oDirname = path.dirname(nFile).replace('_', '');
+                if (isDir) {
+                    // 删除合并的js,images,fonts及map
+                    // [js/_common/a.js, js/_common/b.js]
+                    var hasFile = $.glob.sync(file.dirname + '/**/*').length;
 
                     fDirname = fDirname.replace('_', '');
-                    if (!aFiles.length) {
-                        fs.removeGlobSync([fDirname + '.*', oDirname + '.js.map']);
+                    if (!hasFile) {
+                        fs.removeGlobSync([fDirname + '.*', fDirname + '.js.map']);
                         /*$.del.sync([fDirname + '.*', oDirname + '.js.map'], {
                             force: true
                         })*/
  
                     }
                 } else {
-                    // 删除文件夹
-                    var aFiles = $.glob.sync(fDirname + '/**/*');
-                    if (!aFiles.length) {
+                    // 删除文件夹 dist/iamges/face/1.gif, dist/iamges/face/2.gif,
+                    // fDirname = dist/images/face
+                    var aFiles = $.glob.sync(fDirname + '/**/*').length;
+                    if (!hasFile) {
                         fs.removeSync(fDirname)
                         /*$.del.sync([fDirname], {
                             force: true
                         })*/
                     }
                 }
-            } else if (file.extname == '.scss') {
+            } else if (/\.(png|gif|jpg|jpeg)$/.test(ext)) {
+                if (isDir) {
+                    oTasks.sprites(file.dirname);
+                } else {
+                    oTasks.image(file.path);
+                }
+            } else if (ext == '.svg') {
+                if (isDir) {
+                    oTasks.fonts(file.dirname);
+                } else {
+                    oTasks.image(file.path);
+                }
+            } else if (ext == '.js') {
+                if (isDir) {
+                    oTasks.concatJS(file.dirname);
+                } else {
+                    oTasks.JS(file.path);
+                }
+            } else if (/\.(html|htm|twig|scss)$/.test(ext)) {
                 var fileName = file.stem;
+                // 要处理的文件
+                var _oFiles = {}; 
+                var _oOldFiles = {}; 
                 // 文件内容缓存
                 var oFileCache = {}; 
-                var _oFiles = {};
                 // 加入当前的文件
                 if (fileName[0] != '_') {
                     _oFiles[file.path] = 1;
                 } else {
-                    var files = $.glob.sync(src + '/**/css/**/!('+ fileName +').scss');
-                    var getFiles = function(fileName) {
-                        var reg = new RegExp('(\'|\")\\s*' + fileName.slice(1) + '\\s*(\'|\")');
+                    // 所有文件
+                    if (ext == '.scss') {
+                        var files = $.glob.sync(src + '/**/css/**/!('+ fileName +').scss');
+                    } else {
+                        var files = $.glob.sync(src + '/**/*.{html,htm,twig}');
+                    }
+                    var getFiles = function(fileName, ofilePath) {
+                        if (ext == '.scss') {
+                            var reg = new RegExp("@import\\s+[\'\"]\\s*" + fileName.slice(1) + "\\s*[\'\"]");
+                        } else {
+                            var reg = new RegExp("[extends|include|import]\\s+[\'\"]\\s*" + fileName + "\\.");
+                        }
+
                         files.forEach(function(filePath) {
-                            var _fileName = path.basename(filePath, '.scss');
-                            // 处理所有包括当前'_base'的scss
+                            // 假如当前文件已经在处理的文件里时返回
+                            if (_oFiles[filePath]) return;
+
+                            var _fileName = path.basename(filePath, ext);
+                            // 缓存内容
                             oFileCache[filePath] = oFileCache[filePath] || 
                                                     fs.readFileSync(filePath, 'utf8');
                             if (reg.test(oFileCache[filePath])) {
+                                // 如果包含指定文件，加入要处理的列表
                                 if (_fileName[0] != '_') {
                                     _oFiles[filePath] = 1;
-                                } else{
-                                    getFiles(_fileName);
                                 }
+                                // b.html extend a.html exend _base.html a和b都会找到
+                                // a.scss @import b.scss @import _base.scss a和b都会找到
+                                // 继续找包含当前文件的其它文件
+                                getFiles(_fileName, filePath);
+                                // 原来的文件又被包含，delete掉，直到顶级文件
+                                // delete _oFiles[ofilePath];
                             };
+
                         });
                     }
-                    getFiles(fileName);
-                    
+                    // 如果包含的层次太多时，就不会执行了
+                    try {
+                        getFiles(fileName);
+                    } catch (err) {
+                        console.warn(/Maximum/.test(err) && fileName + '被包含的太多或者层级太深!');
+                    }
+
                     // 清空缓存内容
                     delete oFileCache;
                 }
 
                 // console.log(_oFiles);
                 // return false;
-                for (p in _oFiles) {
-                    if (_oFiles.hasOwnProperty(p)) {
-                        oTasks.scss(p);
-                    }
-                }
-
-            } else if ({".png": 1, ".gif": 1, ".jpg": 1, ".jpeg": 1}[file.extname]) {
-                var tag = path.basename(file.dirname)[0];
-                if (tag != '_') {
-                    oTasks.image(file.path);
-                } else {
-                    oTasks.sprites(file.dirname);
-                }
-            } else if (file.extname == '.svg') {
-                var tag = path.basename(file.dirname)[0];
-                if (tag != '_') {
-                    oTasks.image(file.path);
-                } else {
-                    oTasks.fonts(file.dirname);
-                }
-            } else if (file.extname == '.js') {
-                var tag = path.basename(file.dirname)[0];
-                if (tag != '_') {
-                    oTasks.JS(file.path);
-                } else {
-                    oTasks.concatJS(file.dirname);
-                }
-            } else if ({".html": 1, ".htm": 1}[file.extname]) {
-                var fileName = file.stem;
-                // 所有文件
-                var files = $.glob.sync(src + '/**/*.{html,htm}');
-                // 要处理的文件
-                var _oFiles = {}; 
-                // 文件内容缓存
-                var oFileCache = {}; 
-                // 加入当前的文件
-                if (fileName.slice(0, 1) != '_') {
-                    _oFiles[file.path] = 1;
-                };
-
-                var getFiles = function(fileName, ofilePath) {
-                    var reg = new RegExp("(extends|include|import)\\s+(\'|\")\\S*"+ fileName +".(html\'|htm\")");
-
-                    files.forEach(function(filePath) {
-                        var _fileName = path.basename(filePath, '.html');
-                        // 缓存内容
-                        oFileCache[filePath] = oFileCache[filePath] || 
-                                                fs.readFileSync(filePath, 'utf8');
-                        if (reg.test(oFileCache[filePath])) {
-                            // 如果包含指定文件，加入要处理的列表
-                            if (_fileName.slice(0, 1) != '_') {
-                                _oFiles[filePath] = 1;
-                            };
-                            // 继续遍历，当前文件
-                            getFiles(_fileName, filePath);
-                            // 原来的文件又被包含，delete掉，直到顶级文件
-                            // delete _oFiles[ofilePath];
-                        }
-                    });
-                }
-
-                getFiles(fileName);
-
-                // 清空缓存内容
-                delete oFileCache;
-
-                // console.log(_oFiles);
-                // return false;
                 // 最后处理模板
                 for (p in _oFiles) {
-                    oTasks.html(p);
+                    oTasks[ext == '.scss' ? 'scss' : 'html'](p);
                 }
             }
         });
@@ -783,7 +768,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // 如果是核心开发，不复制直接处理代码
                 cb();
             } else if (!argv.all) {
-                // 项目录里与核心目录比较，存在的文件再同步 （如果项目已经删除，则不同步）
+                // 只同步项目和核心存在的文件（如果项目已经删除，则不同步）项目录里与核心目录比较
                 var atsFromData = $.glob.sync(atsFromSrc + '/**/*'); // ['e:/nodejs/src/libs/js/a.js']
                 var proSrcData = $.glob.sync(proSrc + '/**/*'); // ['e:/src/js/a.js']
                 stream.add(gulp.src('./src/libs/demo.html'));
@@ -884,7 +869,7 @@ module.exports = function(gulp, $, utils, configs) {
                     // 合并
                         oFiles[dirName] = 'concatJS';
                     }
-                } else if (/\.(html|htm)$/.test(file)) {
+                } else if (/\.(html|htm|twig)$/.test(file)) {
                     if (fileName[0] != '_') {
                     // 单个文件
                         oFiles[file] = 'html';

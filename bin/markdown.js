@@ -9,17 +9,27 @@ module.exports = function(gulp, $, utils, configs) {
         // 处理一次js保存起来后面用
         markdownData = {};
 
+    // 初始化swig
+    $.swig(configs.swig);
+    // 扩展fs方法
+    fs.removeGlobSync = function(glob) {
+        var files = $.glob.sync(glob);
+        files.forEach(function(file) {
+            fs.removeSync(file);
+        });
+    }
+
     var getBaseName = function(filePath) {
-        var extname = path.extname(filePath),
+        var ext = path.extname(filePath),
             basename = path.basename(filePath);
-        if ({'.twig': 1, '.scss': 1, '.js': 1}[extname]) {
+        if (/\.(twig|scss|js)/.test(ext)) {
             var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (/(\w+)Bundle/.test(elem)) {
                     basename = RegExp.$1 + '-' + basename;
                 }
             });
-        } else if (extname == '.md') {
+        } else if (ext == '.md') {
             basename = basename.replace(/\.md$/, '');
         }
         return basename;
@@ -54,7 +64,7 @@ module.exports = function(gulp, $, utils, configs) {
             searchableDocuments[basename + '.html'] = {
                 id: basename + '.html',
                 title: basename,
-                body: $.htmlToText.fromString(contents, {
+                body: $.htmlToText.fromString(contents.toString(), {
                         wordwrap: 130
                     }),
             }
@@ -85,94 +95,97 @@ module.exports = function(gulp, $, utils, configs) {
             console.log('err:需要指定路径！');
             return;
         };
-        $.del([
-            _p + '/docs/*.html',
-            '!' + _p
-        ], {
-            force: true
-        }, cb);
+        fs.removeGlobSync(_p + '/docs/*.html')
+        cb();
     })
 
-    var _type = argv.type;
-    
-    gulp.task('copy-img', function() {
-        var stream = $.mergeStream();
-        var _p = argv.p;
-        var APS = [_p];
+
+    var _p = argv.p;
+    var APS = [_p];
+
+    if (argv.pEx) {
+        APS = APS.concat(argv.pEx.split(','));
+    };
+
+    var aType = argv.type && argv.type.split(',') || [];
+    // 没有type, 把目录给type，继续往下走
+    if (!aType.length) {
+        aType = APS;
+    }
+    var sIgnore = '/**/@(vendor|.git|public)/**/*';
+
+    gulp.task('copy-img', function(cb) {
         var imgs = [];
-        if (argv.pEx) {
-            APS = APS.concat(argv.pEx.split(','));
-        };
-        APS.forEach(function(p) {
-            if (_type) {
-                _type.split(',').forEach(function(t) {
-                    imgs = imgs.concat($.glob.sync(path.join(t, '**/*.{png,gif,jpg,jpeg}')));
-                })
-            } else {
-                imgs = imgs.concat($.glob.sync(path.join(p, '!(vendor)/**/doc/**/*.{png,gif,jpg,jpeg}')));
-            }
+
+        aType.forEach(function(t) {
+            var sGlob = '**/doc/**/*.{png,gif,jpg,jpeg}';
+            imgs = imgs.concat($.glob.sync(path.join(t, sGlob), {ignore: path.join(t, sIgnore)}));
         })
+
         imgs.forEach(function(file) {
-            stream.add(gulp.src(file, {base: path.dirname(file)})
-                            .pipe($.changed(path.join(_p, 'docs/images')))
-                            // .pipe($.imagemin(configs.imagemin))
-                            .pipe(gulp.dest(path.join(_p, 'docs/images'))))
+            gulp.src(file, {base: path.dirname(file)})
+                .pipe($.changed(path.join(_p, 'docs/images')))
+                // .pipe($.imagemin(configs.imagemin))
+                .pipe(gulp.dest(path.join(_p, 'docs/images')))
         });
-        
+
+        cb();
     })
 
     gulp.task('tree', ['clean-markdown', 'copy-img'], function() {
-        var _p = argv.p;
-        var APS = [_p];
         var stream = $.mergeStream();
-        if (argv.pEx) {
-            APS = APS.concat(argv.pEx.split(','));
-        };
+
         // 要取的文件的对象
-        var oTypes = {
-            md: '/!(vendor)/**/doc/**/!(README).md',
-            // md: '/!(vendor)/**/doc/**/*.md',
-            twig: '/**/Macro/*.twig',
-            scss: '/**/{mixins,inherit}/*.scss',
-            js: '/!(vendor|.git)/**/src/**/!(static|seajs|_seajs|_sm)/*.js'
-            // js: 'src/**/!(static|seajs|_seajs|_sm)/*.js' 
+        var oGlobs = {
+            md: '**/doc/**/!(README).md',
+            twig: '**/Macro/*.twig',
+            scss: '**/@(mixins|inherit)/*.scss',
+            js: '**/?(src)/**/!(static|_seajs|_sm)/*.js'
         }
 
-        APS.forEach(function(p) {
-            if (_type) {
-                // 只处理指定类型
-                _type.split(',').forEach(function(t) {
-                    if (oTypes[t]) {
-                        // 按类型
-                        files = files.concat($.glob.sync(path.join(p, oTypes[t])));
-                    } else if (path.extname(t)) {
-                        // 按网址
-                        files.push(t);
-                    } else {
-                        // 按目录
-                        files = files.concat($.glob.sync(path.join(t, '{**,!(static|seajs|_seajs)}/*.{md,twig,scss,js}')));
-                    }
+        aType.forEach(function(t) {
+            if (oGlobs[t]) {
+                // 按类型 js
+                APS.forEach(function(p) {
+                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {ignore: path.join(t, sIgnore)}));
                 });
+            } else if (path.extname(t)) {
+                // 按地址
+                files.push(t);
             } else {
-                // 处理所有目录
-                for (prop in oTypes) {
-                    files = files.concat($.glob.sync(path.join(p, oTypes[prop]), {ignore: path.join(p, '/**/vendor/**/*.js')}));
+                // 按目录
+                for (k in oGlobs) {
+                    console.log(path.join(t, oGlobs[k]));
+                    files = files.concat($.glob.sync(path.join(t, oGlobs[k]), {ignore: path.join(t, sIgnore)}));
                 }
             }
-        })
+        });
+        // console.log(files);
+        // return false;
+        // 加入readme
+        var readmePath = path.join(argv.p, 'Resources/doc/readme.md');
+        if (fs.existsSync(readmePath)) {
+            files.push(readmePath);
+        }
+
+            console.log(files);
+            return false;
         files.forEach(function(file) {
             var ext = path.extname(file);
-            var basename = path.basename(file);
-            if ({'.js': 1, '.twig': 1, '.scss': 1}[ext]) {
+            var fileName = getBaseName(file);
+            // 随便一个stream, 为了能继续向下执行
+            stream.add(gulp.src('./src/libs/demo.html', {read: false}));
+            if (/\.(twig|scss|js)/.test(ext)) {
                 stream.add(gulp.src(file)
                     // .pipe($.changed(path.join(_p 'docs'), {extension: '.html'}))
                     .pipe($.plumber(function(err) {
                         console.log('\n');
                         console.log('文件内容错误：' + file);
+                        console.log(err.plugin);
                         console.log(err.message);
                         console.log('\n');
                     }))
-                    // js先加进来，有问题再去掉
+                    // 抓取markdown内容 js先加进来，有问题再去掉
                     .pipe($.if({'.twig': 1, '.scss': 1, '.js': 1}[ext], $.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);
                         if (contents) {
@@ -189,15 +202,12 @@ module.exports = function(gulp, $, utils, configs) {
                         this.push(file2);
                         done();
                     })))
-                    .pipe($.if({
-                        '.js': 1,
-                        '.scss': 1
-                    }[ext], $.swig({
+                    /*.pipe($.if(/\.(js|scss)/.test(ext), $.swig({
                         data: {
                             name: basename,
                             author: argv.a
                         }
-                    })))
+                    })))*/
                     // 调试用
                     /*.pipe($.through2.obj(function(file2, encoding, done) {
                         var contents = String(file2.contents);
@@ -209,37 +219,35 @@ module.exports = function(gulp, $, utils, configs) {
                         template: "{{>main}}"
                     }))
                     .pipe($.through2.obj(function(file2, encoding, done) {
-                        var contents = String(file2.contents);
+                        var contents = file2.contents;
                         if (contents) {
                             console.log(file);
-                            var fileName = getBaseName(file);
-                            markdownData[fileName] = file2.contents;
+                            markdownData[fileName] = contents;
                             processTree(file, contents);
                         } else {
                             files.splice(files.indexOf(file), 1)
                         }
                         done();
                     })));
-            } else if ({'.md': 1}[ext]) {
-                processTree(file, String(fs.readFileSync(file)));
-                // 随便一个stream, 为了能继续向下执行
-                stream.add(gulp.src('./gulp/markdown/quicksearch.html'));
-            } else {
-                // 随便一个stream, 为了能继续向下执行
-                stream.add(gulp.src('./gulp/markdown/quicksearch.html'));
+            } else if (ext == '.md') {
+                var mdData = fs.readFileSync(file);
+
+                markdownData[fileName] = mdData;
+                processTree(file, mdData); //搜索用
             }
         })
         return stream;
     })
     // markdown
     gulp.task('markdown', ['tree'], function() {
+        return false;
         var _p = argv.p;
         // 复制resources
-        gulp.src('./gulp/markdown/*/**')
+        gulp.src('./tpl/markdown/*/**')
             .pipe($.changed(path.join(_p, 'docs')))
             .pipe(gulp.dest(path.join(_p, 'docs')));
         // 搜索文件
-        gulp.src('./gulp/markdown/quicksearch.html')
+        gulp.src('./tpl/markdown/quicksearch.html')
             .pipe($.plumber())
             .pipe($.swig({
                 data: {
@@ -250,37 +258,24 @@ module.exports = function(gulp, $, utils, configs) {
         // 整理顺序
         tree = objSort(tree);
         // 生成每个文件
-        files.push(path.join(argv.p, 'Resources/doc/readme.md'));
         files.forEach(function(file) {
             var basename = getBaseName(file);
 
             var dataFun = function(file1, cb1) {
-                    gulp.src(file)
-                        .pipe($.plumber())
-                        .pipe($.if(utils.hasProp(['.js', '.twig', '.scss']), $.rename({
-                            extname: '.md'
-                        })))
-                        // .pipe($.changed(path.join(argv.p, 'docs'), {extension: '.html'}))
-                        .pipe($.through2.obj(function(file2, encoding, done) {
-                            var contents;
-
-                            file2.contents = markdownData[basename] || file2.contents;
-                            contents = String(file2.contents).replace(/@ (include|extend)/, '@$1');
-                            contents = $.marked(contents);
-                            if (contents) {
-                                cb1(undefined, {
-                                    contents: contents,
-                                    title: basename,
-                                    tree: tree
-                                });
-                            }
-                            done();
-                        }));
+                    contents = markdownData[basename].toString()
+                                .replace(/@ (include|extend)/, '@$1');
+                    if (contents) {
+                        cb1(undefined, {
+                            contents: $.marked(contents),
+                            title: basename,
+                            tree: tree
+                        });
+                    }
                 },
                 dist;
 
             dist = path.join('docs/', /readme/.test(basename) ? 'index.htm' : basename + '.html');
-            gulp.src('./gulp/markdown/index.html')
+            gulp.src('./tpl/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))
                 .pipe($.swig())
