@@ -112,42 +112,26 @@ module.exports = function(gulp, $, utils, configs) {
     if (!aType.length) {
         aType = APS;
     }
-    var sIgnore = '/**/@(vendor|.git|public)/**/*';
 
-    gulp.task('copy-img', function(cb) {
-        var imgs = [];
+    // 要取的文件的对象
+    var oGlobs = {
+        md: '**/doc/**/!(README).md',
+        twig: '**/Macro/*.twig',
+        scss: '**/@(mixins|inherit)/*.scss',
+        js: '**/*.js',
+        img: '**/doc/**/*.{png,gif,jpg,jpeg}'
+    }
 
-        aType.forEach(function(t) {
-            var sGlob = '**/doc/**/*.{png,gif,jpg,jpeg}';
-            imgs = imgs.concat($.glob.sync(path.join(t, sGlob), {ignore: path.join(t, sIgnore)}));
-        })
+    var sIgnore = '**/@(vendor|.git|public|static|_seajs|_sm)/**';
 
-        imgs.forEach(function(file) {
-            gulp.src(file, {base: path.dirname(file)})
-                .pipe($.changed(path.join(_p, 'docs/images')))
-                // .pipe($.imagemin(configs.imagemin))
-                .pipe(gulp.dest(path.join(_p, 'docs/images')))
-        });
-
-        cb();
-    })
-
-    gulp.task('tree', ['clean-markdown', 'copy-img'], function() {
+    gulp.task('tree', ['clean-markdown'], function() {
         var stream = $.mergeStream();
-
-        // 要取的文件的对象
-        var oGlobs = {
-            md: '**/doc/**/!(README).md',
-            twig: '**/Macro/*.twig',
-            scss: '**/@(mixins|inherit)/*.scss',
-            js: '**/?(src)/**/!(static|_seajs|_sm)/*.js'
-        }
 
         aType.forEach(function(t) {
             if (oGlobs[t]) {
                 // 按类型 js
                 APS.forEach(function(p) {
-                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {ignore: path.join(t, sIgnore)}));
+                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {ignore: path.join(p, sIgnore)}));
                 });
             } else if (path.extname(t)) {
                 // 按地址
@@ -155,7 +139,6 @@ module.exports = function(gulp, $, utils, configs) {
             } else {
                 // 按目录
                 for (k in oGlobs) {
-                    console.log(path.join(t, oGlobs[k]));
                     files = files.concat($.glob.sync(path.join(t, oGlobs[k]), {ignore: path.join(t, sIgnore)}));
                 }
             }
@@ -225,6 +208,7 @@ module.exports = function(gulp, $, utils, configs) {
                             markdownData[fileName] = contents;
                             processTree(file, contents);
                         } else {
+                            // 删除没有内容的文件
                             files.splice(files.indexOf(file), 1)
                         }
                         done();
@@ -234,6 +218,14 @@ module.exports = function(gulp, $, utils, configs) {
 
                 markdownData[fileName] = mdData;
                 processTree(file, mdData); //搜索用
+            } else if (/\.(png|gif|jpg|jpeg)/.test(ext)) {
+                files.splice(files.indexOf(file), 1)
+                var dist = path.join(_p, 'docs/images');
+                gulp.src(file, {base: path.dirname(file)})
+                    .pipe($.changed(dist))
+                    // .pipe($.imagemin(configs.imagemin))
+                    .pipe(gulp.dest(dist))
+                // 删除
             }
         })
         return stream;
