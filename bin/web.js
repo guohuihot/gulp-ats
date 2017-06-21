@@ -96,7 +96,7 @@ module.exports = function(gulp, $, utils, configs) {
                             .normal() + '/',
                 path   : path.join(cfg.mode == 4 ? 'test/' : '', pathRelative1)
                             .normal(),
-                rPath  : getRpath(file.path) || '',
+                rPath  : getRpath(file.path),
                 info   : require('../lib/tasks-info'),
             }
         }
@@ -491,17 +491,17 @@ module.exports = function(gulp, $, utils, configs) {
     var getRpath = function(file) {
         var rPath;
         for (p in cfgs) {
-            // 当前文件路径 和 p 这相等
+            // 当前文件路径 和 p 相等
             if (path.normalize(file).indexOf(p) == 0) {
                 var curConfig = cfgs[p];
                 rPath = curConfig.dist != curConfig.libs ?
-                    curConfig.dist + curConfig.libs + '/' : '';
+                    path.relative(p, curConfig.dist + curConfig.libs + '/') : '';
 
                 rPath = curConfig.distEx ? '/' : rPath;
             }
         }
 
-        return rPath.normal();
+        return rPath.normal() || '';
     }
     // watch
 
