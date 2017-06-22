@@ -17,12 +17,6 @@ module.exports = function(gulp, $, utils, configs) {
         cfgs = oInit.configs,
         oTasks = {};
 
-
-    console.log('\n');
-    console.log('当前配置:\n');
-    console.log(oInit.config);
-    console.log('\n');
-
     // 默认项
     argv.d = argv.d === 0 ? false : true;
     // 初始化swig
@@ -352,8 +346,8 @@ module.exports = function(gulp, $, utils, configs) {
         // var stream = gulp.src(files, {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.jshint(configs.jshint))
-            // .pipe($.jshint.reporter())
+            .pipe($.if(argv.j, $.jshint(configs.jshint)))
+            .pipe($.if(argv.j, $.jshint.reporter()))
             .pipe($.data(function(file) {
                 return {
                     name   : path.basename(file.path).slice(0, -3),
@@ -386,8 +380,8 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.changed(dist))
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
-            // .pipe($.jshint(configs.jshint))
-            // .pipe($.jshint.reporter())
+            .pipe($.if(argv.j, $.jshint(configs.jshint)))
+            .pipe($.if(argv.j, $.jshint.reporter()))
             .pipe($.data(tplData))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {

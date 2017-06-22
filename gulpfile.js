@@ -9,8 +9,6 @@ var gulp         = require('gulp'),
     fs           = require('fs-extra');
 
 
-console.trace(1111111111);
-// console.set({ facility: 'local0', title: 'basic' })
 // yargs配置
 $.yargs.alias({
         path      : 'p',
@@ -26,6 +24,7 @@ $.yargs.alias({
         reverse   : 'r',
         mode      : 'm',
         all       : 'al',
+        jshint    : 'j',
         type      : 't'
     })
 

@@ -17,13 +17,15 @@ module.exports = function(gulp, $, utils, configs) {
         files.forEach(function(file) {
             fs.removeSync(file);
         });
-    }
+    };
 
-    var getBaseName = function(filePath) {
-        var ext = path.extname(filePath),
-            basename = path.basename(filePath);
+    var getBaseName = function(oFile) {
+        var filepath = oFile.filepath;
+        var description = oFile.description;
+        var ext = path.extname(filepath),
+            basename = (description || '') + path.basename(filepath);
         if (/\.(twig|scss|js)/.test(ext)) {
-            var aDirs = path.join(path.dirname(filePath), '/').split(path.sep);
+            var aDirs = path.join(path.dirname(filepath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
                 if (/(\w+)Bundle/.test(elem)) {
                     basename = RegExp.$1 + '-' + basename;
@@ -33,12 +35,14 @@ module.exports = function(gulp, $, utils, configs) {
             basename = basename.replace(/\.md$/, '');
         }
         return basename;
-    }
-
-    var processTree = function(file, contents) {
-        var extname = path.extname(file),
-            basename = getBaseName(file),
-            cur = [];
+    };
+    var processTree = function(oFile) {
+        var file = oFile.filepath;
+        var contents = oFile.contents;
+        var extname = path.extname(file);
+        var basename = getBaseName(oFile);
+        var dir;
+        var cur = [];
 
         // 菜单分类命名
         switch (extname) {
@@ -58,7 +62,7 @@ module.exports = function(gulp, $, utils, configs) {
                 cur = cur.concat(tree[dir]);
             }
             if (cur.indexOf(basename) == -1) {
-                cur.push(basename)
+                cur.push(basename);
             }
             tree[dir] = cur;
             searchableDocuments[basename + '.html'] = {
@@ -67,10 +71,10 @@ module.exports = function(gulp, $, utils, configs) {
                 body: $.htmlToText.fromString(contents.toString(), {
                         wordwrap: 130
                     }),
-            }
+            };
         }
         
-    }
+    };
     // 排序
     var objSort = function (old) {
         if (typeof(old) !== 'object' || old === null) {
@@ -83,7 +87,7 @@ module.exports = function(gulp, $, utils, configs) {
             copy[key] = objSort(Array.isArray(v) ? v.sort() : v);
         });
         return copy;
-    }
+    };
 
     // 主体开始
     var _p = argv.p;
@@ -91,12 +95,12 @@ module.exports = function(gulp, $, utils, configs) {
     if (!_p) {
         console.log('err:需要指定路径！');
         return;
-    };
+    }
     var APS = [_p];
 
     if (argv.pEx) {
         APS = APS.concat(argv.pEx.split(','));
-    };
+    }
 
     var aType = argv.type && argv.type.split(',') || [];
     // 没有type, 把目录给type，继续往下走
@@ -110,23 +114,34 @@ module.exports = function(gulp, $, utils, configs) {
         scss: '**/@(mixins|inherit)/*.scss',
         js: '**/src/**/*.js',
         img: '**/doc/**/*.{png,gif,jpg,jpeg}'
-    }
+    };
 
     var sIgnore = '**/@(vendor|.git|static|_seajs|_sm|public)/**';
     var oldFileNum = 0;
     
+    var getRelPath = function(f) {
+        var _relPath;
+        aType.forEach(function(t) {
+            if (f.indexOf(t.normal()) != -1) {
+                _relPath = path.relative(t, f).normal();
+            }
+        });
+        return _relPath;
+    };
     // 先清除html
     gulp.task('markdown:clean', function(cb) {
-        fs.removeGlobSync(_p + '/docs/*.html')
+        fs.removeGlobSync(_p + '/docs/*.html');
         cb();
-    })
+    });
 
     gulp.task('markdown:files', function(cb) {
         aType.forEach(function(t) {
             if (oGlobs[t]) {
                 // 按类型 js
                 APS.forEach(function(p) {
-                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {ignore: path.join(p, sIgnore)}));
+                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {
+                                ignore: path.join(p, sIgnore)
+                            }));
                 });
             } else if (path.extname(t)) {
                 // 按地址
@@ -140,7 +155,9 @@ module.exports = function(gulp, $, utils, configs) {
                 }
                 // 按目录
                 for (k in oGlobs) {
-                    files = files.concat($.glob.sync(path.join(t, oGlobs[k]), {ignore: path.join(t, sIgnore)}));
+                    files = files.concat($.glob.sync(path.join(t, oGlobs[k]), {
+                                ignore: path.join(t, sIgnore)
+                            }));
                 }
             }
         });
@@ -151,25 +168,15 @@ module.exports = function(gulp, $, utils, configs) {
         if (fs.existsSync(readmePath)) {
             files.push(readmePath);
         }
-        cb()
-    })
+        cb();
+    });
 
     gulp.task('markdown:tree', ['markdown:clean', 'markdown:files'], function() {
         var stream = $.mergeStream();
-        var getRelPath = function(f) {
-            var _relPath;
-            aType.forEach(function(t) {
-                if (f.indexOf(t.normal()) != -1) {
-                    _relPath = path.relative(t, f).normal();
-                };
-            });
-            return _relPath;
-        }
         oldFileNum = files.length;
-        files.forEach(function(file, i) {
+        files.forEach(function(file) {
             var ext = path.extname(file);
             var basename = path.basename(file, ext);
-            var filename = getBaseName(file);
             // 随便一个stream, 为了能继续向下执行
             stream.add(gulp.src('./src/libs/demo.html'));
             if (/\.(twig|scss|js)/.test(ext)) {
@@ -186,6 +193,10 @@ module.exports = function(gulp, $, utils, configs) {
                     .pipe($.if(/\.(twig|scss|js)/.test(ext), $.through2.obj(function(file2, encoding, done) {
                         var contents = file2.contents.toString();
                         if (contents) {
+                            if (/@description\s+(\S+)\s/.test(contents)) {
+                                // 保存描述
+                                file2.description = RegExp.$1;
+                            }
                             var aContents = contents.match(/\/\*\*([\s\S]*?)\*\//g);
                             if (aContents) {
                                 var newContents = aContents.join('\n').replace(/@(include|extend)/, '@ $1');
@@ -205,15 +216,8 @@ module.exports = function(gulp, $, utils, configs) {
                             author: argv.a
                         }
                     })))
-                    // 调试用
-                    /*.pipe($.through2.obj(function(file2, encoding, done) {
-                        var contents = String(file2.contents);
-                        console.log(contents);
-                        this.push(file2);
-                        done();
-                    }))*/
                     .pipe($.jsdocToMarkdown({
-                        template: "{{>main}}"
+                        template: '{{>main}}'
                     }))
                     .pipe($.through2.obj(function(file2, encoding, done) {
                         var contents = file2.contents;
@@ -222,11 +226,11 @@ module.exports = function(gulp, $, utils, configs) {
                             console.log(file);
                             var oFile = {
                                 contents: contents,
-                                filepath: getRelPath(file),
-                                filename: filename
-                            }
+                                filepath: file,
+                                description: file2.description
+                            };
                             markdownData.push(oFile);
-                            processTree(file, contents);
+                            processTree(oFile);
                         } else {
                             // 删除没有内容的文件
                             console.log(file, 'removed!');
@@ -239,11 +243,10 @@ module.exports = function(gulp, $, utils, configs) {
                     console.log(file);
                     var oFile = {
                         contents: contents,
-                        filepath:  getRelPath(file),
-                        filename: filename
-                    }
+                        filepath:  file
+                    };
                     markdownData.push(oFile);
-                    processTree(file, contents); //搜索用
+                    processTree(oFile); //搜索用
                 } else {
                     // 删除没有内容的文件
                     console.log(file, 'removed!');
@@ -253,13 +256,13 @@ module.exports = function(gulp, $, utils, configs) {
                 gulp.src(file, {base: path.dirname(file)})
                     .pipe($.changed(dist))
                     // .pipe($.imagemin(configs.imagemin))
-                    .pipe(gulp.dest(dist))
+                    .pipe(gulp.dest(dist));
                 // 删除
                 console.log(file, 'removed!');
             }
-        })
+        });
         return stream;
-    })
+    });
     // markdown
     gulp.task('markdown', ['markdown:tree'], function() {
         // console.log(files);
@@ -283,21 +286,22 @@ module.exports = function(gulp, $, utils, configs) {
         tree = objSort(tree);
         // 生成每个文件
         markdownData.forEach(function(oFile) {
+            var filename = getBaseName(oFile);
             var dataFun = function(file1, cb1) {
                     var contents = oFile.contents.toString()
                             .replace(/@ (include|extend)/, '@$1');
                     if (contents) {
                         cb1(undefined, {
                             contents: $.marked(contents),
-                            filepath: oFile.filepath,
-                            title: oFile.filename,
+                            filepath: getRelPath(oFile.filepath),
+                            title: filename,
                             tree: tree
                         });
                     }
                 },
                 dist;
 
-            dist = path.join('docs/', /readme/.test(oFile.filename) ? 'index.htm' : oFile.filename + '.html');
+            dist = path.join('docs/', /readme/.test(filename) ? 'index.htm' : filename + '.html');
             gulp.src('./tpl/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))

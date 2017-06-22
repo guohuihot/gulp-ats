@@ -31,7 +31,7 @@
     "src": "./src",
     "mode": 1,
     "path": "E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources",
-    "t": 1497512421,
+    "t": 1498094086,
     "alias": "house"
   },
   "E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources": {
@@ -78,7 +78,7 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1498027451,
+    "t": 1498102640,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
@@ -90,7 +90,7 @@
     "src": "src",
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
-    "t": 1498033473,
+    "t": 1498093461,
     "scssPaths": ""
   },
   "E:\\wwwroot\\newhouse": {
@@ -121,5 +121,6 @@
   "build": "web.js",
   "markdown": "markdown.js",
   "clean-markdown": "markdown.js",
-  "markdown:files": "markdown.js"
+  "markdown:files": "markdown.js",
+  "jshint": "jshint.js"
 }
