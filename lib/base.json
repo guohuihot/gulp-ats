@@ -90,7 +90,7 @@
     "src": "src",
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
-    "t": 1498093461,
+    "t": 1498413879,
     "scssPaths": ""
   },
   "E:\\wwwroot\\newhouse": {
@@ -122,5 +122,6 @@
   "markdown": "markdown.js",
   "clean-markdown": "markdown.js",
   "markdown:files": "markdown.js",
-  "jshint": "jshint.js"
+  "jshint": "jshint.js",
+  "vueify": "web.js"
 }

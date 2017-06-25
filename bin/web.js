@@ -432,6 +432,36 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe(gulp.dest(dist))
             .pipe(message('复制并压缩'));
     }
+    oTasks.vue = function(filePath) {
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
+        var dist = cfg.dist;
+
+        return gulp.src(filePath, {
+                base: src
+            })
+            .pipe($.vueify({
+                  "presets": ["es2015"]
+            }))
+            .pipe(gulp.dest(dist))
+            .pipe(message('vueify!'));
+    }
+    oTasks.concatVue = function(dir) {
+        var cfg = getCfgProp(dir);
+        var src = cfg.src;
+        var dist = cfg.dist;
+        var pathRelative = path.relative(src, dir).replace('_', '');
+
+        return gulp.src(dir + '/*.vue', {
+                base: src
+            })
+            .pipe($.vueify({
+                  "presets": ["es2015"]
+            }))
+            .pipe($.rename(pathRelative + '.js'))
+            .pipe(gulp.dest(dist))
+            .pipe(message('vueify!'));
+    }
     /**
      * getCfgProp
      * @description 获取对应配置的属性，主要处理多目录监控里的目录
@@ -584,7 +614,7 @@ module.exports = function(gulp, $, utils, configs) {
             })
         }
         // 监控src
-        $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg}'), {
+        $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg,vue}'), {
             read: false,
             usePolling: true
         }, function(file) {
@@ -615,7 +645,7 @@ module.exports = function(gulp, $, utils, configs) {
                     if (isDir) {
                         oTasks.fonts(file.dirname);
                     }
-                } else if (/\.(png|gif|jpg|jpeg)$/.test(ext)) {
+                } else if (/\.(png|gif|jpe?g)$/.test(ext)) {
                     // 如果是删除小图片，需要重新合并其它图片
                     if (isDir) {
                         oTasks.sprites(file.dirname);
@@ -654,7 +684,13 @@ module.exports = function(gulp, $, utils, configs) {
                         })*/
                     }
                 }
-            } else if (/\.(png|gif|jpg|jpeg)$/.test(ext)) {
+            } else if (/\.(vue)$/.test(ext)) {
+                if (isDir) {
+                    oTasks.concatVue(file.dirname);
+                } else {
+                    oTasks.vue(file.path);
+                }
+            } else if (/\.(png|gif|jpe?g)$/.test(ext)) {
                 if (isDir) {
                     oTasks.sprites(file.dirname);
                 } else {
@@ -672,7 +708,7 @@ module.exports = function(gulp, $, utils, configs) {
                 } else {
                     oTasks.JS(file.path);
                 }
-            } else if (/\.(html|htm|twig|scss)$/.test(ext)) {
+            } else if (/\.(html?|twig|scss)$/.test(ext)) {
                 var fileName = file.stem;
                 // 要处理的文件
                 var _oFiles = {}; 
@@ -846,7 +882,7 @@ module.exports = function(gulp, $, utils, configs) {
                     // 合并
                         oFiles[dirName] = 'fonts';
                     }
-                } else if (/\.(gif|jpg|jpeg|png)$/.test(file)) {
+                } else if (/\.(gif|jpe?g|png)$/.test(file)) {
                     if (dirNameBase[0] != '_') {
                     // 单个文件
                         oFiles[file] = 'image';
@@ -863,7 +899,7 @@ module.exports = function(gulp, $, utils, configs) {
                     // 合并
                         oFiles[dirName] = 'concatJS';
                     }
-                } else if (/\.(html|htm|twig)$/.test(file)) {
+                } else if (/\.(html?|twig)$/.test(file)) {
                     if (fileName[0] != '_') {
                     // 单个文件
                         oFiles[file] = 'html';
@@ -959,5 +995,18 @@ module.exports = function(gulp, $, utils, configs) {
             })
             .pipe($.changed(_dist))
             .pipe(gulp.dest(_dist));
+    });
+    // vue
+    gulp.task('vueify', function() {
+        Object.keys(cfgs).forEach(function(p) {
+            var cfg = cfgs[p];
+            gulp.src(cfg.src + '/**/*.vue', {
+                    base: cfg.src
+                })
+                .pipe($.vueify({
+                      "presets": ["es2015"]
+                }))
+                .pipe(gulp.dest(cfg.dist));
+        });
     });
 };
