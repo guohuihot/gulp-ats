@@ -78,11 +78,11 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1498102640,
+    "t": 1498459490,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
-    "author": "ahuing",
+    "author": "author",
     "distEx": "",
     "libs": "",
     "tpl": "./src/libs/",
@@ -90,8 +90,8 @@
     "src": "src",
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
-    "t": 1498413879,
-    "scssPaths": ""
+    "alias": "t",
+    "t": 1498471583
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",
@@ -123,5 +123,6 @@
   "clean-markdown": "markdown.js",
   "markdown:files": "markdown.js",
   "jshint": "jshint.js",
-  "vueify": "web.js"
+  "vueify": "web.js",
+  "sync": "web.js"
 }
