@@ -19,6 +19,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "browser-sync": "^2.18.12",
     "cheerio": "^0.19.0",
+    "directory-tree": "^2.0.0",
     "fs-extra": "^3.0.1",
     "glob": "^6.0.2",
     "gulp": "^3.9.1",

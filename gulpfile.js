@@ -32,6 +32,7 @@ var task = $.yargs.argv._[0] || 'default';
 var basePath = './lib/base.json';
 var base = fs.readJsonSync(basePath, { throws: false }) || {};
 
+process.env.DEBUG_COLORS = 'true';
 // 如果配置里没有任务对应的文件名，去文件里查找并保存到配置里，下次直接使用
 if (!base[task]) {
     var gulpTasks = fs.readdirSync('./bin/');
