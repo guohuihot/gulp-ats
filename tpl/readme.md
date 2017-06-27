@@ -20,11 +20,11 @@
 #### ats结构
 1. **.git** git的配置文件
 1. **gulp** gulp的配置文件
-	- **css** gulp时css的配置文件，scss模板，css排序规则
-	- **tasks** 所有的任务
-	- **base.json** gulp的基本配置，包括项目目录，文件作者。。。
-	- **tasks.json** gulp任务的提示信息，用于命令行中的提示，让工具使用更简单
-	- **utils.js** js工具模块，gulp内部使用
+    - **css** gulp时css的配置文件，scss模板，css排序规则
+    - **tasks** 所有的任务
+    - **base.json** gulp的基本配置，包括项目目录，文件作者。。。
+    - **tasks.json** gulp任务的提示信息，用于命令行中的提示，让工具使用更简单
+    - **utils.js** js工具模块，gulp内部使用
 1. **node_modules** node模板的存放目录，node会自动生成，默认是被git忽略的
 1. **src** ats的核心部分，css，js，html。。。`维护使用主要是这个目录`
 1. **.gitignore** git的忽略文件的配置
@@ -33,12 +33,37 @@
 
 #### 目录结构
 
-{% for item in tree %}
-	{{item.name}}
-		|___ {% for item1 in item.children %}
-		{{item1.name}}
-	{% endfor %}
+```text
+    
+{% for item in tree.children %}
+{%- if loop.last -%}
+└── {{ item.name }} - {{ item.description -}}
+{%- else -%}
+├── {{ item.name }} - {{ item.description -}}
+{%- endif -%}
+    {% for item1 in item.children %}
+    {%- if loop.last -%}
+    └── {{ item1.name + ' - ' + item1.description -}}
+    {%- else -%}
+    ├── {{ item1.name + ' - ' + item1.description -}}
+    {%- endif -%}
+        {% for item2 in item1.children %}
+        {%- if loop.last -%}
+        └── {{ item2.name + ' - ' + item2.description -}}
+        {%- else -%}
+        ├── {{ item2.name + ' - ' + item2.description -}}
+        {%- endif -%}
+            {% for item3 in item2.children %}
+            {%- if loop.last -%}
+            └── {{ item3.name + ' - ' + item3.description -}}
+            {%- else -%}
+            ├── {{ item3.name + ' - ' + item3.description -}}
+            {%- endif -%}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
 {% endfor %}
+```
 
 #### {{title}}
 {{content|raw}}

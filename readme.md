@@ -20,11 +20,11 @@
 #### ats结构
 1. **.git** git的配置文件
 1. **gulp** gulp的配置文件
-	- **css** gulp时css的配置文件，scss模板，css排序规则
-	- **tasks** 所有的任务
-	- **base.json** gulp的基本配置，包括项目目录，文件作者。。。
-	- **tasks.json** gulp任务的提示信息，用于命令行中的提示，让工具使用更简单
-	- **utils.js** js工具模块，gulp内部使用
+    - **css** gulp时css的配置文件，scss模板，css排序规则
+    - **tasks** 所有的任务
+    - **base.json** gulp的基本配置，包括项目目录，文件作者。。。
+    - **tasks.json** gulp任务的提示信息，用于命令行中的提示，让工具使用更简单
+    - **utils.js** js工具模块，gulp内部使用
 1. **node_modules** node模板的存放目录，node会自动生成，默认是被git忽略的
 1. **src** ats的核心部分，css，js，html。。。`维护使用主要是这个目录`
 1. **.gitignore** git的忽略文件的配置
@@ -33,22 +33,149 @@
 
 #### 目录结构
 
+```text
+    
+├── .babelrc - 
+├── .bashrc - 
+├── bin - 
+    ├── default.js - 
+    
+    ├── dev.js - 
+    
+    ├── imageresize.js - 
+    
+    ├── init.js - 
+    
+    ├── jshint.js - 
+    
+    ├── markdown.js - 
+    
+    ├── pack.js - 
+    
+    ├── web.js - 
+    
+    └── webdown.js - 
+    
+├── editorconfig - 
+├── gulpfile.js - 
+├── lib - 
+    ├── base.json - 
+    
+    ├── configs.js - 
+    
+    ├── csscomb.json - 
+    
+    ├── init.js - 
+    
+    ├── js - 
+        └── jquery.js - 
+        
+    
+    ├── swig - 
+        ├── filters.js - 
+        
+        └── locals.js - 
+        
+    
+    ├── tasks-info.js - 
+    
+    └── utils.js - 
+    
+├── package.json - 
+├── readme.md - 
+├── src - 
+    └── libs - 
+        ├── css - 
+            ├── ats.scss - 
+            ├── demo.scss - 
+            ├── inherit - 
+            ├── mixins - 
+            ├── static - 
+            ├── _font-demo.scss - 
+            ├── _font-modal.scss - 
+            ├── _grid.scss - 
+            ├── _header.scss - 
+            ├── _img-demo.scss - 
+            ├── _modal.scss - 
+            └── _variables.scss - 
+        
+        ├── demo.html - 
+        
+        ├── fonts - 
+            ├── _demo - 
+            └── _modal - 
+        
+        ├── images - 
+            └── _demo - 
+        
+        ├── js - 
+            ├── demo.js - 
+            ├── plugin - 
+            ├── static - 
+            ├── _common - 
+            ├── _js_header.html - 
+            └── _seajs - 
+        
+        ├── pic - 
+            └── s.png - 
+        
+        └── _base.html - 
+        
+    
+└── tpl - 
+    ├── css - 
+        ├── fonts.scss - 
+        
+        └── images.scss - 
+        
+    
+    ├── html - 
+        ├── fonts.html - 
+        
+        ├── images.html - 
+        
+        └── toolsbar.html - 
+        
+    
+    ├── markdown - 
+        ├── fonts - 
+            ├── glyphicons-halflings-regular.eot - 
+            ├── glyphicons-halflings-regular.svg - 
+            ├── glyphicons-halflings-regular.ttf - 
+            ├── glyphicons-halflings-regular.woff - 
+            ├── glyphicons-halflings-regular.woff2 - 
+            ├── modal.eot - 
+            └── modal.woff - 
+        
+        ├── img - 
+            ├── glyphicons-halflings-white.png - 
+            └── glyphicons-halflings.png - 
+        
+        ├── index.html - 
+        
+        ├── quicksearch.html - 
+        
+        ├── scripts - 
+            ├── fulltext-search-ui.js - 
+            ├── fulltext-search.js - 
+            ├── highlight.min.js - 
+            ├── jqmodal.js - 
+            ├── jquery.zeroclipboard.js - 
+            ├── lunr.min.js - 
+            ├── prettify - 
+            ├── toc.js - 
+            └── ZeroClipboard.swf - 
+        
+        └── styles - 
+            ├── highlight - 
+            ├── jqmodal.css - 
+            └── site.cerulean.css - 
+        
+    
+    └── readme.md - 
+    
 
-	
-		|___ 
-
-	
-		|___ 
-
-	
-		|___ 
-
-	
-		|___ 
-
-	
-		|___ 
-
+```
 
 #### 使用说明
 
@@ -114,7 +241,9 @@ gulp init	查看(设置)当前配置
 gulp build	初始化或同步一个项目
 	-p -d -a -m --src --dist --distEx	同init
 
-	--all	重建, 默认不重建，只同步
+	--all	类型：Boolean，默认值：false;
+			false - 只覆盖已存在的核心代码并重建
+			true - 会将所有核心的代码覆盖并重建
 
 	
 gulp watch	监控一个项目目录
@@ -130,40 +259,14 @@ gulp watch	监控一个项目目录
 			类型：bool, 默认值：false
 
 	
-gulp add	新加一个分类到项目里
-	-n(--name)	分类名称
-			类型：string, 默认值：null
-			
-
-	
-gulp clean	清理文件	
-	-p	同build	清理后项目目录下src目录,谨慎使用！
-
-	
-gulp pack:patch	压缩文件并删除原文件
-	-p	项目地址
-
-	-n	打包名称
-
-	
 gulp markdown	markdown文件转html
-	-p	从p目录里抓取所有内容，并生成说明文档到当前目录下的docs中
+	-p	从p目录里抓取所有内容，并生成说明文档到p目录下的docs中
 
-	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
-
-	-t(--type)	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
+	-t(--type)	可选，直接从p目录抓取太慢，可以指定类型、目录或者地址抓取，多个以,号隔开
 			按类型 --type='js,md,twig,css'
 			按目录 --type='e:/a,e:/b'
 			按地址 --type='e:/a.md,e:/b.js'
+			类型：String
 
 	
-gulp webdown	下载网页(扒皮)	
-	-h	网页地址
-
-	-n	页面名称
-
-	-l	内容图片的标志
-
-	-d	下载目录
-
-	
+简写设置

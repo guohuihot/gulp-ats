@@ -1,12 +1,13 @@
-module.exports = function(gulp, $) {
+module.exports = function(gulp, $, utils, configs) {
     var reg = new RegExp('node_modules|.git');
     var tree = $.directoryTree(process.cwd(), {
                     exclude: reg
                 }, function(item, PATH) {
                     // console.log(item, PATH);
                 });
-    
-// console.log(tree);
+    // 初始化swig
+    $.swig(configs.swig);
+console.log(tree);
     gulp.task('default', function() {
         var info = require('../lib/tasks-info');
         console.log(info);
