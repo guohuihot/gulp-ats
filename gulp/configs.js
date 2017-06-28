@@ -1,38 +1,115 @@
 module.exports = function($, utils) {
     return {
         jshint: {
-            bitwise       : false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
-            curly         : false, //循环或者条件语句必须使用花括号包围
-            camelcase     : true, // 使用驼峰命名(camelCase)或全大写下划线命名(UPPER_CASE)
-            eqeqeq        : false, //强制使用三等号
-            indent        : 4,// 代码缩进
-            latedef       : 'nofunc', // 禁止定义之前使用变量，忽略 function 函数声明
-            newcap        : true, // 构造器函数首字母大写
-            quotmark      : true, // 为 true 时，禁止单引号和双引号混用
-            undef         : true, // 变量未定义
-            unused        : true, // 变量未使用
-            strict        : false, // 严格模式
-            maxparams     : 4, //最多参数个数
-            immed         : true, 
+            "bitwise": false, //禁用位运算符，位运算符在 js 中使用较少，经常是把 && 错输成 &
+            "curly": true, //循环或者条件语句必须使用花括号包围
+            "camelcase": false, // 使用驼峰命名(camelCase)或全大写下划线命名(UPPER_CASE)
+            "eqeqeq": false, //强制使用三等号
+            "indent": 4, // 代码缩进
+            "latedef": "nofunc", // 禁止定义之前使用变量，忽略 function 函数声明
+            "newcap": true, // 构造器函数首字母大写
+            "quotmark": true, // 为 true 时，禁止单引号和双引号混用
+            "undef": true, // 变量未定义
+            "unused": true, // 变量未使用
+            "strict": false, // 严格模式
+            "maxparams": 4, //最多参数个数
+            "forin": true, // for-in 语句是否要求过滤原型链上的对象
+            /**
+            * 不允许空的代码快，默认关闭
+            */
+            "noempty": false,
+            /**
+            * 不允许使用 "non-breaking whitespace"。
+            *
+            * 这些字符在非 UTF8 页面会导致代码失效
+            */
+            "nonbsp": true,
+
+            /**
+            * 阻止直接使用 new 调用构造函数的语句（不赋值对象）
+            *
+            * // OK
+            * var a = new Animal();
+            *
+            * // Warn
+            * new Animal();
+            */
+            "nonew": true,
+            "freeze": false, // 是否阻止修改或拓展基本对象（Array、Date 等）的原型链 原型链污染比较危险，默认打开
+
+            /**
+            * 变量只能在函数域上定义，在代码块上定义的变量给出警告
+            *
+            * // OK
+            * function test() {
+             *    var x;
+             *
+             *    if (true) {
+             *        x = 0;
+             *    }
+             *
+             *    x += 1;
+             * }
+            *
+            * // No Way
+            * function test() {
+             *
+             *    if (true) {
+             *        var x = 0;
+             *    }
+             *
+             *    x += 1;
+             * }
+            */
+            "funcscope": true,
+            /**
+            * 写字面量时，逗号放前面给出警告，例如：
+            *
+            * var obj = {
+             *     name: 'Anton'
+             *   , handle: 'valueOf'
+             *   , role: 'SW Engineer'
+             * }
+            */
+            "laxcomma": true,
+            /**
+            * 每个函数只允许使用一个 var 定义变量
+            *
+            * 默认关闭
+            */
+            "onevar": false,
+            "immed": true,
             //匿名函数调用必须 (function() { // body }()); 而不是 (function() { // body })();
-            maxdepth      : 4, //最大嵌套深度
-            maxcomplexity : 4, // 复杂度检测
-            maxlen        : 100, // 最大行数
-            asi           : false,
-            boss          : true, //控制“缺少分号”的警告
-            lastsemic     : true, // 检查一行代码最后声明后面的分号是否遗漏
-            laxcomma      : true, //检查不安全的折行，忽略逗号在最前面的编程风格
-            loopfunc      : true, //检查循环内嵌套 function
-            multistr      : true, // 检查多行字符串
-            notypeof      : true, // 检查无效的 typeof 操作符值
-            sub           : true, // person['name'] vs. person.name
-            supernew      : true, // new function () { ... } 和 new Object ;
-            validthis     : true, // 在非构造器函数中使用 this 
-            node          : true,
-            jquery        : true,
-            globals: {
-                seajs   : false,
-                uri2MVC : false
+            "maxdepth": 4, //最大嵌套深度
+            "maxcomplexity": 6, // 复杂度检测
+            "maxlen": 100, // 最大行数
+            "asi": false,
+            "boss": true, //控制“缺少分号”的警告
+            "lastsemic": true, // 检查一行代码最后声明后面的分号是否遗漏
+            "laxcomma": true, //检查不安全的折行，忽略逗号在最前面的编程风格
+            "loopfunc": true, //检查循环内嵌套 function
+            "multistr": true, // 检查多行字符串
+            "notypeof": true, // 检查无效的 typeof 操作符值
+            "sub": true, // person['name'] vs. person.name
+            "supernew": true, // new function () { ... } 和 new Object ;
+            "validthis": true, // 在非构造器函数中使用 this 
+            "node": true,
+            "browser": true, // 暴露浏览器的变量
+            "devel": true,
+            "jquery": true,
+            "globals": {
+                "$": true, //$为全局变量
+                "jQuery": true, //jQuery为全局变量
+                "seajs": false,
+                "csrf_token": false,
+                "BASE_URL": false,
+                "jsbase": false,
+                "baseUrl": false,
+                "BASE_THEME": false,
+                "UEDITOR_HOME_URL": false,
+                "moment": false,
+                "define": false,
+                "uri2MVC": false
             }
         },
         uglify: {

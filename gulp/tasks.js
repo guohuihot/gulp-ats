@@ -1,4 +1,4 @@
-module.exports = {
+var tasks = {
     
     '\t': {
         
@@ -88,7 +88,11 @@ module.exports = {
         argv: {
             
             '-p -d -a -m --src --dist --distEx': '同init',
-            '--all': '重建, 默认不重建，只同步',
+            '--all': [
+                '类型：Boolean，默认值：false;',
+                'false - 只覆盖已存在的核心代码并重建',
+                'true - 会将所有核心的代码覆盖并重建',
+            ].join('\n\t\t\t')
         }
     },
     
@@ -117,72 +121,53 @@ module.exports = {
         }
     },
     
-    add: {
-        
-        title: '新加一个分类到项目里',
-        
-        argv: {
-            
-            '-n(--name)': [
-                '分类名称',
-                '类型：string, 默认值：null',
-                ''
-            ].join('\n\t\t\t')
-        }
-    },
-    
-    clean: {
-        
-        title: '清理文件\t',
-        
-        argv: {
-            
-            '-p': '同build\t清理后项目目录下src目录,谨慎使用！'
-        }
-    },
-    
-    'pack:patch': {
-        
-        title: '压缩文件并删除原文件',
-        
-        argv: {
-            
-            '-p': '项目地址',
-            
-            '-n': '打包名称'
-        }
-    },
-    
     markdown: {
         
         title: 'markdown文件转html',
         
         argv: {
             
-            '-p': '从p目录里抓取所有内容，并生成说明文档到当前目录下的docs中',
-            '--pEx': '可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取',
-            '--type': [
-                '可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取',
+            '-p': '从p目录里抓取所有内容，并生成说明文档到p目录下的docs中',
+            '-t(--type)': [
+                '可选，直接从p目录抓取太慢，可以指定类型、目录或者地址抓取，多个以,号隔开',
                 '按类型 --type=\'js,md,twig,css\'',
                 '按目录 --type=\'e:/a,e:/b\'',
                 '按地址 --type=\'e:/a.md,e:/b.js\'',
+                '类型：String',
             ].join('\n\t\t\t')
-        }
-    },
-    
-    webdown: {
-        
-        title: '下载网页(扒皮)\t',
-        
-        argv: {
-            
-            '-h': '网页地址',
-            
-            '-n': '页面名称',
-            
-            '-l': '内容图片的标志',
-            
-            '-d': '下载目录'
         }
     }
 }
+
+// 处理demo
+var taskInfo = '',
+    params;
+
+taskInfo += [
+    '\n',
+    '例：',
+    'gulp build -p \'C:\\Users\\Administrator\\Desktop\\test\'',
+    '显示帮助信息(参数一个字母一个中线，如：-p，大于一个字母两个中线，如：--path)',
+    '\n'
+].join('\n');
+
+for (var i in tasks) {
+    params = '';
+    for (var j in tasks[i]['argv']) {
+        params += j + '\t' + tasks[i]['argv'][j] + '\n\n\t';
+    }
+    taskInfo += 'gulp ' + i + '\t' + tasks[i]['title'] + '\n\t' + params + '\n';
+}
+
+taskInfo += [
+    '\n',
+    '简写设置',
+    'alias w=\'gulp watch\'',
+    'alias g=\'gulp\'',
+    'alias m=\'gulp markdown\'',
+    'alias b=\'gulp build\'',
+    'alias ..=\'cd ..\'',
+    '\n'
+].join('\n\n\t');
+
+module.exports = taskInfo;

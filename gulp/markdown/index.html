@@ -109,7 +109,8 @@
 
 <footer>
 	<span class="copyright">
-	copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now()|date('Y-m-d H:i:s')}} 更新
+	copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now()|date('Y-m-d H:i:s')}} 更新<br/>
+	FilePath: {{filepath}}
 	</span>
 </footer>
 
@@ -121,7 +122,7 @@
 <script src="scripts/fulltext-search-ui.js"></script>
 <script src="scripts/jquery.zeroclipboard.js"></script>
 
-<script>
+<script type="text/javascript">
 $( function () {
 	$( "[id*='$']" ).each( function () {
 		var $this = $( this );

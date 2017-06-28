@@ -6,6 +6,13 @@ var path = require('path');
 String.prototype.normal = function() {
     return this.split(path.sep).join('/');
 }
+// [a, b, c, d].chunk(2) => [[a, b], [c, d]]
+Array.prototype.chunk = function(n) {
+    for (var i = 0, temp = [], l = ~~this.length / n; temp.length < l; temp[i++] = this.splice(0, n));
+    return temp;
+}
+
+// [1, 2, 3, 4, 5, 6].chunk(2)
 
 var utils = {
         /**
@@ -96,6 +103,18 @@ var utils = {
                 }
             }
             return [nW, nH];
+        },
+        getTasks: function(str) {
+            var reg = new RegExp('gulp.task\\([\'\"]\\s?(\\S+)\\s?[\'\"]', 'g');
+            var arr = reg.exec(str);
+            var tasks = [];
+
+            while (arr) {
+                tasks.push(arr[1]);
+                arr = reg.exec(str);
+            }
+
+            return tasks;
         }
     };
 

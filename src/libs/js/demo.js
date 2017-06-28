@@ -1,4 +1,5 @@
 {% include '_js_header.html' %}
+// @require('babel');
 
 define(function(require, exports, moudles) {
 	var $ = require('jquery');
