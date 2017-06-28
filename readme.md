@@ -269,4 +269,19 @@ gulp markdown	markdown文件转html
 			类型：String
 
 	
-简写设置
+
+
+
+	简写设置
+
+	alias w='gulp watch'
+
+	alias g='gulp'
+
+	alias m='gulp markdown'
+
+	alias b='gulp build'
+
+	alias ..='cd ..'
+
+	
