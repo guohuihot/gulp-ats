@@ -97,6 +97,11 @@ module.exports = function(gulp, $, utils, configs) {
         return;
     }
     var APS = [_p];
+
+    if (argv.pEx) {
+        APS = APS.concat(argv.pEx.split(','));
+    }
+
     var aType = argv.type && argv.type.split(',') || [];
     // 没有type, 把目录给type，继续往下走
     if (!aType.length) {

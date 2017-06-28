@@ -36,7 +36,6 @@
 ```text
     
 ├── .babelrc - 
-├── .bashrc - 
 ├── bin - 
     ├── default.js - 
     
@@ -241,9 +240,7 @@ gulp init	查看(设置)当前配置
 gulp build	初始化或同步一个项目
 	-p -d -a -m --src --dist --distEx	同init
 
-	--all	类型：Boolean，默认值：false;
-			false - 只覆盖已存在的核心代码并重建
-			true - 会将所有核心的代码覆盖并重建
+	--all	重建, 默认不重建，只同步
 
 	
 gulp watch	监控一个项目目录
@@ -259,29 +256,40 @@ gulp watch	监控一个项目目录
 			类型：bool, 默认值：false
 
 	
-gulp markdown	markdown文件转html
-	-p	从p目录里抓取所有内容，并生成说明文档到p目录下的docs中
+gulp add	新加一个分类到项目里
+	-n(--name)	分类名称
+			类型：string, 默认值：null
+			
 
-	-t(--type)	可选，直接从p目录抓取太慢，可以指定类型、目录或者地址抓取，多个以,号隔开
+	
+gulp clean	清理文件	
+	-p	同build	清理后项目目录下src目录,谨慎使用！
+
+	
+gulp pack:patch	压缩文件并删除原文件
+	-p	项目地址
+
+	-n	打包名称
+
+	
+gulp markdown	markdown文件转html
+	-p	从p目录里抓取所有内容，并生成说明文档到当前目录下的docs中
+
+	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
+
+	-t(--type)	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
 			按类型 --type='js,md,twig,css'
 			按目录 --type='e:/a,e:/b'
 			按地址 --type='e:/a.md,e:/b.js'
-			类型：String
 
 	
+gulp webdown	下载网页(扒皮)	
+	-h	网页地址
 
+	-n	页面名称
 
+	-l	内容图片的标志
 
-	简写设置
-
-	alias w='gulp watch'
-
-	alias g='gulp'
-
-	alias m='gulp markdown'
-
-	alias b='gulp build'
-
-	alias ..='cd ..'
+	-d	下载目录
 
 	
