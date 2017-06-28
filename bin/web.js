@@ -448,7 +448,7 @@ module.exports = function(gulp, $, utils, configs) {
                 indent             : '    ',           // Indent whitespace
                 headerComment      : true,             // Using <header-comment> Insert the header comments
                 templateReplaceTag : '__template__', // vue component template replace tag
-                loadCSSMethod      : 'require.loadCSS' // define the load css method for require
+                loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename({extname: '.js'}))
             .pipe($.babel({
@@ -474,7 +474,7 @@ module.exports = function(gulp, $, utils, configs) {
                 indent             : '    ',           // Indent whitespace
                 headerComment      : true,             // Using <header-comment> Insert the header comments
                 templateReplaceTag : '__template__', // vue component template replace tag
-                loadCSSMethod      : 'require.loadCSS' // define the load css method for require
+                loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename(pathRelative + '.js'))
             .pipe(gulp.dest(dist))
@@ -883,7 +883,7 @@ module.exports = function(gulp, $, utils, configs) {
                 .pipe(gulp.dest(proDist))
             }
 
-            var files = $.glob.sync(path.join(proSrc, '/**/*.{gif,jpg,jpeg,png,svg,html,htm,js}'));
+            var files = $.glob.sync(path.join(proSrc, '/**/*.{gif,jpg,jpeg,png,svg,html,htm,js,vue}'));
             // 先整理
             files.forEach(function(file) {
                 var fileName = path.basename(file);
@@ -892,6 +892,14 @@ module.exports = function(gulp, $, utils, configs) {
 
                 if (dirNameBase == 'static') {
                         oFiles[file] = 'copy';
+                } else if (/\.vue$/.test(file)) {
+                    if (dirNameBase[0] != '_') {
+                    // 单个文件
+                        oFiles[file] = 'vue';
+                    } else if (!utils.inArray(dirName, oFiles.fonts)) {
+                    // 合并
+                        oFiles[dirName] = 'concatVue';
+                    }
                 } else if (/\.svg$/.test(file)) {
                     if (dirNameBase[0] != '_') {
                     // 单个文件
@@ -1013,18 +1021,5 @@ module.exports = function(gulp, $, utils, configs) {
             })
             .pipe($.changed(_dist))
             .pipe(gulp.dest(_dist));
-    });
-    // vue
-    gulp.task('vueify', function() {
-        Object.keys(cfgs).forEach(function(p) {
-            var cfg = cfgs[p];
-            gulp.src(cfg.src + '/**/*.vue', {
-                    base: cfg.src
-                })
-                .pipe($.vueify({
-                      "presets": ["es2015"]
-                }))
-                .pipe(gulp.dest(cfg.dist));
-        });
     });
 };
