@@ -8,7 +8,7 @@ module.exports = function(gulp, $, utils, configs) {
         searchableDocuments = {},
         // 处理一次js保存起来后面用
         markdownData = [];
-
+    var hasReadme;
     // 初始化swig
     $.swig(configs.swig);
     // 扩展fs方法
@@ -109,7 +109,7 @@ module.exports = function(gulp, $, utils, configs) {
     }
     // 要取的文件的对象
     var oGlobs = {
-        md: '**/doc/**/!(README).md',
+        md: '**/doc/**/*.md',
         twig: '**/Macro/*.twig',
         scss: '**/@(mixins|inherit)/*.scss',
         js: '**/src/**/*.js',
@@ -130,7 +130,7 @@ module.exports = function(gulp, $, utils, configs) {
     };
     // 先清除html
     gulp.task('markdown:clean', function(cb) {
-        fs.removeGlobSync(_p + '/docs/*.html');
+        fs.removeGlobSync(_p + '/docs/*.{html,htm}');
         cb();
     });
 
@@ -148,10 +148,17 @@ module.exports = function(gulp, $, utils, configs) {
                 files.push(t);
             } else {
                 // js 有地址里有src，glob里去掉src
-                if (t.indexOf('/src') == -1) {
+                if (t.normal().indexOf('/src') == -1) {
                     oGlobs.js = '**/src/**/*.js';
                 } else {
                     oGlobs.js = '**/*.js';
+                }
+                if (t.normal().indexOf('/doc') == -1) {
+                    oGlobs.md = '**/doc/**/*.md';
+                    oGlobs.img = '**/doc/**/*.{png,gif,jpg,jpeg}';
+                } else {
+                    oGlobs.md = '**/*.md';
+                    oGlobs.img = '**/*.{png,gif,jpg,jpeg}';
                 }
                 // 按目录
                 for (k in oGlobs) {
@@ -163,11 +170,6 @@ module.exports = function(gulp, $, utils, configs) {
         });
         // console.log(files);
         // return false;
-        // 加入readme
-        var readmePath = path.join(argv.p, 'Resources/doc/readme.md');
-        if (fs.existsSync(readmePath)) {
-            files.push(readmePath);
-        }
         cb();
     });
 
@@ -251,7 +253,7 @@ module.exports = function(gulp, $, utils, configs) {
                     // 删除没有内容的文件
                     console.log(file, 'removed!');
                 }
-            } else if (/\.(png|gif|jpg|jpeg)/.test(ext)) {
+            } else if (/\.(png|gif|jpe?g)/.test(ext)) {
                 var dist = path.join(_p, 'docs/images');
                 gulp.src(file, {base: path.dirname(file)})
                     .pipe($.changed(dist))
@@ -284,12 +286,19 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe(gulp.dest(path.join(_p, 'docs')));
         // 整理顺序
         tree = objSort(tree);
+        // 添加封面
+        markdownData.push({
+            contents: new Buffer('cover'),
+            filepath: 'index'
+        })
+
         // 生成每个文件
         markdownData.forEach(function(oFile) {
             var filename = getBaseName(oFile);
             var dataFun = function(file1, cb1) {
                     var contents = oFile.contents.toString()
                             .replace(/@ (include|extend)/, '@$1');
+                            
                     if (contents) {
                         cb1(undefined, {
                             contents: $.marked(contents),
@@ -301,7 +310,7 @@ module.exports = function(gulp, $, utils, configs) {
                 },
                 dist;
 
-            dist = path.join('docs/', /readme/.test(filename) ? 'index.htm' : filename + '.html');
+            dist = path.join('docs/', filename + '.html');
             gulp.src('./tpl/markdown/index.html')
                 .pipe($.plumber())
                 .pipe($.data(dataFun))

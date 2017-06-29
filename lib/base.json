@@ -78,7 +78,7 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1498637239,
+    "t": 1498719710,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
@@ -91,7 +91,7 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
     "alias": "t",
-    "t": 1498492520
+    "t": 1498698049
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",

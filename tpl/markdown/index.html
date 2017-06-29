@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-	<title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>{{ title }}</title>
 
-	<!--[if lt IE 9]>
-	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-	<!-- <link type="text/css" rel="stylesheet" href="styles/highlight/solarized-light.css"> -->
-	<link type="text/css" rel="stylesheet" href="styles/highlight/monokai-sublime.css">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- <link type="text/css" rel="stylesheet" href="styles/highlight/solarized-light.css"> -->
+    <link type="text/css" rel="stylesheet" href="styles/highlight/monokai-sublime.css">
 
-	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
-	<link type="text/css" rel="stylesheet" href="styles/jqmodal.css">
+    <link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+    <link type="text/css" rel="stylesheet" href="styles/jqmodal.css">
 
 </head>
 
@@ -20,47 +20,47 @@
 
 <div class="navbar navbar-default navbar-fixed-top ">
 <div class="container">
-	<div class="navbar-header">
-		<a class="navbar-brand" href="./">说明文档</a>
-		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
+    <div class="navbar-header">
+        <a class="navbar-brand" href="./">说明文档</a>
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
         </button>
-	</div>
-	<div class="navbar-collapse collapse" id="topNavigation">
-		<ul class="nav navbar-nav">
-		{# {{ tree|json_encode|raw }} #}
-		{% for Adirs, dir1 in tree %}
-			{% if loop.index < 9 %}
-			<li class="dropdown {{loop.index}}">
-				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">{{Adirs}}<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					{% for dir in dir1 %}
-					<li><a href="{{dir}}.html#jsdoc">{{dir}}</a></li>
-					{% endfor %}
-				</ul>
-			</li>
-			{% else %}
-				{% if loop.index == 9 %}
-			<li class="dropdown">
-				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">更多<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-				{% endif %}
+    </div>
+    <div class="navbar-collapse collapse" id="topNavigation">
+        <ul class="nav navbar-nav">
+        {# {{ tree|json_encode|raw }} #}
+        {% for Adirs, dir1 in tree %}
+            {% if loop.index < 9 %}
+            <li class="dropdown {{loop.index}}">
+                <a href="global.html" class="dropdown-toggle" data-toggle="dropdown">{{Adirs}}<b class="caret"></b></a>
+                <ul class="dropdown-menu ">
+                    {% for dir in dir1 %}
+                    <li><a href="{{dir}}.html#jsdoc">{{dir}}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% else %}
+                {% if loop.index == 9 %}
+            <li class="dropdown">
+                <a href="global.html" class="dropdown-toggle" data-toggle="dropdown">更多<b class="caret"></b></a>
+                <ul class="dropdown-menu ">
+                {% endif %}
 
-					<li><b style="padding-left: 5px">{{Adirs}}</b></li>
-					{% for dir in dir1 %}
-					<li><a href="{{dir}}.html#jsdoc">{{dir}}</a></li>
-					{% endfor %}
+                    <li><b style="padding-left: 5px">{{Adirs}}</b></li>
+                    {% for dir in dir1 %}
+                    <li><a href="{{dir}}.html#jsdoc">{{dir}}</a></li>
+                    {% endfor %}
 
-				{% if loop.last %}
-				</ul>
-			</li>
-				{% endif %}
-			{% endif %}
-		{% endfor %}
-		</ul>
-		<div class="col-sm-3 col-md-3">
+                {% if loop.last %}
+                </ul>
+            </li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        </ul>
+        <div class="col-sm-3 col-md-3">
             <form class="navbar-form" role="search">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="搜索关键字" name="q" id="search-input">
@@ -70,7 +70,7 @@
                 </div>
             </form>
         </div>
-	</div>
+    </div>
 
 </div>
 </div>
@@ -79,15 +79,26 @@
 <div class="container" id="toc-content">
 <div class="row">
 
-	<div class="col-md-9">
-		<div id="main">{{contents|raw}}</div>
-	</div>
+    <div class="col-md-9">
+        <div id="main">
+            {% if contents|trim == '<p>cover</p>' %}
+                {% for k, v in tree %}
+                    <h4>{{k}}</h4>
+                    {% for k1, v1 in v %}
+                        <h5><a href="{{v1}}.html">{{v1}}</a></h5>
+                    {% endfor %}
+                {% endfor %}
+            {% else %}
+            {{contents|raw}}
+            {% endif %}
+        </div>
+    </div>
 
-	<div class="clearfix"></div>
+    <div class="clearfix"></div>
 
-	<div class="col-md-3">
-		<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-	</div>
+    <div class="col-md-3">
+        <div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+    </div>
 
 </div>
 </div>
@@ -108,10 +119,9 @@
 </div>
 
 <footer>
-	<span class="copyright">
-	copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now()|date('Y-m-d H:i:s')}} 更新<br/>
-	FilePath: {{filepath}}
-	</span>
+    <span class="copyright">
+    copyright <a href="http://www.08cms.com" target="_blank">08cms.com</a> <br> {{now()|date('Y-m-d H:i:s')}} 更新<br/>
+    </span>
 </footer>
 
 <script src="scripts/prettify/jquery.min.js"></script>
@@ -124,58 +134,58 @@
 
 <script type="text/javascript">
 $( function () {
-	$( "[id*='$']" ).each( function () {
-		var $this = $( this );
+    $( "[id*='$']" ).each( function () {
+        var $this = $( this );
 
-		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
-	} );
+        $this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+    } );
 
-	$.catchAnchorLinks( {
+    $.catchAnchorLinks( {
         navbarOffset: 10
-	} );
-	$( "#toc" ).toc( {
-		anchorName  : function ( i, heading, prefix ) {
-			var id = $( heading ).attr( "id" );
-			return  prefix + i;
-			return id && (id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') + i) || ( prefix + i );
-		},
-		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
-		showAndHide : false,
-		smoothScrolling: true
-	} );
+    } );
+    $( "#toc" ).toc( {
+        anchorName  : function ( i, heading, prefix ) {
+            var id = $( heading ).attr( "id" );
+            return  prefix + i;
+            return id && (id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') + i) || ( prefix + i );
+        },
+        selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+        showAndHide : false,
+        smoothScrolling: true
+    } );
 
-	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
-	$( '.dropdown-toggle' ).dropdown();
+    $( "#main span[id^='toc']" ).addClass( "toc-shim" );
+    $( '.dropdown-toggle' ).dropdown();
 
     $( "table" ).each( function () {
       var $this = $( this );
       $this.addClass('table table-bordered table-striped js-options-table');
     } );
     $('pre').each(function(index, el) {
-    	$code = $(this).find('code');
-    	$code.attr('class', function(i, c) {
-    		if (c) {
-    			$(this).before('<span class="btn-copy">复制</span>')
-    		};
-    		return c && c.replace('xml', 'html');
-    	})
-    	
+        $code = $(this).find('code');
+        $code.attr('class', function(i, c) {
+            if (c) {
+                $(this).before('<span class="btn-copy">复制</span>')
+            };
+            return c && c.replace('xml', 'html');
+        })
+        
     });
 
 
     $('body')
-    	.on('copy', '.btn-copy', function(e) {
-    		$('.btn-copy').text('复制');
+        .on('copy', '.btn-copy', function(e) {
+            $('.btn-copy').text('复制');
             e.clipboardData.clearData();
             e.clipboardData.setData("text/plain", $(this).text('已复制').next().text());
             e.preventDefault();
         })
     // 高亮
-	hljs.initHighlightingOnLoad();
+    hljs.initHighlightingOnLoad();
 
-	// 图片预览
-	
-	var getImgSize = function(img, maxW, maxH) {
+    // 图片预览
+    
+    var getImgSize = function(img, maxW, maxH) {
             var nH, nW, _W, _H;
 
             nW = _W = img.width;
@@ -192,8 +202,8 @@ $( function () {
             }
             return [nW, nH];
         }
-	$('#main').off('.img-click').on('click.img-click', 'img', function() {
-			var imgUrl = this.src;
+    $('#main').off('.img-click').on('click.img-click', 'img', function() {
+            var imgUrl = this.src;
             var _img = new Image();
             // 图片加载完成再弹出，否则会错位
             _img.onload=function () {
@@ -204,12 +214,12 @@ $( function () {
                 // 处理小图片
                 var _h = Math.max(aImgWH[1], 150) + 'px';
                 var html = '<div class="imgs-lay" style="height: '+ _h +'"><img style="width: '+ aImgWH[0] +'px; height: '+ aImgWH[1] +'px" src="'+ imgUrl +'" /><div class="imgs-prev font-ico-arwl" style="line-height: '+ _h +'"></div><div class="imgs-next font-ico-arwr" style="line-height: '+ _h +'"></div></div>';
-					$.jqModal.lay(html);
+                    $.jqModal.lay(html);
             }
 
             _img.src = imgUrl;
 
-	})
+    })
 
 
 } );
@@ -219,10 +229,10 @@ $( function () {
 
 
 <script type="text/javascript">
-	$(document).ready(function() {
-		SearcherDisplay.init();
-	});
+    $(document).ready(function() {
+        SearcherDisplay.init();
+    });
 </script>
-
+    <!-- FilePath: {{filepath}} -->
 </body>
 </html>

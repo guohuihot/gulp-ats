@@ -440,20 +440,17 @@ module.exports = function(gulp, $, utils, configs) {
         return gulp.src(filePath, {
                 base: src
             })
-            .pipe($.vueModule({
+            .pipe($.plumber())
+            .pipe($.vueModule2({
                 debug              : false,            // Debug mode
-                amd                : false,            // AMD style, Define module name and deps
+                amd                : true,            // AMD style, Define module name and deps
                 define             : true,             // Using define() wrapper the module, false for Node.js (CommonJS style)
-                defineName         : false,            // Define the module name
+                defineName         : true,            // Define the module name
                 indent             : '    ',           // Indent whitespace
                 headerComment      : true,             // Using <header-comment> Insert the header comments
-                templateReplaceTag : '__template__', // vue component template replace tag
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename({extname: '.js'}))
-            .pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))
             .pipe(gulp.dest(dist))
             .pipe(message('vueify!'));
     }
@@ -466,14 +463,14 @@ module.exports = function(gulp, $, utils, configs) {
         return gulp.src(dir + '/*.vue', {
                 base: src
             })
-            .pipe($.vueModule({
+            .pipe($.plumber())
+            .pipe($.vueModule2({
                 debug              : false,            // Debug mode
-                amd                : false,            // AMD style, Define module name and deps
+                amd                : true,            // AMD style, Define module name and deps
                 define             : true,             // Using define() wrapper the module, false for Node.js (CommonJS style)
-                defineName         : false,            // Define the module name
+                defineName         : true,            // Define the module name
                 indent             : '    ',           // Indent whitespace
                 headerComment      : true,             // Using <header-comment> Insert the header comments
-                templateReplaceTag : '__template__', // vue component template replace tag
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename(pathRelative + '.js'))
