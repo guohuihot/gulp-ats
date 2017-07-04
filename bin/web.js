@@ -324,26 +324,12 @@ module.exports = function(gulp, $, utils, configs) {
 
         var pathRelative = path.relative(src, dir).replace('_', '');
             // fName        = path.basename(dir).slice(1);
-/*        var aFiles = $.glob.sync(dir + '/*.js');
-        var dependsMap = {};
-        var filesMap = {};
-        var depends = []
-
-        aFiles.forEach(file => {
-            var basename = path.basename(file, '.js')
-            aFiles.forEach(function(file2) {
-                var sCon = fs.readFileSync(file2, 'utf8');
-                if (utils.getDepends(sCon).includes(basename)) {
-                    depends.push(basename);
-                };
-            });
-
-        });
-       
-        console.log(depends);
-        return false;*/
-        var stream = gulp.src(dir + '/*.js', {base: src })
-        // var stream = gulp.src(files, {base: src })
+        // 按首数字排序
+        var aFiles = $.glob.sync(dir + '/*.js').sort(function(a, b) {
+                            return (parseInt(a) || 1000) - (parseInt(b) || 1000);
+                        });
+        // var stream = gulp.src(dir + '/*.js', {base: src })
+        var stream = gulp.src(aFiles, {base: src })
             .pipe($.plumber())
             .pipe($.if(argv.d, $.sourcemaps.init()))
             .pipe($.if(argv.j, $.jshint(configs.jshint)))
@@ -670,7 +656,7 @@ module.exports = function(gulp, $, utils, configs) {
                 /*$.del.sync(delFile, {
                     force: true
                 });*/
-                fs.removeSync(delFile)
+                fs.removeGlobSync(delFile)
                 // dist目录 dist/js/_common
                 // dist目录 dist/images/_common
                 var fDirname = path.dirname(distFile);

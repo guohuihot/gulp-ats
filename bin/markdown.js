@@ -52,6 +52,9 @@ module.exports = function(gulp, $, utils, configs) {
             case '.js':
                 dir = 'JS文档';
                 break;
+            case '.twig':
+                dir = 'Twig';
+                break;
             default:
                 dir = path.basename(path.dirname(file));
         }
@@ -81,10 +84,23 @@ module.exports = function(gulp, $, utils, configs) {
             return old;
         }
         var copy = Array.isArray(old) ? [] : {};
-        var keys = Object.keys(old).sort();
+        var keys = Object.keys(old).sort(function(a, b) {
+                return (parseInt(a) || 1000) - (parseInt(b) || 1000);
+            });
+
         keys.forEach(function(key) {
             var v = old[key];
-            copy[key] = objSort(Array.isArray(v) ? v.sort() : v);
+            var newKey = key.filterPreNumbers();
+            var cur = copy[newKey] || [];
+            
+            copy[newKey] = objSort(Array.isArray(v) ? v.sort(function(a, b) {
+                return (parseInt(a) || 1000) - (parseInt(b) || 1000);
+            }) : v.filterPreNumbers());
+
+            // 都是数组的时合并
+            if (Array.isArray(cur) && Array.isArray(copy[newKey])) {
+                copy[newKey] = copy[newKey].concat(cur);
+            }
         });
         return copy;
     };
@@ -294,7 +310,7 @@ module.exports = function(gulp, $, utils, configs) {
 
         // 生成每个文件
         markdownData.forEach(function(oFile) {
-            var filename = getBaseName(oFile);
+            var filename = getBaseName(oFile).filterPreNumbers();
             var dataFun = function(file1, cb1) {
                     var contents = oFile.contents.toString()
                             .replace(/@ (include|extend)/, '@$1');
