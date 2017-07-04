@@ -325,9 +325,7 @@ module.exports = function(gulp, $, utils, configs) {
         var pathRelative = path.relative(src, dir).replace('_', '');
             // fName        = path.basename(dir).slice(1);
         // 按首数字排序
-        var aFiles = $.glob.sync(dir + '/*.js').sort(function(a, b) {
-                            return (parseInt(a) || 1000) - (parseInt(b) || 1000);
-                        });
+        var aFiles = $.glob.sync(dir + '/*.js').sortByPreNumbers();
         // var stream = gulp.src(dir + '/*.js', {base: src })
         var stream = gulp.src(aFiles, {base: src })
             .pipe($.plumber())

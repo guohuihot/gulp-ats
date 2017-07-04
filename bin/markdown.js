@@ -84,18 +84,14 @@ module.exports = function(gulp, $, utils, configs) {
             return old;
         }
         var copy = Array.isArray(old) ? [] : {};
-        var keys = Object.keys(old).sort(function(a, b) {
-                return (parseInt(a) || 1000) - (parseInt(b) || 1000);
-            });
+        var keys = Object.keys(old).sortByPreNumbers();
 
         keys.forEach(function(key) {
             var v = old[key];
             var newKey = key.filterPreNumbers();
             var cur = copy[newKey] || [];
             
-            copy[newKey] = objSort(Array.isArray(v) ? v.sort(function(a, b) {
-                return (parseInt(a) || 1000) - (parseInt(b) || 1000);
-            }) : v.filterPreNumbers());
+            copy[newKey] = objSort(Array.isArray(v) ? v.sortByPreNumbers() : v.filterPreNumbers());
 
             // 都是数组的时合并
             if (Array.isArray(cur) && Array.isArray(copy[newKey])) {
