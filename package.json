@@ -1,6 +1,6 @@
 {
   "name": "gulp-ats",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Auto complete tools, gulp cli",
   "devDependencies": {},
   "keywords": [
@@ -50,7 +50,6 @@
     "gulp-iconfont": "^5.0.1",
     "gulp-if": "^2.0.0",
     "gulp-imagemin": "^2.4.0",
-    "gulp-jimp": "^1.2.7",
     "gulp-jsdoc-to-markdown": "^1.2.2",
     "gulp-jsdoc3": "^0.2.1",
     "gulp-jshint": "^1.12.0",
@@ -71,12 +70,10 @@
     "images": "^3.0.0",
     "marked": "^0.3.5",
     "merge-stream": "^1.0.0",
-    "moment": "^2.10.6",
     "node.extend": "^1.1.5",
     "through2": "^2.0.1",
     "vinyl-ftp": "^0.4.5",
     "vinyl-sourcemaps-apply": "^0.2.1",
-    "wiredep": "^2.2.2",
     "yargs": "^3.29.0"
   }
 }
