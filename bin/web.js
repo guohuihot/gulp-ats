@@ -608,7 +608,8 @@ module.exports = function(gulp, $, utils, configs) {
                             done();
                         }))
                         .pipe(gulp.dest(cfg.distEx))
-                        .pipe(utils.browserSync.stream());
+                        .pipe(utils.browserSync.stream())
+                        .pipe(message());
                 }
             })
         }

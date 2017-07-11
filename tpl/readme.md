@@ -20,6 +20,17 @@
 - 自动抓取js的说明信息生成js说明文档
 - vue 转 js
 
+#### 技术栈
+
+- node
+- gulp
+- sass
+- font svg
+- markdown
+- swig twig
+- jsdoc
+- vue
+
 #### 安装node插件
 
 1. `node` `git` 安装 请自行百度

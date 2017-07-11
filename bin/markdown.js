@@ -303,6 +303,13 @@ module.exports = function(gulp, $, utils, configs) {
             contents: new Buffer('cover'),
             filepath: 'index'
         })
+        // marked option
+        var renderer = new $.marked.Renderer();
+
+        renderer.link = function( href, title, text ) {
+            var sTarget = href.slice(0, 1) != '#' ? 'target="_blank"' : '';
+            return '<a '+ sTarget +' href="'+ href +'" title="' + text + '">' + text + '</a>';
+        }
 
         // 生成每个文件
         markdownData.forEach(function(oFile) {
@@ -313,7 +320,7 @@ module.exports = function(gulp, $, utils, configs) {
                             
                     if (contents) {
                         cb1(undefined, {
-                            contents: $.marked(contents),
+                            contents: $.marked(contents, {renderer:renderer }),
                             filepath: getRelPath(oFile.filepath),
                             title: filename,
                             tree: tree
