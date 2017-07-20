@@ -20,6 +20,17 @@
 - 自动抓取js的说明信息生成js说明文档
 - vue 转 js
 
+#### 技术栈
+
+- node
+- gulp
+- sass
+- font svg
+- markdown
+- swig twig
+- jsdoc
+- vue
+
 #### 安装node插件
 
 1. `node` `git` 安装 请自行百度
@@ -409,10 +420,12 @@ gulp markdown	markdown文件转html
 
 	--pEx	可选，默认从p目录里抓取内容，也可以额外指定一个目录一并抓取
 
-	-t(--type)	可选，直接从p目录抓取太慢，可以指定类型或者目录，地址抓取
-			按类型 --type='js,md,twig,css'
+	-t(--type)	可选，直接从p目录抓取太慢，可以指定目录或者地址抓取
 			按目录 --type='e:/a,e:/b'
 			按地址 --type='e:/a.md,e:/b.js'
+
+	-i(--ignore)	排除某些文件，按glob的方式写，多个逗号隔开
+			例：排除scss,js -i='**/*.scss,**/*.js'
 
 	
 gulp webdown	下载网页(扒皮)	

@@ -53,7 +53,7 @@ module.exports = function(gulp, $, utils, configs) {
                 dir = 'JS文档';
                 break;
             case '.twig':
-                dir = 'Twig';
+                dir = 'Macro';
                 break;
             default:
                 dir = path.basename(path.dirname(file));
@@ -108,17 +108,10 @@ module.exports = function(gulp, $, utils, configs) {
         console.log('err:需要指定路径！');
         return;
     }
-    var APS = [_p];
-
-    if (argv.pEx) {
-        APS = APS.concat(argv.pEx.split(','));
-    }
 
     var aType = argv.type && argv.type.split(',') || [];
-    // 没有type, 把目录给type，继续往下走
-    if (!aType.length) {
-        aType = APS;
-    }
+    // 将当前目录加入
+    aType.push(_p)
     // 要取的文件的对象
     var oGlobs = {
         md: '**/doc/**/*.md',
@@ -128,9 +121,13 @@ module.exports = function(gulp, $, utils, configs) {
         img: '**/doc/**/*.{png,gif,jpg,jpeg}'
     };
 
-    var sIgnore = '**/@(vendor|.git|static|_seajs|_sm|public)/**';
+    var aIgnore = ['**/@(vendor|.git|static|_seajs|_sm|public)/**'];
     var oldFileNum = 0;
-    
+
+    if (argv.ignore) {
+        aIgnore = aIgnore.concat(argv.ignore.split(','));
+    }
+
     var getRelPath = function(f) {
         var _relPath;
         aType.forEach(function(t) {
@@ -148,14 +145,7 @@ module.exports = function(gulp, $, utils, configs) {
 
     gulp.task('markdown:files', function(cb) {
         aType.forEach(function(t) {
-            if (oGlobs[t]) {
-                // 按类型 js
-                APS.forEach(function(p) {
-                    files = files.concat($.glob.sync(path.join(p, oGlobs[t]), {
-                                ignore: path.join(p, sIgnore)
-                            }));
-                });
-            } else if (path.extname(t)) {
+            if (path.extname(t)) {
                 // 按地址
                 files.push(t);
             } else {
@@ -175,7 +165,7 @@ module.exports = function(gulp, $, utils, configs) {
                 // 按目录
                 for (k in oGlobs) {
                     files = files.concat($.glob.sync(path.join(t, oGlobs[k]), {
-                                ignore: path.join(t, sIgnore)
+                                ignore: aIgnore
                             }));
                 }
             }

@@ -23,9 +23,12 @@ module.exports = function(gulp, $, utils, configs) {
     $.swig(configs.swig);
     // 扩展fs方法
     fs.removeGlobSync = function(glob) {
-        var files = $.glob.sync(glob);
+        var files = Array.isArray(glob) ? glob : $.glob.sync(glob);
         files.forEach(function(file) {
-            fs.removeSync(file);
+            if (fs.existsSync(file)) {
+                fs.removeSync(file);
+                console.log(file + '  deleted!');
+            }
         });
     }
 
@@ -470,10 +473,9 @@ module.exports = function(gulp, $, utils, configs) {
      */
     var getCfgProp = function(file, key) {
         var prop; 
-
         for (p in cfgs) {
             // 当前文件的path 与其配置里相同时
-            if (path.normalize(file).indexOf(p) == 0) {
+            if (path.normalize(file).normal().indexOf(p.normal()) == 0) {
                 if (key) {
                     prop = cfgs[p][key];
                 } else {
@@ -481,7 +483,6 @@ module.exports = function(gulp, $, utils, configs) {
                 }
             }
         }
-
         return prop;
     }
     /**
@@ -515,7 +516,7 @@ module.exports = function(gulp, $, utils, configs) {
         var rPath;
         for (p in cfgs) {
             // 当前文件路径 和 p 相等
-            if (path.normalize(file).indexOf(p) == 0) {
+            if (path.normalize(file).normal().indexOf(p.normal()) == 0) {
                 var curConfig = cfgs[p];
                 rPath = curConfig.dist != curConfig.libs ?
                     path.relative(p, curConfig.dist + curConfig.libs + '/') : '';
@@ -665,9 +666,9 @@ module.exports = function(gulp, $, utils, configs) {
                     // [js/_common/a.js, js/_common/b.js]
                     var hasFile = $.glob.sync(file.dirname + '/**/*').length;
 
-                    fDirname = fDirname.replace('_', '');
                     if (!hasFile) {
-                        fs.removeGlobSync([fDirname + '.*', fDirname + '.js.map']);
+                        fDirname = fDirname.replace('_', '');
+                        fs.removeGlobSync(fDirname + '.*');
                         /*$.del.sync([fDirname + '.*', oDirname + '.js.map'], {
                             force: true
                         })*/
@@ -676,7 +677,7 @@ module.exports = function(gulp, $, utils, configs) {
                 } else {
                     // 删除文件夹 dist/iamges/face/1.gif, dist/iamges/face/2.gif,
                     // fDirname = dist/images/face
-                    var aFiles = $.glob.sync(fDirname + '/**/*').length;
+                    var hasFile = $.glob.sync(fDirname + '/**/*').length;
                     if (!hasFile) {
                         fs.removeSync(fDirname)
                         /*$.del.sync([fDirname], {
@@ -727,9 +728,9 @@ module.exports = function(gulp, $, utils, configs) {
                     }
                     var getFiles = function(fileName, ofilePath) {
                         if (ext == '.scss') {
-                            var reg = new RegExp("@import\\s+[\'\"]\\s*" + fileName.slice(1) + "\\s*[\'\"]");
+                            var reg = new RegExp("@import\\s+(\'|\")\\s*" + fileName.slice(1) + "\\s*(\'|\")");
                         } else {
-                            var reg = new RegExp("[extends|include|import]\\s+[\'\"]\\s*" + fileName + "\\.");
+                            var reg = new RegExp("(extends|include|import)\\s+(\'|\")(.*\\/)?" + fileName + "\\.");
                         }
 
                         files.forEach(function(filePath) {

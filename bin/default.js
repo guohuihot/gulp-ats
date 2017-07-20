@@ -7,7 +7,7 @@ module.exports = function(gulp, $, utils, configs) {
                 });
     // 初始化swig
     $.swig(configs.swig);
-console.log(tree);
+    
     gulp.task('default', function() {
         var info = require('../lib/tasks-info');
         console.log(info);

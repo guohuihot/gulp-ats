@@ -25,6 +25,7 @@ $.yargs.alias({
         mode      : 'm',
         all       : 'al',
         jshint    : 'j',
+        ignore    : 'i',
         type      : 't'
     })
 

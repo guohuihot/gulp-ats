@@ -78,7 +78,7 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1499666963,
+    "t": 1500543704,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
@@ -91,7 +91,7 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
     "alias": "t",
-    "t": 1498698049
+    "t": 1500543557
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",
@@ -124,5 +124,27 @@
   "markdown:files": "markdown.js",
   "jshint": "jshint.js",
   "vueify": "web.js",
-  "sync": "web.js"
+  "sync": "web.js",
+  "D:/test": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "D:/test",
+    "t": 1499761572
+  },
+  "C:\\Users\\Administrator\\Desktop\\home": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "C:\\Users\\Administrator\\Desktop\\home",
+    "t": 1500454796
+  }
 }
