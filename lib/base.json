@@ -31,7 +31,7 @@
     "src": "./src",
     "mode": 1,
     "path": "E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources",
-    "t": 1498094086,
+    "t": 1502852771,
     "alias": "house"
   },
   "E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources": {
@@ -55,8 +55,8 @@
     "src": "./src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources",
-    "t": 1497576787,
-    "alias": "core"
+    "alias": "core",
+    "t": 1502852748
   },
   "E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources": {
     "author": "author",
@@ -78,7 +78,7 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1500543704,
+    "t": 1508461860,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
@@ -91,7 +91,7 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
     "alias": "t",
-    "t": 1500543557
+    "t": 1500865177
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",

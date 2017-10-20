@@ -7,9 +7,9 @@ ${{tag}}-fz: inherit !default;
     font-style: normal;
 	src: url('{{fUrl}}{{fName}}.eot');
 	src: url('{{fUrl}}{{fName}}.eot?#iefix') format('embedded-opentype'),
-		url('{{fUrl}}{{fName}}.woff') format('woff');//,
+		url('{{fUrl}}{{fName}}.svg#{{fName}}') format('svg'),
 		//url('{{fUrl}}{{fName}}.ttf') format('truetype'),
-		//url('{{fUrl}}{{fName}}.svg#{{fName}}') format('svg');
+		url('{{fUrl}}{{fName}}.woff') format('woff');
 }
 ${{tag}}-fz: inherit !default;
 ${{tag}}-fl: none !default;

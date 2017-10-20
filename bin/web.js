@@ -216,9 +216,10 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.iconfont({
                 fontName: pathBase + 'fonts/' + fName, // required
                 // appendUnicode: true, // recommended option
-                formats: ['eot', 'woff'], // default, 'woff2' and 'svg' are available
+                formats: ['eot', 'woff', 'svg'], // default, 'woff2' and 'svg' are available
                 normalize: true, // 兼容不同大小的字体图标合成
                 // fontHeight: 32,
+                fontHeight: 1001,
                 centerHorizontally: true,
                 // timestamp: Math.round(Date.now()/1000) // recommended to get consistent builds when watching files
             }))
@@ -251,6 +252,10 @@ module.exports = function(gulp, $, utils, configs) {
                     .pipe(message());
                 cb && cb();
             })
+            // 两次压缩svg
+            /*.pipe($.if(function(file) {
+                return path.extname(file.path) == '.svg';
+            }, $.imagemin(configs.imagemin)))*/
             .pipe(gulp.dest(dist))
             .pipe(message('font 生成'));
             stream.add(stream1)
@@ -429,6 +434,7 @@ module.exports = function(gulp, $, utils, configs) {
             })
             .pipe($.plumber())
             .pipe($.vueModule2({
+                CWD                : CWD,
                 debug              : false,            // Debug mode
                 amd                : true,            // AMD style, Define module name and deps
                 define             : true,             // Using define() wrapper the module, false for Node.js (CommonJS style)
@@ -438,6 +444,11 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename({extname: '.js'}))
+            .pipe($.if(function(file1) {
+                return utils.inArray('babel', utils.getRequires(file1.contents));
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))
             .pipe(gulp.dest(dist))
             .pipe(message('vueify!'));
     }
@@ -446,12 +457,14 @@ module.exports = function(gulp, $, utils, configs) {
         var src = cfg.src;
         var dist = cfg.dist;
         var pathRelative = path.relative(src, dir).replace('_', '');
+        // scss
 
         return gulp.src(dir + '/*.vue', {
                 base: src
             })
             .pipe($.plumber())
             .pipe($.vueModule2({
+                CWD                : CWD,
                 debug              : false,            // Debug mode
                 amd                : true,            // AMD style, Define module name and deps
                 define             : true,             // Using define() wrapper the module, false for Node.js (CommonJS style)
@@ -461,6 +474,11 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename(pathRelative + '.js'))
+            .pipe($.if(function(file1) {
+                return utils.inArray('babel', utils.getRequires(file1.contents));
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))
             .pipe(gulp.dest(dist))
             .pipe(message('vueify!'));
     }

@@ -111,7 +111,7 @@ module.exports = function(gulp, $, utils, configs) {
 
     var aType = argv.type && argv.type.split(',') || [];
     // 将当前目录加入
-    aType.push(_p)
+    // aType.push(_p)
     // 要取的文件的对象
     var oGlobs = {
         md: '**/doc/**/*.md',
@@ -121,7 +121,7 @@ module.exports = function(gulp, $, utils, configs) {
         img: '**/doc/**/*.{png,gif,jpg,jpeg}'
     };
 
-    var aIgnore = ['**/@(vendor|.git|static|_seajs|_sm|public)/**'];
+    var aIgnore = ['**/@(vendor|.git|static|_seajs|_sm|public|dev_admin|node_modules)/**'];
     var oldFileNum = 0;
 
     if (argv.ignore) {
