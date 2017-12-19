@@ -3982,9 +3982,13 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   display: block;
 }
 .nav > li > a {
-  position: relative;
-  display: block;
-  padding: 10px 15px;
+    position: relative;
+    display: block;
+    text-overflow: ellipsis;
+    padding: 10px 15px;
+    max-width: 110px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 .nav > li > a:hover,
 .nav > li > a:focus {

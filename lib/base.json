@@ -78,7 +78,7 @@
     "src": "src",
     "mode": 1,
     "path": "E:\\wwwroot\\newcore\\src\\CoreBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HouseBundle\\Resources,E:\\wwwroot\\newhouse\\site\\HousemobileBundle\\Resources,E:\\wwwroot\\newhouse\\site\\MemberBundle\\Resources,E:\\wwwroot\\newcore\\src\\ManageBundle\\Resources",
-    "t": 1508461860,
+    "t": 1513318889,
     "alias": "all"
   },
   "C:\\Users\\Administrator\\Desktop\\test": {
@@ -146,5 +146,72 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\home",
     "t": 1500454796
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\core": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\core",
+    "t": 1513655668
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\house": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\house",
+    "t": 1513655279
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\manage": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\manage",
+    "t": 1513655847
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\member": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\member",
+    "t": 1513655867
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\housemobile": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\housemobile",
+    "t": 1513655881
+  },
+  "E:\\wwwroot\\newhouse\\web\\bundles\\core,E:\\wwwroot\\newhouse\\web\\bundles\\house,E:\\wwwroot\\newhouse\\web\\bundles\\housemobile,E:\\wwwroot\\newhouse\\web\\bundles\\manage,E:\\wwwroot\\newhouse\\web\\bundles\\member": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse\\web\\bundles\\core,E:\\wwwroot\\newhouse\\web\\bundles\\house,E:\\wwwroot\\newhouse\\web\\bundles\\housemobile,E:\\wwwroot\\newhouse\\web\\bundles\\manage,E:\\wwwroot\\newhouse\\web\\bundles\\member",
+    "alias": "all",
+    "t": 1513668903
   }
 }

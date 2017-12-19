@@ -68,8 +68,8 @@ module.exports = function(gulp, $, utils, configs) {
                 cur.push(basename);
             }
             tree[dir] = cur;
-            searchableDocuments[basename + '.html'] = {
-                id: basename + '.html',
+            searchableDocuments[basename.filterPreNumbers() + '.html'] = {
+                id: basename.filterPreNumbers() + '.html',
                 title: basename,
                 body: $.htmlToText.fromString(contents.toString(), {
                         wordwrap: 130
@@ -271,7 +271,7 @@ module.exports = function(gulp, $, utils, configs) {
     gulp.task('markdown', ['markdown:tree'], function() {
         // console.log(files);
         // console.log(markdownData);
-        console.log('共处理', markdownData.length + '/' + oldFileNum, '个文件！');
+        var message = '共处理 ' + markdownData.length + '/' + oldFileNum + ' 个文件！';
         var _p = argv.p;
         // 复制resources
         gulp.src('./tpl/markdown/*/**')
@@ -285,7 +285,8 @@ module.exports = function(gulp, $, utils, configs) {
                     searchableDocuments: JSON.stringify(searchableDocuments)
                 }
             }))
-            .pipe(gulp.dest(path.join(_p, 'docs')));
+            .pipe(gulp.dest(path.join(_p, 'docs')))
+            .pipe($.notify(message));
         // 整理顺序
         tree = objSort(tree);
         // 添加封面

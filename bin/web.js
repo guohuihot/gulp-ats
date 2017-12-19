@@ -608,7 +608,7 @@ module.exports = function(gulp, $, utils, configs) {
                     /*$.del([cfg.distEx + '/' + pathRelative], {
                         force: true
                     });*/
-                } else {
+                } else if (cfg.distEx) {
                     gulp.src(file.path, {
                             base: cfg.dist
                         })
