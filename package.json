@@ -1,6 +1,6 @@
 {
   "name": "gulp-ats",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Auto complete tools, gulp cli",
   "devDependencies": {},
   "keywords": [
@@ -60,6 +60,7 @@
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-swig": "^0.8.0",
+    "gulp-typescript": "^3.2.3",
     "gulp-uglify": "^1.4.2",
     "gulp-vue-module2": "^0.1.2",
     "gulp-watch": "^4.3.5",

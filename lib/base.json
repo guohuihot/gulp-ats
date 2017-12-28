@@ -91,7 +91,7 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
     "alias": "t",
-    "t": 1500865177
+    "t": 1514194544
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",
@@ -212,6 +212,17 @@
     "mode": 1,
     "path": "E:\\wwwroot\\newhouse\\web\\bundles\\core,E:\\wwwroot\\newhouse\\web\\bundles\\house,E:\\wwwroot\\newhouse\\web\\bundles\\housemobile,E:\\wwwroot\\newhouse\\web\\bundles\\manage,E:\\wwwroot\\newhouse\\web\\bundles\\member",
     "alias": "all",
-    "t": 1513668903
+    "t": 1514446574
+  },
+  "E:\\wwwroot\\newhouse81\\web\\bundles\\core": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "E:\\wwwroot\\newhouse81\\web\\bundles\\core",
+    "t": 1513740020
   }
 }

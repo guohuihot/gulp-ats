@@ -1,21 +1,21 @@
 module.exports = function(gulp, $, utils, configs) {
     // base
     var path  = require('path'),
-        fs        = require('fs-extra'),
-        argv      = $.yargs.argv,
-        CWD       = process.cwd() + '/',
-        SOURCEURL = path.join(CWD, './tpl/'),
+        fs         = require('fs-extra'),
+        argv       = $.yargs.argv,
+        CWD        = process.cwd() + '/',
+        SOURCEURL  = path.join(CWD, './tpl/'),
         
-        sign      = {
-        img       : 'img',
-        font      : 'font'
+        sign       = {
+        img        : 'img',
+        font       : 'font'
         },
-        ftp       = {},
-        isBuild = false,
-        oInit = require('../lib/init')($, argv),
+        ftp        = {},
+        isBuild    = false,
+        oInit      = require('../lib/init')($, argv),
         isMultiple = oInit.isMultiple, // 多目录
-        cfgs = oInit.configs,
-        oTasks = {};
+        cfgs       = oInit.configs,
+        oTasks     = {};
 
     // 默认项
     argv.d = argv.d === 0 ? false : true;
@@ -106,6 +106,21 @@ module.exports = function(gulp, $, utils, configs) {
                 to: 'gbk'
             })))
             .pipe($.if(argv.d, sourcemaps(filePath)))
+
+            .pipe($.if(!argv.s, $.through2.obj(function(file2, encoding, done) {
+                var cfg = getCfgProp(filePath)
+                // 处理sourcemap
+                if (/\.(js|css|scss|ts|vue)$/.test(file2.path)) {
+                    var relPath = 'http://localhost:8888/' + 
+                                    path.relative(cfg.src, path.dirname(filePath))
+                                    .normal() + '/';
+                    var newContents = file2.contents
+                                        .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
+                    file2.contents = new Buffer(newContents);   
+                };           
+                this.push(file2);
+                done();
+            })))
             .pipe(gulp.dest(dist))
             .pipe($.through2.obj(function(file, encoding, done) {
                 if (path.extname(file.path) != '.map') {
@@ -350,10 +365,13 @@ module.exports = function(gulp, $, utils, configs) {
             }))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
-                return utils.inArray('babel', utils.getRequires(file1.contents));
+                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
+            /*.pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))*/
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
         
@@ -376,8 +394,11 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.if(argv.j, $.jshint.reporter()))
             .pipe($.data(tplData))
             .pipe($.swig({ext: '.js'}))
+            /*.pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))*/
             .pipe($.if(function(file1) {
-                return utils.inArray('babel', utils.getRequires(file1.contents));
+                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -424,6 +445,58 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe(gulp.dest(dist))
             .pipe(message('复制并压缩'));
     }
+    oTasks.ts = function(filePath) {
+        var cfg = getCfgProp(filePath);
+        var src = cfg.src;
+        var dist = cfg.dist;
+
+        return gulp.src(filePath, {
+                base: src
+            })
+            .pipe($.plumber())
+            .pipe($.typescript({
+                isolatedModules: true,
+                noImplicitAny: false,
+            }))
+            .pipe($.rename({extname: '.js'}))
+            /*.pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))
+            .pipe($.if(function(file1) {
+                return utils.inArray('babel', utils.getRequires(file1.contents));
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))*/
+            .pipe(gulp.dest(dist))
+            .pipe(message('ts!'));
+    }
+    oTasks.concatTs = function(dir) {
+        var cfg = getCfgProp(dir);
+        var src = cfg.src;
+        var dist = cfg.dist;
+        var pathRelative = path.relative(src, dir).replace('_', '');
+        // scss
+
+        return gulp.src(dir + '/*.ts', {
+                base: src
+            })
+            .pipe($.plumber())
+            .pipe($.typescript({
+                isolatedModules: true,
+                noImplicitAny: false,
+            }))
+            .pipe($.rename(pathRelative + '.js'))
+            .pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))/*
+            .pipe($.if(function(file1) {
+                return utils.inArray('babel', utils.getRequires(file1.contents));
+            }, $.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            })))*/
+            .pipe(gulp.dest(dist))
+            .pipe(message('ts!'));
+    }
     oTasks.vue = function(filePath) {
         var cfg = getCfgProp(filePath);
         var src = cfg.src;
@@ -444,8 +517,11 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename({extname: '.js'}))
+            /*.pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))*/
             .pipe($.if(function(file1) {
-                return utils.inArray('babel', utils.getRequires(file1.contents));
+                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -474,8 +550,11 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename(pathRelative + '.js'))
+            /*.pipe($.babel({
+                presets: ['babel-preset-env'].map(require.resolve)
+            }))*/
             .pipe($.if(function(file1) {
-                return utils.inArray('babel', utils.getRequires(file1.contents));
+                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -613,19 +692,6 @@ module.exports = function(gulp, $, utils, configs) {
                             base: cfg.dist
                         })
                         .pipe($.changed(cfg.distEx))
-                        .pipe($.through2.obj(function(file2, encoding, done) {
-                            // 处理sourcemap
-                            if (/\.(js|css)$/.test(file.path)) {
-                                var relPath = 'http://localhost:8888/' + 
-                                                path.relative(cfg.path, path.dirname(file.path))
-                                                .normal() + '/';
-                                var newContents = file2.contents
-                                                    .toString().replace(/(sourceMappingURL=)/, '$1' + relPath);
-                                file2.contents = new Buffer(newContents);   
-                            };           
-                            this.push(file2);
-                            done();
-                        }))
                         .pipe(gulp.dest(cfg.distEx))
                         .pipe(utils.browserSync.stream())
                         .pipe(message());
@@ -633,7 +699,7 @@ module.exports = function(gulp, $, utils, configs) {
             })
         }
         // 监控src
-        $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg,vue}'), {
+        $.watch(getWatchDir('/**/*.{js,scss,css,gif,jpg,jpeg,png,html,htm,svg,vue,ts}'), {
             read: false,
             usePolling: true
         }, function(file) {
@@ -708,6 +774,12 @@ module.exports = function(gulp, $, utils, configs) {
                     oTasks.concatVue(file.dirname);
                 } else {
                     oTasks.vue(file.path);
+                }
+            } else if (/\.(ts)$/.test(ext)) {
+                if (isDir) {
+                    oTasks.concatTs(file.dirname);
+                } else {
+                    oTasks.ts(file.path);
                 }
             } else if (/\.(png|gif|jpe?g)$/.test(ext)) {
                 if (isDir) {
