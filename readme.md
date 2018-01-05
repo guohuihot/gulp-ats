@@ -30,6 +30,7 @@
 - swig twig
 - jsdoc
 - vue
+- ts(typeScript)
 
 #### 安装node插件
 
@@ -311,6 +312,28 @@ index.html
         ├── _xxx
           ├── a.vue
           ├── b.vue
+```
+处理后 
+```text
+    dist
+      ├── js
+        ├── aaa.js
+        ├── xxx.js
+```
+- 基本与JS一样
+- 所有有下划线的文件夹都会将其内部的文件合并成一个文件（以当前文件夹命名）
+
+##### Ts
+
+- 合并
+处理前
+```text
+    src
+      ├── js
+        ├── aaa.ts
+        ├── _xxx
+          ├── a.ts
+          ├── b.ts
 ```
 处理后 
 ```text
