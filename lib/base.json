@@ -91,7 +91,7 @@
     "mode": 1,
     "path": "C:\\Users\\Administrator\\Desktop\\test",
     "alias": "t",
-    "t": 1514194544
+    "t": 1515144359
   },
   "E:\\wwwroot\\newhouse": {
     "author": "author",
@@ -212,7 +212,7 @@
     "mode": 1,
     "path": "E:\\wwwroot\\newhouse\\web\\bundles\\core,E:\\wwwroot\\newhouse\\web\\bundles\\house,E:\\wwwroot\\newhouse\\web\\bundles\\housemobile,E:\\wwwroot\\newhouse\\web\\bundles\\manage,E:\\wwwroot\\newhouse\\web\\bundles\\member",
     "alias": "all",
-    "t": 1514446574
+    "t": 1515142791
   },
   "E:\\wwwroot\\newhouse81\\web\\bundles\\core": {
     "author": "author",
@@ -224,5 +224,16 @@
     "mode": 1,
     "path": "E:\\wwwroot\\newhouse81\\web\\bundles\\core",
     "t": 1513740020
+  },
+  "C:\\Users\\Administrator\\Desktop\\cfzx-pc": {
+    "author": "author",
+    "distEx": "",
+    "libs": "",
+    "tpl": "./src/libs/",
+    "dist": "",
+    "src": "src",
+    "mode": 1,
+    "path": "C:\\Users\\Administrator\\Desktop\\cfzx-pc",
+    "t": 1515145588
   }
 }
