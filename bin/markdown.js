@@ -27,8 +27,10 @@ module.exports = function(gulp, $, utils, configs) {
         if (/\.(twig|scss|js)/.test(ext)) {
             var aDirs = path.join(path.dirname(filepath), '/').split(path.sep);
             aDirs.forEach(function(elem) {
-                if (/(\w+)Bundle/.test(elem)) {
-                    basename = RegExp.$1 + '-' + basename;
+                if (argv.arrPre && argv.arrPre.split(',').indexOf(elem) > -1) {
+                    basename = elem + '-' + basename;
+                } else if (/(\w+)Bundle/.test(elem)) {
+                    basename = RegExp.$1.toLowerCase() + '-' + basename;
                 }
             });
         } else if (ext == '.md') {

@@ -365,13 +365,10 @@ module.exports = function(gulp, $, utils, configs) {
             }))
             .pipe($.swig({ext: '.js'}))
             .pipe($.if(function(file1) {
-                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
-            /*.pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))*/
             .pipe($.if(!argv.d, $.uglify(configs.uglify)))
             .pipe($.concat(pathRelative + '.js'))
         
@@ -394,11 +391,8 @@ module.exports = function(gulp, $, utils, configs) {
             .pipe($.if(argv.j, $.jshint.reporter()))
             .pipe($.data(tplData))
             .pipe($.swig({ext: '.js'}))
-            /*.pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))*/
             .pipe($.if(function(file1) {
-                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -459,14 +453,11 @@ module.exports = function(gulp, $, utils, configs) {
                 noImplicitAny: false,
             }))
             .pipe($.rename({extname: '.js'}))
-            /*.pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))
             .pipe($.if(function(file1) {
                 return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
-            })))*/
+            })))
             .pipe(gulp.dest(dist))
             .pipe(message('ts!'));
     }
@@ -486,14 +477,11 @@ module.exports = function(gulp, $, utils, configs) {
                 noImplicitAny: false,
             }))
             .pipe($.rename(pathRelative + '.js'))
-            .pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))/*
             .pipe($.if(function(file1) {
                 return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
-            })))*/
+            })))
             .pipe(gulp.dest(dist))
             .pipe(message('ts!'));
     }
@@ -517,11 +505,8 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename({extname: '.js'}))
-            /*.pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))*/
             .pipe($.if(function(file1) {
-                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))
@@ -550,11 +535,8 @@ module.exports = function(gulp, $, utils, configs) {
                 loadCSSMethod      : '$.loadCSS' // define the load css method for require
             }))
             .pipe($.rename(pathRelative + '.js'))
-            /*.pipe($.babel({
-                presets: ['babel-preset-env'].map(require.resolve)
-            }))*/
             .pipe($.if(function(file1) {
-                return !utils.inArray('noBabel', utils.getRequires(file1.contents));
+                return utils.inArray('babel', utils.getRequires(file1.contents));
             }, $.babel({
                 presets: ['babel-preset-env'].map(require.resolve)
             })))

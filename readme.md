@@ -30,7 +30,6 @@
 - swig twig
 - jsdoc
 - vue
-- ts(typeScript)
 
 #### 安装node插件
 
@@ -323,28 +322,6 @@ index.html
 - 基本与JS一样
 - 所有有下划线的文件夹都会将其内部的文件合并成一个文件（以当前文件夹命名）
 
-##### Ts
-
-- 合并
-处理前
-```text
-    src
-      ├── js
-        ├── aaa.ts
-        ├── _xxx
-          ├── a.ts
-          ├── b.ts
-```
-处理后 
-```text
-    dist
-      ├── js
-        ├── aaa.js
-        ├── xxx.js
-```
-- 基本与JS一样
-- 所有有下划线的文件夹都会将其内部的文件合并成一个文件（以当前文件夹命名）
-
 #### 使用说明
 
 
@@ -402,8 +379,8 @@ gulp init	查看(设置)当前配置
 			类型：string,  默认值：保留上次的值
 			PS：需要绝对路径
 
-	其它	Js默认会使用es6转换，当不使用es6转换时，请Js在内容里加 // @require('nobabel') 
-			注意要写在注释里，不然会被解析
+	其它	Js可以使用es6的新语法，请Js代码里加 // @require('babel') 
+			Ats会转换对应的代码，注意要写在注释里，不然会被解析
 			为保证文件的正确转换请保持所有文件编码一致
 
 	
@@ -453,6 +430,11 @@ gulp markdown	markdown文件转html
 
 	-i(--ignore)	排除某些文件，按glob的方式写，多个逗号隔开
 			例：排除scss,js -i='**/*.scss,**/*.js'
+
+	--arrPre	给生成文件加前缀，多个逗号隔开，当前缀与路径匹配时说明文档会加上前缀
+			例：加上这个 --arrPre='house,housemobile,manage,core,member'
+			，当抓取 E:\abc\newhouse\web\bundles\house\src\js\aaa.js
+			匹配到了路径中的 house, 最终生成名称为 house-aaa.html 的说明文档
 
 	
 gulp webdown	下载网页(扒皮)	
