@@ -934,18 +934,19 @@ module.exports = function(gulp, $, utils, configs) {
                 return gulp.src(file, {
                     base: proSrc
                 })
-                .pipe($.changed(proSrc))
+                // .pipe($.changed(proSrc))
                 .pipe(gulp.dest(proDist))
+                .pipe(message('copyed!'));
             }
 
-            var files = $.glob.sync(path.join(proSrc, '/**/*.{gif,jpg,jpeg,png,svg,html,htm,js,vue}'));
+            var files = $.glob.sync(path.join(proSrc, '/**/*.{gif,jpg,jpeg,png,svg,html,htm,js,vue,swf}'));
             // 先整理
             files.forEach(function(file) {
                 var fileName = path.basename(file);
                 var dirName = path.dirname(file);
                 var dirNameBase = path.basename(dirName);
 
-                if (dirNameBase == 'static') {
+                if (dirNameBase == 'static' || /\.swf$/.test(file)) {
                         oFiles[file] = 'copy';
                 } else if (/\.vue$/.test(file)) {
                     if (dirNameBase[0] != '_') {

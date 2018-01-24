@@ -46,13 +46,16 @@
         background-color: #272822;
         position: relative;
     }
-    .class {
+
+    .class-wrap {
         position: absolute;
         bottom: 0;
         left: 0;
-        height: 48px;
+        min-height: 48px;
         width: 100%;
         cursor: pointer;
+        font-size: 12px;
+
     }
     pre {
         margin: 15px 0;
@@ -72,7 +75,6 @@
         float: right;
         border: 2px solid #fff;
     }
-
     .bg i.act {
         border-color: #f00;
     }
@@ -90,14 +92,13 @@
     <div class="row">
         <h2>调用方式</h2>
 
-        <h3>css</h3>
-<pre class="text">
+        <h3>css调用</h3>点击下面文字直接复制到剪切板
+<pre class="text" title="点击复制内容！">
 @import 'img-{{fName}}'; //导入css 标识-文件名
-@include img-{{fName}}($img-{{fName}}); //调用全部样式， 标识-文件名($标识-文件名);
 </pre>
-        <h3>html</h3>
+        <h3>html调用</h3>
 <pre>
-{{'<i class="img-demo-home"></i>; //class 标识+合成后文件名+单个文件名'}}
+{{'<i class="img-demo-home"></i>; //class 标识(img)-原图片所属文件夹名(demo)-原图片文件名(home)'}}
 </pre>
 
         <h3><span class="fr bg"><i></i><i></i><i></i><i></i><i class="act"></i></span>详细代码</h3>
@@ -109,7 +110,10 @@
 {% for name, data in cssData %}
     <li>
         <i class="{{sign}}-{{fName}}-{{name}}"></i>
-        <div class="class">{{sign}}-{{fName}}-{{name}}</div>
+        <div class="class-wrap">
+            <div class="class" title='<i class="{{sign}}-{{fName}}-{{name}}"></i>' data-text='<i class="{{sign}}-{{fName}}-{{name}}"></i>'>复制带html</div>
+            <div class="class" title='{{sign}}-{{fName}}-{{name}}' data-text='{{sign}}-{{fName}}-{{name}}' >{{sign}}-{{fName}}-{{name}}</div>
+        </div>
     </li>
 {% endfor %}
 </ul>
@@ -128,8 +132,9 @@ if (BASE_URL.indexOf('http') == 0) {
             var $icons = $('.class, .text');
             $('body').on('copy', '.class, .text', function(e) {
                     $icons.removeAttr('style');
+                    $(this).css({color:'#f00'});
                     e.clipboardData.clearData();
-                    e.clipboardData.setData("text/plain", $(this).css({color:'#f00'}).text());
+                    e.clipboardData.setData("text/plain", $(this).data('text') || $(this).text());
                     e.preventDefault();
                 })
                 .on('click', '.bg i', function() {

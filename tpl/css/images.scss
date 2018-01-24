@@ -7,22 +7,36 @@ ${{tag}}:({{ data.width|cssSize }}, {{data.height|cssSize}}, {{data.offset_x|css
 {% endfor %}
 ${{sign}}-{{fName}}: ({{tags}});
 
+%ico{{fName}} {
+    display: inline-block;
+    *zoom: 1;
+    *display: inline;
+    vertical-align: middle;
+    line-height: 300px;
+    overflow: hidden;
+    background-image: url({{fUrl}});
+}
+
+{% if cssData|length > 1 %}
+@each $sprite in ${{sign}}-{{fName}} {
+  .#{nth($sprite, 5)} {
+      width: nth($sprite, 1);
+      height: nth($sprite, 2);
+      background-position: nth($sprite, 3) nth($sprite, 4);
+      @extend %ico{{fName}};
+  }
+}
+{% else %}
+  {# 一个时直接调用 #}
+  .#{nth({{tags}}, 5)} {
+      width: nth({{tags}}, 1);
+      height: nth({{tags}}, 2);
+      background-position: nth({{tags}}, 3) nth({{tags}}, 4);
+      @extend %ico{{fName}};
+  }
+{% endif %}
+
+{# 兼容之前的 #}
 @mixin {{sign}}-{{fName}}($sprites) {
-  %ico{{fName}} {
-      display: inline-block;
-      *zoom: 1;
-      *display: inline;
-      vertical-align: middle;
-      line-height: 300px;
-      overflow: hidden;
-      background-image: url({{fUrl}});
-  }
-  @each $sprite in $sprites {
-    .#{nth($sprite, 5)} {
-        width: nth($sprite, 1);
-        height: nth($sprite, 2);
-        background-position: nth($sprite, 3) nth($sprite, 4);
-        @extend %ico{{fName}};
-    }
-  }
+  
 }
