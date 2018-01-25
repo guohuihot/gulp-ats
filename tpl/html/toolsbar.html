@@ -4,7 +4,7 @@
         var aP = (location.href.match(/tps?:\/\/[^\/]+(.+)/) || [, ''])[1].split('/');
         aP.shift();
         var aAs = [
-        			'<a onclick="this.parentNode.style.display = \'none\'" title="关闭">x</a>', 
+        			'<a onclick="this.parentNode.style.display = \'none\';document.body.style.paddingTop = 0" title="关闭">x</a>', 
         			'<a href="/">根目录</a>'
         		];
         aP.forEach(function(item, i) {
@@ -15,15 +15,18 @@
  	})(window, document); 	
 </script>
 <style type="text/css">
-
+    body {
+        padding-top: 16px;
+    }
 	#ats-toolsbar {
-		position: fixed;
+		position: absolute;
 		left: 0;
 		top: 0;
+        width: 100%;
 		z-index: 99999;
+        height: 16px;
 		background-color: yellow;
-		padding-right: 10px;
-		font: bold 14px/1.6 arial;
+		font: bold 12px/1.4 arial;
 	}
 
 	#ats-toolsbar a {
