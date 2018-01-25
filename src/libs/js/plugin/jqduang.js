@@ -1,17 +1,13 @@
 /*!
-* @author : <%= author %> <ahuing@163.com>
+* @author : Ahuing
 * @date   : 2015-04-10
-* @name   : <%= name %> v2.0
-* @modify : <%= date %>
- */
+* @name   : {{name}} v2.10
+* @modify : {{now()|date('Y-m-d')}}
+*/
 
 !function ($, win, undefined) {
     'use strict';
-    /**
-     * @class Duang
-     * @param {string} ele jq 选择器
-     * @param {object} options 相关配置
-     */
+
     var Duang = function (ele, options) {
         this.o       = options
         this.$ele    = $(ele)
@@ -25,36 +21,44 @@
         // 对象长度
         this.len = this.$obj.length
         // 运动方向
-        this.dire = options.effect.search(/top|weibo/) == 0 && 'top' || 'left'
+        // this.dire = options.effect.search(/top|weibo/) == 0 && 'top' || 'left'
+        this.dire = /^(top|weibo|fade)/.test(options.effect) && 'top' || 'left'
         // 运动效果
         this.effect = options.effect.replace(this.dire, '')
     }
 
     /**
-     * @name DEFAULTS
-     * @param {string} obj=li jq选择器 要播放的对象
-     * @param {?string} cell jq选择器 控制元素的父级 `是外层不是元素本身`
-     * @param {string} trigger=mouseover 播放时控制元素上的触发事件 `click mouseover`
-     * @param {string} effect=fade 播放效果 `fade fold left leftLoop leftMarqueue top topLoop topMarqueue weibo`
-     * @param {number} speed=400 播放速度
-     * @param {number} index=0 默认索引
-     * @param {boolean} autoplay=1 自动播放
-     * @param {number} interval=3000 播放间隔时间
-     * @param {string} prevbtn jq选择器 播放上一个
-     * @param {string} nextbtn jq选择器 播放上一个
-     * @param {boolean} btnloop 点击上一个下一个按钮时是否循环播放
-     * @param {number} delay=100 延迟时间,优化`click` or `mouseover`时延迟切换
-     * @param {string} easing=swing 动画效果扩展 默认jQuery提供`linear` 和 `swing`  其它需要{@link http://gsgd.co.uk/sandbox/jquery/easing|easing}扩展支持
-     * @param {boolean} fluid=0 启用流体,目前只支持`fade fold left leftLoop`当`o.visible=1` 时的设置
-     * @param {string} lazyload=null 启用懒加载, `lazyload=src`从图片的`data-src`读取图片的地址并替换给图片的`src`
-     * @param {number} visible=1 可见数量
-     * @param {number} steps=1 每次播放的数量
-     * @param {boolean} overstop=1 鼠标悬停时是否停止播放
-     * @param {boolean} showtit=0 是否显示当前播放的标题
-     * @param {string} pagewrap jq选择器 要显示分页内容的父级
-     * @param {boolean} wheel=0 是否启用鼠标滚动播放
-     * @param {string} actclass=act 播放时当前控制元素上的`class`
-     * @示例 从data启动
+     * @module jqDuang
+     * @version v2.10
+     * @description 网页特效插件，幻灯片，焦点图，滑动门，滚动图片，轮播图
+     * @param {Object} o jqDuang的配置
+     * @param {string} o.obj=li jq选择器 要播放的对象
+     * @param {string} o.objex=null jq选择器 要播放的扩展对象，可同时切换多个对象集
+     * @param {?string} o.cell jq选择器 控制元素的父级 `是外层不是元素本身`
+     * @param {string} o.trigger=mouseover 播放时控制元素上的触发事件 `click mouseover`
+     * @param {string} o.effect=fade 播放效果 `fade fold left leftLoop leftMarqueue top topLoop topMarqueue weibo`
+     * @param {number} o.speed=400 播放速度
+     * @param {number} o.index=0 默认索引
+     * @param {number} o.autoplay=3000 自动播放间隔时间为0时不自动播放
+     * @param {string} o.prevbtn jq选择器 播放上一个
+     * @param {string} o.nextbtn jq选择器 播放上一个
+     * @param {boolean} o.btnloop 点击上一个下一个按钮时是否循环播放
+     * @param {number} o.delay=100 延迟时间,优化`click` or `mouseover`时延迟切换
+     * @param {string} o.easing=swing 动画效果扩展 默认jQuery提供`linear` 和 `swing`  其它需要{@link http://gsgd.co.uk/sandbox/jquery/easing|easing}扩展支持
+     * @param {boolean} o.fluid=0 启用流体,目前只支持`fade fold left leftLoop`当`o.visible=1` 时的设置
+     * @param {string} o.lazyload=null 启用懒加载, `lazyload=src`从图片的`data-src`读取图片的地址并替换给图片的`src`
+     * @param {number} o.visible=1 可见数量
+     * @param {number} o.steps=1 每次播放的数量
+     * @param {boolean} o.overstop=1 鼠标悬停时是否停止播放
+     * @param {boolean} o.showtit=0 是否启用显示标题
+     * @param {string} o.titletpl 当前播放的标题的模板, o.showtit==1时有效 可以是这样：`'<a class="tit-jd" target="_blank" href="{url}">{title}</a>'` 其中的 `{url} {title}` 会被替换成对应的内容
+     * @param {string} o.celltpl=<i>{num}</i> cell内单项的模板 默认：`'<i>{num}</i>'` 其中的 `{num}` 会被替换成对应的索引值，从1开始
+     * @param {string} o.pagewrap jq选择器 要显示分页内容的父级
+     * @param {string} o.pagetpl={act}/{total} 分页的内容模板，`o.pagewrap`存在时有效 `act` - 当前索引，`total` - 总数
+     * @param {boolean} o.wheel=0 是否启用鼠标滚动播放, 需要`mousewheel`支持
+     * @param {string} o.actclass=act 播放时当前控制元素上的`class`
+     *
+     * @方法一 从data启动
      * ```html
      * <div class="jqDuang" data-obj="li" data-cell=".sm" data-prevbtn=".prevbtn" data-nextbtn=".nextbtn" data-effect="left" data-pagewrap=".page">
      *     <div class="lg">
@@ -72,7 +76,32 @@
      *    <div class="page"></div>
      * </div>
      * ```
-     * @示例 从js启动
+     * @方法二 从data启动(推荐)
+     * ```html
+     * <div data-duang="{
+            obj: "li", 
+            cell: ".sm",
+            prevbtn: ".prevbtn",
+            nextbtn: ".nextbtn",
+            effect: "left",
+            pagewrap: ".page"
+     * }">
+     *     <div class="lg">
+     *        <ul>
+     *            <li> <a href=""> <img src="" alt=""/> </a> </li>
+     *            <li> <a href=""> <img src="" alt=""/> </a> </li>
+     *            <li> <a href=""> <img src="" alt=""/> </a> </li>
+     *            <li> <a href=""> <img src="" alt=""/> </a> </li>
+     *            <li> <a href=""> <img src="" alt=""/> </a> </li>
+     *        </ul>
+     *    </div>
+     *    <div class="sm"></div>
+     *    <div class="prevbtn"></div>
+     *    <div class="nextbtn"></div>
+     *    <div class="page"></div>
+     * </div>
+     * ```
+     * @方法三 从js启动
      * ```html
      * <div class="selector">
      *     <div class="lg">
@@ -89,8 +118,8 @@
      *    <div class="nextbtn"></div>
      *    <div class="page"></div>
      * </div>
-     * ```
-     * ```js
+     * <script>
+     *     
      * $('.selector').jqDuang({
      *   obj: 'li',
      *   cell: '',
@@ -98,8 +127,7 @@
      *   effect: 'fade',
      *   speed: 400,
      *   index: 0 ,
-     *   autoplay: 1,
-     *   interval: 3000,
+     *   autoplay: 3000,
      *   prevbtn: '',
      *   nextbtn: '',
      *   delay: 150,
@@ -110,13 +138,32 @@
      *   steps: 1 ,
      *   overstop: 1,
      *   showtit: 0,
+     *   titletpl: '<a class="tit-jd" target="_blank" href="{url}">{title}</a>',
      *   pagewrap: '',
      *   btnloop: 1,
      *   wheel: 0,
      *   actclass: 'act'
      * })
+     * </script>
+     * ```
+     * 
+     * @播放前的事件 before.jd
+     * @示例 调用
+     * ```js
+        $('.selector').on('before.jd', function() {
+            console.log($(this).data('jqDuang'));
+        })
+     * ```
+     * @播放后的事件 after.jd
+     * @示例 调用
+     * ```js
+        $('.selector').on('after.jd', function() {
+            console.log($(this).data('jqDuang'));
+        })
      * ```
      * @可用参数及默认配置
+     *
+     * 
      */
     Duang.DEFAULTS = {
         obj      : 'li',
@@ -125,8 +172,7 @@
         effect   : 'fade',
         speed    : 500,
         index    : 0,
-        autoplay : 1,
-        interval : 3000,
+        autoplay : 3000,
         prevbtn  : null,
         nextbtn  : null,
         delay    : 100,
@@ -136,16 +182,45 @@
         visible  : 1,
         steps    : 1,
         overstop : 1,
-        showtit  : 0,
+        showtit  : null,
+        titletpl : '<a class="tit-jd" target="_blank" href="{url}">{title}</a>',
+        celltpl  : '<i>{num}</i>',
         pagewrap : null,
+        pagetpl  : '{act}/{total}',
         btnloop  : 1,
         wheel    : 0,
         actclass : 'act'
     };
 
     Duang.prototype = {
+
         /**
-         * @method lazyload 
+         * @method template
+         * @description 简单的模板引擎
+         * @param  {String} tpl 模板字符串
+         * @param  {Object} data 数据对象
+         * @return {String} 解析后的字符串
+         *
+         * @example
+         * ```js
+         * var tpl = '<div>{a}</div><div>{b}</div>'
+         * template(tpl, {
+         *     a: 1,
+         *     b: 2
+         * }) // <div>1</div><div>2</div>
+         * ```
+         */
+        template: function(tpl, data) {
+            var re = /{([^{<>]+)}/g;
+            var match;
+            var _tpl = tpl;
+            while (match = re.exec(tpl)) {
+                _tpl = _tpl.replace( match[0] , data[match[1]] || '' );
+            }
+            return _tpl.replace(/[\r\t\n]/g, " ");
+        },
+        /**
+         * @method lazyload
          * @description 懒加载
          * @param {array} $items 要处理的img jq对象
          * @ignore
@@ -159,29 +234,17 @@
             });
         },
         /**
-         * @method firstUper
-         * @description 首页字母大写
-         * @param  {string} str 要处理的字符串
-         * @return {string}     处理后的字符串
-         * @ignore
-         */
-        firstUper: function(str) {
-            return str.replace(/(\w)/,function(s){
-                return s.toUpperCase();
-            })
-        },
-        /**
-         * @method getSpace 
+         * @method getSpace
          * @description 获取dom的margin+padding
          * @param  {string} str 要处理的字符串
          * @return {string}     处理后的字符串
          * @ignore
          */
         getSpace: function($el, attr) {
-            return $el['outer' + this.firstUper(attr)](true) - $el[attr]();
+            return $el[$.camelCase('outer-' + attr)](true) - $el[attr]();
         },
         /**
-         * @method initBtn 
+         * @method initBtn
          * @description 初始化按钮事件
          * @param  {string} type 按钮类型
          * @ignore
@@ -206,18 +269,24 @@
         },
         init: function() {
             var _self      = this,
-                $obj       = _self.$obj, 
-                $objP      = $obj.parent(), 
-                $objPP     = $objP.parent(), 
+                $obj       = _self.$obj,
+                $objP      = $obj.parent(),
+                $objPP     = $objP.parent(),
                 o          = _self.o,
                 ppCss      = {
                                 position: 'relative',
                                 overflow: 'hidden'
                             },
                 dire       = _self.dire,
-                attr       = dire == 'top' && 'height' || 'width', 
-                outerAttr  = 'outer' + _self.firstUper(attr), 
+                attr       = dire == 'top' && 'height' || 'width',
+                outerAttr  = $.camelCase('outer-' + attr),
                 $cells;
+
+            // 兼容一层p
+            if (!{fade: 1, fold: 1}[o.effect]) {
+                $objPP = $objP;
+                $objP = $('<div class="temp"></div>').append($obj).appendTo($objPP);
+            }
             // 分页
             _self.pages = !_self.effect
                 // 不循环滚动
@@ -225,15 +294,21 @@
                 // 循环滚动 marqueue loop
                 || Math.ceil(_self.len / o.steps);
 
-            
+            // 没有内容
+            if (!_self.len) return;
             // 只有一页,不切换
-            if (_self.pages <= 1 || _self.len <= o.visible) return;
+            if (_self.pages <= 1 || _self.len <= o.visible) {
+                // 处理懒加载
+                _self.play(_self.loopNext = o.index, 1);
+                return;
+            }
             // 速度为0时启用直接切换
             // if (!o.speed) {
             //     _self.effect = 'fade';
             // }
 
             $obj.css('float', dire == 'top' ? 'none' : 'left');
+
             // 每个单元的尺寸
             if (!!o.fluid && o.visible == 1 && {fade: 1, fold: 1, leftLoop: 1, left: 1}[o.effect]) {
                 var attr = 'width',
@@ -247,6 +322,7 @@
                     var oSize = _self.size;
 
                     _self.size = _self.$ele[outerAttr](true);
+
                     $objP.stop(true, true).css(dire, function(i, v) {
                         // 处理改变后的差值, 循环时+1
                         return parseInt(v) - (_self.size - oSize) * (_self.index + (_self.effect == 'Loop'));
@@ -285,7 +361,7 @@
                         },
                         $obj1 = $obj.eq(0),
                         // 计算多余的边距,让滚动外框两边对齐
-                        marginMore = parseInt($obj1.css('margin-' + dire)) 
+                        marginMore = parseInt($obj1.css('margin-' + dire))
                                     - parseInt($obj1.css('margin-' + (dire == 'left' ? 'right' : 'bottom')));
 
                     pCss[attr] = 29999;
@@ -327,7 +403,7 @@
                 } else {
                     var __html = [];
                     for (var i = 0; i < _self.pages; i++) {
-                        __html.push('<i>' + (i + 1) + '</i>');
+                        __html.push(_self.template(o.celltpl, {num: i + 1}));
                     }
                     $cells = $(__html.join('')).appendTo(_self.$ele.find(o.cell));
                 }
@@ -350,14 +426,17 @@
                 _self.$obj
                     .add($cells)
                     .add(o.prevbtn && _self.effect != 'Marqueue' && o.prevbtn + ',' + o.nextbtn || null)
-                    .on('mouseover', $.proxy(_self.stop, _self))
-                    .on('mouseout', $.proxy(_self.start, _self))
+
+                    .on('mouseover.jd', $.proxy(_self.stop, _self))
+                    .on('mouseout.jd', $.proxy(_self.start, _self))
             }
 
             // 显示标题
             if (!!o.showtit && o.visible == 1) {
                 var objD = $obj.eq(o.index).data();
-                _self.$title = $('<a class="tit-jd" target="_blank" href="' + objD.url + '">' + objD.title + '</a>').insertAfter($objPP)
+                // 兼容v2.01之前的代码
+                _self.$title = $(_self.template(o.titletpl, objD)).insertAfter($objPP)
+
                 objD = null;
             }
 
@@ -366,7 +445,6 @@
                 _self.initBtn('prev')
                 _self.initBtn('next')
             }
-
             _self.play(_self.loopNext = o.index, 1)
         },
         /**
@@ -379,10 +457,10 @@
          */
         start: function() {
             clearInterval(this.t1);
-            this.t1 = setInterval($.proxy(this.next, this), this.o.interval);
+            this.t1 = setInterval($.proxy(this.next, this), this.o.autoplay);
         },
         /**
-         * @method stop 
+         * @method stop
          * @description 停止播放插件
          * @示例 js
          * ```js
@@ -393,8 +471,8 @@
             clearInterval(this.t1);
         },
         /**
-         * @method get 
-         * @param {string} i=null prev next 
+         * @method get
+         * @param {string} i=null prev next
          * @description 获取上一个,下一个,默认获取当前激活
          * @return {array} jq对象
          * @示例 获取当前激活
@@ -440,7 +518,7 @@
                     }  else {
                         offsets = 1 + loopNext;
                         // offsets = (1 + loopNext) * o.steps;
-                    }     
+                    }
                 } else {
                     if (loopNext == _self.pages) {
                         offsets =  o.steps;
@@ -464,7 +542,7 @@
             return _self.$obj.eq(offsets)
         },
         /**
-         * @method next 
+         * @method next
          * @description 播放下一个
          * @示例 js
          * ```js
@@ -475,18 +553,18 @@
             this.play(this.effect != 'Marqueue' && (this.loopNext = this.index + 1) % this.pages);
         },
         /**
-         * @method prev 
+         * @method prev
          * @description 播放上一个
          * @示例 js
          * ```js
          *     $('[data-duang=1]').jqDuang('prev');
          * ```
          */
-        prev: function() {            
+        prev: function() {
             this.play(((this.loopNext = this.index - 1) + this.pages) % this.pages);
         },
         /**
-         * @method play 
+         * @method play
          * @description 播放第几个
          * @param {number} next 要播放的对象
          * @param {number} speed=0 切换速度
@@ -501,12 +579,19 @@
                 o        = _self.o,
                 $objP    = _self.$obj.parent(),
                 pCss     = {},
-                speed    = speed || o.speed;
+                // 1 只用于初始化
+                speed    = speed === 1 ? 0 : (speed || o.speed);
 
             if (_self.index == next && _self.effect != 'Marqueue') return;
             /**
              * @event before.jd
              * @description 播放前的事件
+             * @示例 调用
+             * ```js
+             *  $('.selector').on('before', function() {
+             *      console.log($(this).data('jqDuang'));
+             *  })
+             * ```
              */
             _self.$ele.trigger('before.jd');
             switch(_self.effect){
@@ -552,7 +637,7 @@
                 default :
                     var loopNext = _self.loopNext,
                         offsets, // 目标位置
-                        start; 
+                        start;
 
                     if (_self.effect == 'Loop') {
                         if (loopNext == _self.pages) {
@@ -593,21 +678,22 @@
             // 标题
             if(!!o.showtit && o.visible == 1) {
                 var objData = _self.$obj.eq(next + (_self.effect == 'Loop') * 1).data();
-                _self.$title.html(objData.title)[0].href = objData.url;
+                _self.$title.html(objData.title).attr('href', objData.url);
             }
             // 分页
             if (o.pagewrap) {
-                _self.$ele.find(o.pagewrap).html(next + 1 + '/' + _self.pages);
+                _self.$ele.find(o.pagewrap).html(_self.template(o.pagetpl, {act: next + 1, total: _self.pages}));
             }
             // 控制按钮
-            if (o.cell) {
+            if (o.cell && _self.$cells) {
                 _self.$cells.removeClass(o.actclass).eq(next).addClass(o.actclass)
             }
             // 扩展对象, next过大时没有扩展对象,不执行
-            if (_self.$objex.length > next) {
+            // console.log(_self.$objex);
+            if (_self.$objex && _self.$objex.length > next) {
                 _self.$objex.hide().eq(next).show();
             }
-            // 
+            //
             _self.index = next;
             // 按钮循环
             if (!o.btnloop && o.prevbtn) {
@@ -616,12 +702,42 @@
                 next == _self.pages - 1 && _self.$ele.find(o.nextbtn).addClass('disabled');
             }
             /**
-             * @event before.jd
+             * @event after.jd
              * @description 播放后的事件
+             * @示例 调用
+             * ```js
+             *  $('.selector').on('after', function() {
+             *      console.log($(this).data('jqDuang'));
+             *  })
+             * ```
              */
             _self.$ele.trigger('after.jd');
         }
 
+    }
+
+    /**
+     * @method parseJSON
+     * @description 解析json字符串
+     * @param  {string} jsonStr json字串
+     * @return {object} json对象, 解析不成功返回空对象
+     * @example 示例 调用
+     * ```js
+     * parseJSON('{"a": 1, "b": 1}'); // {"a": 1, "b": 1}
+     * parseJSON('{a: 1, b: 1}'); // {"a": 1, "b": 1}
+     * parseJSON('aaa'); // {}
+     * ```
+     */
+    function parseJSON(jsonStr) {
+        var obj ={};
+        try {
+            if (typeof jsonStr == 'object') {
+                obj = jsonStr;
+            } else if (typeof jsonStr == 'string' && /^[\[|\{](\s|.*|\w)*[\]|\}]$/.test($.trim(jsonStr))) {
+                obj = (new Function('return ' + jsonStr))();
+            }
+        } catch (err) {}
+        return  obj;
     }
 
     function Plugin(option, arg) {
@@ -638,7 +754,7 @@
                 data = $this.data('jqDuang'),
                 options;
             if (!data) {
-                options = $.extend({}, Duang.DEFAULTS, $this.data(), typeof option == 'object' && option);
+                options = $.extend({}, Duang.DEFAULTS, parseJSON($this.data('duang')), $this.data(), typeof option == 'object' && option);
 
                 $this.data('jqDuang', data = new Duang(this, options))
                 data.init();
@@ -662,8 +778,8 @@
         return this
     }
 
-    $(win).on('load', function () {
-        $('[data-duang=1], .jqDuang').each(function() {
+    $(win).off('.jqDuang').on('load.jqDuang', function () {
+        $('[data-duang], .jqDuang').each(function() {
             var $this = $(this);
             Plugin.call($this, $this.data())
         });
