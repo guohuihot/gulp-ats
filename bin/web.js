@@ -645,6 +645,13 @@ module.exports = function(gulp, $, utils, configs) {
                 // index: 'a.html',
                 port: 8888
             });
+
+            console.log();
+            console.log('请在要刷新的模板上加入下列代码：');
+            console.log(`<script id="__bs_script__">//<![CDATA[
+        document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.18.12'><\/script>".replace("HOST", location.hostname));
+//]]></script>`);
+            console.log();
         };
 
         if (argv.f) {
