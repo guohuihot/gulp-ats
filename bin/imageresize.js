@@ -1,6 +1,6 @@
 module.exports = function(gulp, $, utils, configs) {
     var path  = require('path'),
-        fs  = require('fs'),
+        fs  = require('fs-extra'),
         argv = $.yargs.argv;
 
     // imageresize
@@ -126,14 +126,15 @@ module.exports = function(gulp, $, utils, configs) {
 
     gulp.task('delete-thumb', function(){
         var _src = argv.p;
-        var aFiles = $.glob.sync(path.join(_src, '**/*.{jpg,jpeg}'));
+        var aFiles = $.glob.sync(path.join(_src, '**/*.{jpg,jpeg,png}'));
+        var i = 0;
         aFiles.forEach(function(path) {
             if (/\S+_\d+_\d+/.test(path)) {
                 console.log(path);
-                $.del(path, {
-                    force: true
-                })
+                fs.removeSync(path);
+                i ++ ;
             };
         });
+        console.log(`共清除${i}个图片`);
     });
 };
