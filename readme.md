@@ -59,6 +59,8 @@
     
     ├── pack.js - 
     
+    ├── view-base.js - 
+    
     ├── web.js - 
     
     └── webdown.js - 
@@ -336,6 +338,12 @@ gulp init	查看(设置)当前配置
 			类型：string, 默认值：保留上次的值
 			可多个项目地址，用逗号隔开
 			前提是多个项目里的每个项目需要预先配配置好
+			
+			另:当p目录下有config.json文件时
+			ats优先使用config.json配置
+			其内容格式如下(仅做参考)
+			{"core(要监听p下的文件夹)":{"src":"xxx","dist":"xxx","extend":{"src(srcEx)":"xxx","dist(distEx)":"xxx"}}}
+			以上除了core和extend(相对目录)不一样，其它的和init通用配置一样
 
 	-a(--alias)	可配置别名
 			给配置起一个别名，下次直接用别名，如
@@ -379,6 +387,11 @@ gulp init	查看(设置)当前配置
 			类型：string,  默认值：保留上次的值
 			PS：需要绝对路径
 
+	--srcEx	扩展原目录，有时我们修改原文件时也要同步到其它目录，
+			这样就可以给ats再多指定一个src目录
+			类型：string,  默认值：保留上次的值
+			PS：需要绝对路径
+
 	其它	Js可以使用es6的新语法，请Js代码里加 // @require('babel') 
 			Ats会转换对应的代码，注意要写在注释里，不然会被解析
 			为保证文件的正确转换请保持所有文件编码一致
@@ -391,7 +404,7 @@ gulp build	初始化或同步一个项目
 
 	
 gulp watch	监控一个项目目录
-	-p -d -a -m --src --dist --distEx	同init
+	-p -d -a -m --src --srcEx --dist --distEx	同init
 
 	-s(--server)	创建一个web服务器(写静态页面时需要)
 			类型：bool, 默认值：false
@@ -412,6 +425,8 @@ gulp add	新加一个分类到项目里
 gulp clean	清理文件	
 	-p	同build	清理后项目目录下src目录,谨慎使用！
 
+	
+gulp base	查看配置文件	
 	
 gulp pack:patch	压缩文件并删除原文件
 	-p	项目地址

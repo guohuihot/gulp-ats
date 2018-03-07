@@ -609,6 +609,7 @@ module.exports = function(gulp, $, utils, configs) {
     // watch
 
     utils.browserSync = $.browserSync.create();
+
     gulp.task('watch', function() {
 
         // 自动刷新 静态服务器使用
@@ -672,11 +673,12 @@ module.exports = function(gulp, $, utils, configs) {
 
                 var pathRelative = path.relative(cfg.dist, file.path);
                 if (file.event == 'unlink') {
-                    fs.removeSync(cfg.distEx + '/' + pathRelative);
+                    fs.removeGlobSync([path.join(cfg.distEx, pathRelative)]);
                     /*$.del([cfg.distEx + '/' + pathRelative], {
                         force: true
                     });*/
-                } else if (cfg.distEx) {
+                } else if (cfg.distEx && path.basename(file.path) != 'config.json') {
+                    // 排除程序配置文件config.json
                     gulp.src(file.path, {
                             base: cfg.dist
                         })
@@ -699,6 +701,16 @@ module.exports = function(gulp, $, utils, configs) {
             // _common
             var baseDirname = path.basename(file.dirname);
             var isDir = baseDirname[0] == '_' ;
+            // 处理扩展src 同步更新
+            if (cfg.srcEx) {
+                gulp.src(file.path, {
+                        base: cfg.src
+                    })
+                    .pipe($.changed(cfg.srcEx))
+                    .pipe(gulp.dest(cfg.srcEx))
+                    .pipe(utils.browserSync.stream())
+                    .pipe(message());
+            }
 
             if (file.event == 'unlink') {
                 // src/js/a.js
@@ -752,11 +764,16 @@ module.exports = function(gulp, $, utils, configs) {
                     // fDirname = dist/images/face
                     var hasFile = $.glob.sync(fDirname + '/**/*').length;
                     if (!hasFile) {
-                        fs.removeSync(fDirname)
+                        fs.removeGlobSync([fDirname])
                         /*$.del.sync([fDirname], {
                             force: true
                         })*/
                     }
+                }
+
+                // 同步删除srcEx对应的文件
+                if (cfg.srcEx) {
+                    fs.removeGlobSync([path.join(cfg.srcEx, path.relative(cfg.src, file.path))])
                 }
             } else if (/\.(vue)$/.test(ext)) {
                 if (isDir) {
