@@ -1,13 +1,14 @@
 /**
 * author : ahuing
 * date   : 2015-8-7
-* name   : jqscrollspy v1.0
-* modify : 2015-8-12 15:17:32
+* name   : jqscrollspy v1.01
+* modify : 2017-03-22
  */
 !function ($) {
     var Scrollspy = function (self, opt) {
         this.o     = $.extend({}, Scrollspy.defaults, opt)
-        this.$cell = $(self).find(this.o.obj)
+        this.$self = $(self)
+        this.$cell = this.$self.find(this.o.obj)
     }
 
     Scrollspy.defaults = {
@@ -26,12 +27,20 @@
                 var st = $win.scrollTop() + _this.o.offset, iIndex = hasCls ? 0 : undefined;
                 if (st < bH - wH) {
                     for (var i = 0; i < _this.aTop.length; i++) {
-                        st >= _this.aTop[i] && _this.aTop[i] > 0 && (iIndex = i);
+                        st >= _this.aTop[i] && _this.aTop[i] > 0 && (iIndex = _this.index = i);
                     };
                 }
-                else iIndex = -1;
+                else {
+                    iIndex = _this.index = -1
+                };
 
-                _this.$cell.removeClass('act').eq(iIndex).addClass('act');
+                var $actCell = _this.$cell.eq(iIndex);
+
+                if (!$actCell.hasClass('act')) {
+                    _this.$cell.removeClass('act');
+                    $actCell.addClass('act');
+                    _this.$self.trigger('scrollActive.jqScrollspy');
+                };
             }
 
             _this.aTop = [];
